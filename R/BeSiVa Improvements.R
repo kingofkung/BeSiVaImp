@@ -53,7 +53,7 @@ Vandat <- readRDS('Vandat.RDS')
 
  
 maindforig <-  readRDS('maindf2.rds')
-str(maindf2)
+
 
 ifilename <-  'imputation3.rds' #Name of file where imputation is stored:
 mickey <- readRDS(file = ifilename)
@@ -89,37 +89,12 @@ head(maindf2)
 maindforig <- maindforig[, !colnames(maindforig) %in% varsToNotInclude]
 
 
-# #See what happens when we move the data shift to before controldf2 is defined
-# possAIVs <- c('SpecVotes', 'TenDummy','cat_age', 'Age','Sex','Party')
-# maindf2 <- maindf2[, c(which(colnames(maindf2) %in% possAIVs), which(!colnames(maindf2) %in% possAIVs))] #rearrange maindf2 s.t. columns of interest come first
-maindfin <- maindf2
-maindfinorig <- maindforig
-
-# set.seed(12345)
-
-# length of storage matrices and master iterator
-
-# ulen <- 50
-
-#Put together a matrix to store PCP values for test and training sets
-
-PCCTeststore <- matrix(NA, nrow = ulen, ncol = 6)
-PCCTrainstore <- matrix(NA, nrow = ulen, ncol = 6)
-
-colnames(PCCTeststore) <- c('BeSiVa', 'Lasso', 'Elastic Net', 'Random Forest', 'Adaboost.M1Unimp', 'Adaboost.M1Imp')
-colnames(PCCTrainstore)<- c('BeSiVa', 'Lasso', 'Elastic Net', 'Random Forest', 'Adaboost.M1')
-
 #begin working on iterating data for purpose of presentation
 
 u <- 1
 	ptr <- proc.time()
 	
-	# for( i in randseeds ) { 
-	# print( paste('seed =',i))	
-	# set.seed(i)
-	
-	maindf2 <- maindfin #If I don't do this, It'll shrink maindf2 until there's nothing left
-	maindforig <- maindfinorig
+
 	# pull out a tenth of the data for control purposes
 	tenperc <-  createFolds(1:nrow(maindf2), k = 10)
 	
@@ -162,7 +137,7 @@ u <- 1
 	
 	colsnottouse <- c("sp07Rec", "sp07.2Rec", "sp08Rec", 'reg_party_rep','attemptcount', 'voterid', 'votebuilder_identifier', 'dsnRec', 'cen10_asian', 'namecheck', 'phone_primary_cell',zerovar, redundant, mostlyNAs, ActivateVars, clarityvars, colnames(maindf2)[nearZeroVar(maindf2)], 'sp08', 'deevdiv')
 	
-	colnames(maindf2)
+	# colnames(maindf2)
 	#construct dataframes for prediction and comparison
 	xdata <- 	model.matrix(sp08 ~ ., data = maincontdf2)
 	newxdata <- model.matrix(sp08 ~ ., data = truecont) #change it so that all predictions are made on truecont
@@ -173,7 +148,7 @@ u <- 1
 
 	
 	Rprof('bensprof.txt')
-	write.table('',file = '/Users/bjr/GitHub/bjrThesis/R/scores.csv', sep = ',', col.names = F, row.names = F) #clear scores table					
+	# write.table('',file = '/Users/bjr/GitHub/bjrThesis/R/scores.csv', sep = ',', col.names = F, row.names = F) #clear scores table					
 	
 	# for(L in 1:1) { #begin DV loop
 		deev <- 'sp08'
@@ -193,7 +168,7 @@ u <- 1
 		colsnumstoavoid <-  which(colnames(maindf2) %in% colsnottouse)
 		colnumstouse <- which(!colnames(maindf2) %in% colsnottouse)  # get all the columns we want to use as IVs
 		
-		write.csv( colnames(maindf2[,colnumstouse]), '/Users/bjr/GitHub/bjrThesis/R/colnumsused.csv')
+		# write.csv( colnames(maindf2[,colnumstouse]), '/Users/bjr/GitHub/bjrThesis/R/colnumsused.csv')
 		
 		#create variable selecting loop
 		# This loop will select a single variable and regress it against deev
@@ -224,11 +199,8 @@ u <- 1
 				iloopbreaker <- 1 #iloopbreaker begins as 1
 				
 				 ivstouse <- c(priorIVs, colnames(maindf2)[colnumstouse[i]])
-				
-				# ivstouse <- priorIVs
-				
-				# if(NIVs == 1) ivformed <-  ivstouse  else ivformed <-  do.call(paste,c(as.list( ivstouse), sep = ' + ')) # if NIVs is not one, we need to form a list of IVs to place into formed eqn. If it isn't then we can just use the text from ivstouse
-				# ivformed <-  do.call(paste,c(as.list( ivstouse), sep = ' + ')) #Great if you want to use do.call, but I found something better below
+								
+
 				ivformed <-  paste(ivstouse, collapse = ' + ')
 				formedeqn <- as.formula(paste('deevdiv', " ~ ", ivformed)) #Form our equation. In this version, we're going to need to figure out the DV's structure before we start these loops
 				
@@ -250,39 +222,25 @@ u <- 1
 				
 				criter <- critergen(controldf2$currentpreds, controldf2$deevdiv) #now generates criterion based on validation set
 				 
-				# # # print(currentVarResid)
 				
 				if(i == 1 & NIVs == 1 ){ #On the very first pass,
 					bestReg <- currentReg #The First regression is the best regression.
 					bestRtPredRat <- criter
-	
-					# bestVarResid <- currentVarResid #Same with the residual variance
-					# bestVarResST <- bestVarResid #and thus we put it in storage
-					# print(paste('Number of correctly predicted Zeros =', onZeroPreds))
-					# print(paste('Number of correctly predicted Ones =', onOnePreds))
 				
 					print(paste('Rate to beat =',round( criter, 6)))
 					bestIV <- colnames(maindf2)[colnumstouse[i]]
 					 } #keep them always if i == 1
 				
-				# print( paste('currentVarResid =', currentVarResid ))
-				# print(paste('bestVarResid =', bestVarResid))
-				
-				# residdif <- currentVarResid - bestVarResid
-				# # print(paste('currentVarResid - bestVarResid = ', round(currentVarResid, 4), '-', round(bestVarResid, 4), '≈', round(residdif, 4 )) )
-				
-					# if(bestVarResid > currentVarResid){ #if the currentVarResid is lower than the bestVarresid
-						if(criter > bestRtPredRat){ #if the current prediction ratio is bigger than the best one so far
-						bestReg <- currentReg #put the current reg as best reg
-						print(summary(bestReg)$coefficients[,3])#print z values
-						print(criter) 
+				if(criter > bestRtPredRat){ #if the current prediction ratio is bigger than the best one so far
+					bestReg <- currentReg #put the current reg as best reg
+					# print(summary(bestReg)$coefficients[,3])#print z values
+					# print(criter) 
 	
-						print('Summary should be here')
-						bestRtPredRat <- criter # Put the current right prediction ratio as the best one, 
-						bestIV <- colnames(maindf2)[colnumstouse[i]] #and save the bestIV for storage in priorIVs
-						print(paste('Best Criterion Value =',round( bestRtPredRat,6)))
-						metabreaker <- 0 #make the metabreaker variable = 0
-						} # if the best regressions residual variance is bigger than the current regression's residual variance, the current regression replaces the prior best regression. 	
+					bestRtPredRat <- criter # Put the current right prediction ratio as the best one, 
+					bestIV <- colnames(maindf2)[colnumstouse[i]] #and save the bestIV for storage in priorIVs
+					print(paste('Best Criterion Value =',round( bestRtPredRat,6)))
+					metabreaker <- 0 #make the metabreaker variable = 0
+				} # if the best regressions residual variance is bigger than the current regression's residual variance, the current regression replaces the prior best regression. 	
 					
 				
 				# print(paste('i =', i))
@@ -341,11 +299,11 @@ u <- 1
 	# masterregST <- 	c(masterregST, coef(bestRegST)[-1])
 	Rprof(NULL)
 		
-	summaryRprof('bensprof.txt')
+	# summaryRprof('bensprof.txt')
 
 
 
-system('say Done!')
+# system('say Done!')
 
 
 
