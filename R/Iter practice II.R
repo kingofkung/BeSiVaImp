@@ -40,14 +40,9 @@ oneVRegs2 <-  apply(ind.var, MARGIN = 2, function(x) {
 dualIter <-  
 lapply( colnames(ind.var), function(y){
 
-lapply(colnames(ind.var), function(x) {
-
-print(paste(y,x))	
-	
-}
-)
-}
-)
+	x <- lapply(colnames(ind.var), function(x) {paste(x,y)
+		})
+	})
 #This thing iterates first by chainging all the columns in the x, then changing the column in y, and could hypothetically iterate all dual combinations of x, with repeats.
 
 # # Still no clue how to create the output
@@ -57,6 +52,25 @@ print(paste(y,x))
 # X1 + X2 + X3 + X4
 # X1 + X2 + X3 + X4 + X5
 # # Using only the apply family
+
+# I'd need to figure out how to store the old output somewhere
+
+# How to do it with a for loop:
+lastcol <- {}
+for( i in colnames(ind.var)) {
+	lastcol  <- c(lastcol, i) #how to capture this...
+	print(paste(lastcol, collapse = ' + '))
+	}
+
+
+lapply(colnames(ind.var), FUN = function(x, lastcol2 = gary){ 
+	
+	lastcol2 <- c(lastcol2,x) #trying the same way, but I can't figure out how to make it store the info... There's got to be a way to dynamically control lastcol2 from the outside
+	}
+)
+
+
+
 
 
 
