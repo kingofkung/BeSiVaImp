@@ -63,16 +63,16 @@ for( i in colnames(ind.var)) {
 	}
 
 
-lapply(colnames(ind.var), function(gary){
+	u <-  t(as.data.frame(lapply(colnames(ind.var), FUN = function(x){ 	
+		print(x)
+		x
+	})))
+
+v <- lapply(u, function(y) {
 	
-u <-  lapply(colnames(ind.var), FUN = function(x, lastcol2 = gary){ 
+	print(paste(y,yprior))
 	
-	lastcol2 <- c(lastcol2,x) #trying the same way, but I can't figure out how to make it store the info... There's got to be a way to dynamically control lastcol2 from the outside
-	})
-
-
-	})
-
+})
 
 
 
