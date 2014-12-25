@@ -71,14 +71,17 @@ subsetter <- function(dataframe){ # make a function to take a dataframe and retu
 		 
 		 
 		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together
-		reg <-  glm(as.formula(form), data = alldat, family = famiglia)	
-		critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = T)
+		reg <-  glm(as.formula(form), data = alldat, family = famiglia)	#Perform the regression
+		critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = F) #generate the criterion.
+			#Just realized, critergen will need to be changed if we ever want to use it on something else. Residuals should work for continuous, but need to brush up on deviance. 
 		
 		
 		}
 	)
 	
-which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful
+print(singregs)
+
+which(singregs == max(unlist(singregs))) # get the biggest in the list of ivs
 
 #create besiva function
 BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){
