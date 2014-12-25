@@ -71,8 +71,8 @@ subsetter <- function(dataframe){ # make a function to take a dataframe and retu
 		 
 		 
 		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together
-		reg <-  lm(as.formula(form), data = alldat)	
-		print(critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = T))
+		reg <-  glm(as.formula(form), data = alldat, family = famiglia)	
+		critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = T)
 		
 		
 		}

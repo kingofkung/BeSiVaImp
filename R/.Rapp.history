@@ -1,99 +1,3 @@
-# Iter practice II#
-# Created 12/23/14#
-# A Ben Rogers Joint#
-# Last Edited 12/23/14#
-#
-# Preamble: This code replicates an example I found of a way to use lapply to work of ver multiple columns in a regression#
-#
-set.seed(1000)#
-values <- runif(50) #Select 50 random Values from the uniform distribution #
-values[sample(1:length(values), 10)] <- NA # add some random fluctuations to the data, apparently just for fun#
-ind.var <- data.frame(matrix(values, ncol = 5)) # and make that into a data frame#
-#
-# Make a dependent variable#
-dep <- runif(10)#
-dep#
-#
-#create regression formula between each column in the dataframe against the dv#
-#
-oneVRegNames <-  lapply(colnames(ind.var), function(x) { form.reg <- paste('dep ~ ', x ) }) # What is happening here is that I am applying the function that pastes the "dep ~" to each value in the colnames of ind.var. I do not see a difference between using paste and paste0 in the function I created. I am using paste instead.#
-#Now let us create a function that lets us make regressions with this technique#
-#
-oneVRegs <-  lapply(colnames(ind.var), function(x) { #
-	form.reg <- paste('dep ~ ', x ) #
-	lm(form.reg, data = ind.var)#
-	}) # Now, instead of returning the text, as seen in oneVarRegNames, we actually return the regressions in the list. What I do not understand is how the code understands what ind.var is if we didn't pass it into the function. Note: It still worked despite using paste!!!#
-# try it with apply instead of lapply#
-#
-oneVRegs2 <-  apply(ind.var, MARGIN = 2, function(x) {#
-	lm(dep ~ x, data = ind.var)#
-	}#
-) #Ok. This makes more sense than the one we were using previously, but#
-#
-# Try to figure out how to make it create a set that starts with just one and adds variables by iteration, without resorting to for loops#
-#
-dualIter <-  #
-lapply( colnames(ind.var), function(y){#
-#
-lapply(colnames(ind.var), function(x) {#
-#
-print(paste(y,x))	#
-}#
-)#
-}#
-)#
-#This thing iterates first by chainging all the columns in the x, then changing the column in y, and could hypothetically iterate all dual combinations of x, with repeats.#
-#
-# # Still no clue how to create the output#
-# X1#
-# X1 + X2#
-# X1 + X2 + X3#
-# X1 + X2 + X3 + X4#
-# X1 + X2 + X3 + X4 + X5#
-# # Using only the apply family
-dualIter <-  #
-lapply( colnames(ind.var), function(y){#
-#
-eric <- lapply(colnames(ind.var), function(x) {#
-#
-print(paste(y,x))	#
-}#
-)
-}#
-)
-dualIter <-  #
-lapply( colnames(ind.var), function(y){#
-#
-eric <- lapply(colnames(ind.var), function(x) {#
-#
-print(paste(y,x))	#
-}#
-)#
-print(eric)#
-#
-}#
-)
-dualIter <-  #
-lapply( colnames(ind.var), function(y){#
-#
-eric <- lapply(colnames(ind.var), function(x) {#
-#
-# print(paste(y,x))	#
-}#
-)#
-print(eric)#
-#
-}#
-)
-dualIter <-  #
-lapply( colnames(ind.var), function(y){#
-#
-	eric <- lapply(colnames(ind.var), function(x) {#
-	return(eric)#
-	}#
-	)#
-}#
-)
 dualIter <-  #
 lapply( colnames(ind.var), function(y){#
 #
@@ -579,7 +483,6 @@ sample(ncol(IVdat))
 sample(ncol(IVdat), 0:1)
 sample(c(0,1), ncol(IVdat), replace = T)
 negseq <- -1* 1:nrow(IVdat)
-negseq <- -1* 1:nrow(IVdat)
 countdown <- nrow(IVdat) + negseq
 countdown
 countdown <- nrow(IVdat) + 1 + negseq
@@ -613,14 +516,6 @@ sample(c(0,1), ncol(IVdat), replace = T)
 sample(IVdat )
 seqlist <- list(seq1, seq2,negseq, countdown, seq7)
 IVdat[, sample(length(seqlist), length(seqlist))]
-IVdat[, sample(length(seqlist), length(seqlist))]
-IVdat[, sample(length(seqlist), length(seqlist))]
-IVdat[, sample(length(seqlist), length(seqlist))]
-IVdat[, sample(length(IVdat), length(seqlist))]
-IVdat[, sample(length(IVdat), length(seqlist))]
-IVdat[, sample(length(IVdat), length(seqlist))]
-IVdat[, sample(length(IVdat), length(seqlist))]
-IVdat[, sample(length(IVdat), length(seqlist))]
 IVdat[, sample(length(IVdat), length(seqlist))]
 lapply(IVdat[, sample(length(IVdat), length(seqlist))] , function(x) x <- x + seqlist)
 IVdat[, sample(length(IVdat), length(seqlist))]
@@ -852,18 +747,6 @@ BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
 	# Deev: the Dependent variable data. This si input as a column of data#
 	# Ivys: the independent variable data. Input as a dataframe or list#
 	# aivs: any always independent variables you'd like included, #
-	singreg <-  lapply(Ivys, function(column, aivees, famiglia){#
-		form paste(Deev, ' ~ ', paste(aivees, column, collapse = '+'))#
-		glm(as.formula(form), family = famiglia)#
-	}#
-	)#
-	}
-#create besiva function#
-BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
-#So this is the BeSiVa algorithm#
-	# Deev: the Dependent variable data. This si input as a column of data#
-	# Ivys: the independent variable data. Input as a dataframe or list#
-	# aivs: any always independent variables you'd like included, #
 	singreg <-  lapply(Ivys, function(column, aivees, famiglia = fam){#
 		form paste(Deev, ' ~ ', paste(aivees, column, collapse = '+'))#
 		glm(as.formula(form), family = famiglia)#
@@ -951,7 +834,6 @@ aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
 		glm(as.formula(form), family = famiglia)#
 	}#
 	)
-dvdat
 dvdat
 names(dvdat)
 names(dvdat) <- 'DV'
@@ -1492,15 +1374,6 @@ singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev)
 		critergen()#
 	}#
 	)
-singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = data.frame(Deev, aivdat, Ivys)){#
-#
-		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #
-		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + '))#
-		form <- paste(dvname, '~', Ivform)#
-		glm(as.formula(form), family = famiglia, data = alldat)#
-		critergen()#
-	}#
-	)
 #define your dummy information#
 aivs = c('X1', 'X3')#
 Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
@@ -1620,3 +1493,625 @@ subsetter <- function(dataframe){ # make a function to take a dataframe and retu
 	}#
 	)#
 lapply(singregs, function(x) length(residuals(x)) )
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rnorm(nrow(IVdat)))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		lm(as.formula(form), data = alldat)#
+	}#
+	)#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
+resid(reg)
+singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		resid(reg)#
+	}#
+	)
+singregs
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rnorm(nrow(IVdat)))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		mean(resid(reg))#
+	}#
+	)#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
+singregs
+min(abs(singregs))
+lapply(singregs, function(regs) min(abs(regs)))
+min(singregs)
+min(unlist(singregs))
+which(unlist(singregs) == min(unlist(singregs)))
+which(singregs == min(unlist(singregs)))
+which(singregs == min(abs(unlist(singregs))))
+dvdat <- as.data.frame(rbinom(nrow(IVdat)))
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rbinom(nrow(IVdat)))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		mean(resid(reg))#
+	}#
+	)#
+which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful#
+#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		mean(resid(reg))#
+	}#
+	)#
+which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful#
+#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		mean(resid(reg))#
+	}#
+	)#
+which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful#
+#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
+dvdat
+as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+# devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		mean(resid(reg))#
+	}#
+	)#
+which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful#
+#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+# devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),], ptdat = fdf[subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		critergen(predict(ptdat), fdf[,dvname])#
+		}#
+	)#
+which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful#
+#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
+ptdat
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+# devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),], ptdat = fdf[subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		critergen(predict(reg, ptdat), fdf[,dvname])#
+		}#
+	)#
+which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful#
+#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
+singregs
+# Besiva 2 #
+# Created 12/24/14#
+# A Ben Rogers Joint#
+# Last Edited 12/24/14#
+#
+# Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data#
+critergen <- function( predicted, measured, fulltabl = FALSE ) {#
+	predictedRes <- ifelse(predicted >= .5, 1,0)   #
+	if (fulltabl == TRUE) return( prop.table(table(predictedRes == measured, exclude = NULL))) else return( prop.table(table(predictedRes == measured, exclude = NULL))['TRUE']) #output: % true in table of elastic net's predictions on test set#
+}#
+# Phase 1: Create Simulated Data#
+set.seed(12345) # so it's replicable#
+# make empty matrix to store IVs in#
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))#
+IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data#
+dvdat <- as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))#
+#
+seq1 <- 1:nrow(IVdat)#
+seq2 <- 1:nrow(IVdat) * 2#
+negseq <- -1* 1:nrow(IVdat)#
+countdown <- nrow(IVdat) + 1 + negseq#
+seq7 <- seq2/2 * 7#
+# devseq <- seq2#
+seqlist <- list(seq1, seq2, negseq, countdown, seq7)#
+#
+IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.#
+#
+IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information#
+#
+dvdat <- dvdat + devseq#
+names(dvdat) <- 'DV'#
+# #begin working on BeSiVa guts#
+#define your dummy information#
+aivs = c('X1', 'X3')#
+Ivys <- IVdat[, !colnames(IVdat) %in% aivs]#
+Deev <- dvdat#
+fam = 'gaussian'#
+aivdat <- IVdat[, colnames(IVdat) %in% aivs]#
+names(aivdat)#
+names(Ivys[3])#
+#
+fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life#
+subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva#
+	fulllen <- nrow(dataframe) #Get and store the full length of the dataset#
+	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result#
+	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the #
+}#
+#lapply function that loops over all independent variables in Ivys and makes a linear regression with them#
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),], ptdat = fdf[subsetter(fdf),]){#
+#
+		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.#
+		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in#
+		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together#
+		reg <-  lm(as.formula(form), data = alldat)	#
+		print(critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = T))#
+		}#
+	)#
+which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful#
+#
+#create besiva function#
+BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){#
+#So this is the BeSiVa algorithm#
+	# Deev: the Dependent variable data. This si input as a column of data#
+	# Ivys: the independent variable data. Input as a dataframe or list#
+	# aivs: any always independent variables you'd like included, #
+	# fam: the family created by the glm function#
+	}
