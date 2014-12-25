@@ -22,14 +22,14 @@ set.seed(12345) # so it's replicable
 # make empty matrix to store IVs in
 IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))
 IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data
-dvdat <- as.data.frame(rnorm(nrow(IVdat)))
+dvdat <- as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))
 
 seq1 <- 1:nrow(IVdat)
 seq2 <- 1:nrow(IVdat) * 2
 negseq <- -1* 1:nrow(IVdat)
 countdown <- nrow(IVdat) + 1 + negseq
 seq7 <- seq2/2 * 7
-devseq <- seq2
+# devseq <- seq2
 
 
 seqlist <- list(seq1, seq2, negseq, countdown, seq7)
@@ -64,23 +64,21 @@ subsetter <- function(dataframe){ # make a function to take a dataframe and retu
 
 
 #lapply function that loops over all independent variables in Ivys and makes a linear regression with them
-	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),]){
+	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),], ptdat = fdf[subsetter(fdf),]){
 
 		ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.
 		Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in
 		 
 		 
 		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together
-		lm(as.formula(form), data = alldat)
+		reg <-  lm(as.formula(form), data = alldat)	
+		print(critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = T))
 		
 		
-		
-		
-		
-	}
+		}
 	)
 	
-
+which(singregs == min(abs(unlist(singregs)))) #until we can get critergen to work via simulated data, this could be useful
 
 #create besiva function
 BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){
