@@ -76,8 +76,8 @@ v <- lapply(u, function(y) {
 
 
 
+x <- apply(ind.var, 2, function(x) glm(dep ~ x, data = ind.var) )
 
-
-
+x
 
 

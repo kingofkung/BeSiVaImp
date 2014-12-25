@@ -8,7 +8,7 @@
 
 set.seed(12345) #make it replicable 
 inputwd <- '/Users/bjr/Desktop/ClassData' #Set the directory where all data will go
-# inputwd <- "C:/Users/usernamehere/Desktop" #Windows version to put the data on the desktop
+# inputwd <- "C:/Users/usernamehere/Desktop" #Windows version to put the data on the desktop. Note: untested
 
 setwd(inputwd)
 
