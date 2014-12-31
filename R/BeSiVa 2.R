@@ -5,7 +5,6 @@
 
 # Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data
 
-rm(list = ls())
 
 critergen <- function( predicted, measured, fulltabl = FALSE ) {
 	predictedRes <- ifelse(predicted >= .5, 1,0)   
