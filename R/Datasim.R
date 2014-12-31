@@ -4,7 +4,9 @@
 # Last Edited 12/30/14
 
 #Preamble: In order to better focus my BeSiVa Code, I've decided to separate out the simulated data code.
-
+ 
+rm(list = ls()) 
+ 
 # Phase 1: Create Simulated Data
 set.seed(12345) # so it's replicable
 

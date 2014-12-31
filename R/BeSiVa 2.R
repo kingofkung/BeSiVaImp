@@ -10,7 +10,7 @@
 
 
 set.seed(12345)
-fdf <- data.frame(dvdat, aivdat, Ivys) #create full dataframe like we'd see in real life
+fdf <- data.frame(dvdat, IVdat) #create full dataframe like we'd see in real life
 head(fdf)
 # Deevname <- names(dvdat)
 # Ivynames <- names(Ivys)
@@ -47,12 +47,12 @@ BeSiVa <- function(Deevname, Ivynames, aivnames, df, fam = 'gaussian', niter = 3
 	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the 
 	}
 	
-	for(u in 1:niter){ #Guaranteed to give each IV its own iteration. Not strictly needed
+	for(u in 1:niter){ #determines number of iterations.
 		#lapply function that loops over all independent variables in Ivys and makes a linear regression with them
 		singregs <-  lapply(c('', Ivynames), FUN = function(col, dvname = Deevname, aivees = names(aivdat), famiglia = fam, alldat = df[-subsetter(df),], ptdat = df[subsetter(df),]){
 		
 			ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.
-			Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste taht in
+			Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste that into Ivform
 			 
 			 
 			form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together
@@ -66,7 +66,7 @@ BeSiVa <- function(Deevname, Ivynames, aivnames, df, fam = 'gaussian', niter = 3
 				
 		bestvar <-  names(Ivys)[which(singregs == max(unlist(singregs))) - 1] #Give me the biggest value of singregs, and make sure to subtract 1 since we've added an AIV regression in singregs.
 		
-		aivs <-  c(aivs, bestvar)
+		ifelse(test = bestvar %in% aivs, yes = break ,no = aivs <-  c(aivs, bestvar)) #If bestvar has already been found by the algorithm, exit the loop and return only the aivs that matter. If it hasn't, add bestvar to aivs
 	 }	
 	aivs
 
@@ -80,7 +80,7 @@ BeSiVa <- function(Deevname, Ivynames, aivnames, df, fam = 'gaussian', niter = 3
 # fam = 'binomial'
 # aivdat <- IVdat[, colnames(IVdat) %in% aivs]
 	
-BeSiVa(names(dvdat), names(IVdat	[,!names(IVdat) %in% aivs]), aivnames = aivs, df = fdf, niter = 3)
+BeSiVa(names(dvdat), names(IVdat	[,!names(IVdat) %in% aivs]), aivnames = aivs, df = fdf, niter = 8)
 	
 	
 	
