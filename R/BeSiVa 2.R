@@ -5,6 +5,7 @@
 
 # Preamble: using what we have done with iteration so far, we will create a new version of the BeSiVa algorithm that works from some simulated data
 
+rm(list = ls())
 
 critergen <- function( predicted, measured, fulltabl = FALSE ) {
 	predictedRes <- ifelse(predicted >= .5, 1,0)   
@@ -47,18 +48,16 @@ names(dvdat) <- 'DV'
 aivs = c('X1', 'X3')
 Ivys <- IVdat[, !colnames(IVdat) %in% aivs]
 Deev <- dvdat
-fam = 'gaussian'
+fam = 'binomial'
 aivdat <- IVdat[, colnames(IVdat) %in% aivs]
-names(aivdat)
-names(Ivys[3])
 
 fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life
 
 
-subsetter <- function(dataframe){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva
+subsetter <- function(dataframe, sep = 10){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva
 	
 	fulllen <- nrow(dataframe) #Get and store the full length of the dataset
-	ptestlen <- round(fulllen/10)	#divide it by ten and store the rounded result
+	ptestlen <- round(fulllen/sep)	#divide it by ten and store the rounded result
 	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the 
 }
 
@@ -81,7 +80,13 @@ subsetter <- function(dataframe){ # make a function to take a dataframe and retu
 	
 print(singregs)
 
-which(singregs == max(unlist(singregs))) # get the biggest in the list of ivs
+# which(singregs == max(unlist(singregs))) # get the biggest in the list of ivs
+
+names(Ivys)[which(singregs == max(unlist(singregs))) - 1] #Give me the biggest value of singregs, and make sure to subtract 1 since we've added an AIV regression in singregs.
+
+
+
+
 
 #create besiva function
 BeSiVa <- function(Deev, Ivys, aivs, fam = 'gaussian'){
