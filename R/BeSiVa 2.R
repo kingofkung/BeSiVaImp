@@ -14,36 +14,6 @@ critergen <- function( predicted, measured, fulltabl = FALSE ) {
 }
 
 
-# Phase 1: Create Simulated Data
-set.seed(12345) # so it's replicable
-
-
-
-
-# make empty matrix to store IVs in
-IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))
-IVdat <- as.data.frame( lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data
-dvdat <- as.data.frame(rbinom(nrow(IVdat), size = 1, prob = 0.5))
-
-seq1 <- 1:nrow(IVdat)
-seq2 <- 1:nrow(IVdat) * 2
-negseq <- -1* 1:nrow(IVdat)
-countdown <- nrow(IVdat) + 1 + negseq
-seq7 <- seq2/2 * 7
-# devseq <- seq2
-
-
-seqlist <- list(seq1, seq2, negseq, countdown, seq7)
-
-IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.
-
-IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the information
-
-dvdat <- dvdat + devseq
-names(dvdat) <- 'DV'
-# #begin working on BeSiVa guts
-
-
 #define your dummy information
 aivs = c('X1', 'X3')
 Ivys <- IVdat[, !colnames(IVdat) %in% aivs]
@@ -51,7 +21,11 @@ Deev <- dvdat
 fam = 'binomial'
 aivdat <- IVdat[, colnames(IVdat) %in% aivs]
 
+
+
 fdf <- data.frame(Deev, aivdat, Ivys) #create full dataframe like we'd see in real life
+
+
 
 
 subsetter <- function(dataframe, sep = 10){ # make a function to take a dataframe and return rows that will become the pseudotest subset for besiva
@@ -61,7 +35,7 @@ subsetter <- function(dataframe, sep = 10){ # make a function to take a datafram
 	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the 
 }
 
-
+for(u in names(Ivys)){
 #lapply function that loops over all independent variables in Ivys and makes a linear regression with them
 	singregs <-  lapply(c('', names(Ivys)), FUN = function(col, dvname = names(Deev), aivees = names(aivdat), famiglia = fam, alldat = fdf[-subsetter(fdf),], ptdat = fdf[subsetter(fdf),]){
 
@@ -70,8 +44,8 @@ subsetter <- function(dataframe, sep = 10){ # make a function to take a datafram
 		 
 		 
 		form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together
-		reg <-  glm(as.formula(form), data = alldat, family = famiglia)	#Perform the regression
-		critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = F) #generate the criterion.
+		print(reg <-  glm(as.formula(form), data = alldat, family = famiglia))	#Perform the regression
+		print(critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = F)) #generate the criterion.
 			#Just realized, critergen will need to be changed if we ever want to use it on something else. Residuals should work for continuous, but need to brush up on deviance. 
 		
 		
@@ -82,10 +56,10 @@ print(singregs)
 
 # which(singregs == max(unlist(singregs))) # get the biggest in the list of ivs
 
-names(Ivys)[which(singregs == max(unlist(singregs))) - 1] #Give me the biggest value of singregs, and make sure to subtract 1 since we've added an AIV regression in singregs.
+bestvar <-  names(Ivys)[which(singregs == max(unlist(singregs))) - 1] #Give me the biggest value of singregs, and make sure to subtract 1 since we've added an AIV regression in singregs.
 
-
-
+aivs <-  c(aivs, bestvar)
+}
 
 
 #create besiva function
