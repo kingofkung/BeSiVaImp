@@ -38,7 +38,7 @@ IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the inform
 
 # dvdat <- dvdat + devseq
 
-relation <- IVdat[,4]
+relation <- IVdat[,4] + rnorm(nrow(IVdat), mean = 0, sd = .8)
 
 dvdat <- data.frame('DV' = exp(relation)/(1 + exp(relation))) #Get into logistic form
 dvdat <-  ifelse(dvdat >= .5, 1, 0)
