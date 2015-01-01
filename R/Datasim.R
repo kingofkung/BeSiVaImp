@@ -8,11 +8,11 @@
 rm(list = ls()) 
  
 # Phase 1: Create Simulated Data
-set.seed(12345) # so it's replicable
+set.seed(123456) # so it's replicable
 
 # make empty matrix where we can store IVs
-IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 50))
-IVdat <- as.data.frame(lapply(IVdat, function(x) x <- rnorm(nrow(IVdat)))) #Fill that frame with data
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 1000))
+IVdat <- as.data.frame(lapply(IVdat, function(x) x <- rnorm(nrow(IVdat), mean = 0, sd = 7))) #Fill that frame with data
 
 
 
@@ -38,7 +38,7 @@ IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the inform
 
 # dvdat <- dvdat + devseq
 
-relation <- IVdat[,4] + rnorm(nrow(IVdat), mean = 0, sd = .8)
+relation <- IVdat[,5] + rnorm(nrow(IVdat), mean = 0, sd = .8)
 
 dvdat <- data.frame('DV' = exp(relation)/(1 + exp(relation))) #Get into logistic form
 dvdat <-  ifelse(dvdat >= .5, 1, 0)

@@ -14,11 +14,11 @@ fdf <- data.frame(dvdat, IVdat) #create full dataframe like we'd see in real lif
 head(fdf)
 Deevname <- colnames(dvdat)
 Ivynames <- names(IVdat)
-aivnames <- 'X2'
+aivnames <- 'X1'
 fam = 'binomial'
 niter <- 1
 df <- fdf
-
+# offsettr <- 0
 # # #create besiva function
 # BeSiVa <- function(Deevname, Ivynames, aivnames = NULL, df, fam = 'gaussian', niter = 3){
 	#So this is the BeSiVa algorithm
@@ -33,7 +33,6 @@ df <- fdf
 	#define the data for each
 	Ivys <- df[, colnames(df) %in% Ivynames & !colnames(df) %in% aivnames]
 	Deev <- df[, colnames(df) %in% Deevname]
-	ifelse(is.null(aivnames) == T, aivdat <-  Ivys[1], aivdat <- Ivys[,colnames(Ivys) %in% aivnames] )
 	
 	
 	critergen <- function( predicted, measured, fulltabl = FALSE ) {
@@ -50,9 +49,13 @@ df <- fdf
 	sample(fulllen, ptestlen)	#then get a sample from the rows that uses ptestlen as the 
 	}
 	
-	for(u in 1:niter){ #determines number of iterations.
+			ifelse( is.null(aivnames) == T, {LapIvys <- Ivynames; offsettr <- 0}, {LapIvys <-  c('', Ivynames); offsettr <- 1}) #if there are no aivs mentioned, make sure the first regression includes an IV. If there are, make sure that the first regression is blank (to account for only the aivs). In addition, create a value for offsettr
+	
+	
+	for(u in 1:niter){ #determines number of rounds of variable consideration (NVar).
+		
 		#lapply function that loops over all independent variables in Ivys and makes a linear regression with them
-		singregs <-  lapply(c('', Ivynames), FUN = function(col, dvname = Deevname, aivees = aivnames, famiglia = fam, alldat = df[-subsetter(df),], ptdat = df[subsetter(df),]){
+		singregs <-  lapply(LapIvys, FUN = function(col, dvname = Deevname, aivees = aivnames, famiglia = fam, alldat = df[-subsetter(df),], ptdat = df[subsetter(df),]){
 		
 			ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.
 			Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste that into Ivform
@@ -60,20 +63,22 @@ df <- fdf
 			 
 			form <- paste(dvname, '~', Ivform) #Make and store a formula with IVfom and dvname as text together
 			reg <-  glm(as.formula(form), data = alldat, family = famiglia)	#Perform the regression
-			print(critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = F)) #generate the criterion.
+			print(summary(reg))
+			crit <-  critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = F) #generate the criterion.
 				#Just realized, critergen will need to be changed if we ever want to use it on something else. Residuals should work for continuous, but need to brush up on deviance. 
 			
+			crit
 			
 			}
 		)
-			which(singregs == max(unlist(singregs)))	
-		bestvar <-  names(Ivys)[which(singregs == max(unlist(singregs))) - 1] #Give me the biggest value of singregs, and make sure to subtract 1 since we've added an AIV regression in singregs. #Turns out that the which command gives us all of the answers with the highest result. Why we get the same results from
+			# which(singregs == max(unlist(singregs)))	
+			bestvar <-  LapIvys[which(singregs == max(unlist(singregs)))] #Give me the biggest value of singregs, and make sure to subtract offsettr since we've added an AIV regression in singregs. #Turns out that the which command gives us all of the answers with the highest result. Why we get the results from one variable over is still a bug I am working on.
 		
 		ifelse(test = bestvar %in% aivnames, yes = break, no = aivnames <-  c(aivnames, bestvar)) #If bestvar has already been found by the algorithm, exit the loop and return only the aivs that matter. If it hasn't, add bestvar to aivs
-	 }	
+	 }	#Close NVar loop
 	aivnames
 
-	# }
+	# } #Close function
 	
 	
 # #define your dummy information
