@@ -11,14 +11,14 @@ rm(list = ls())
 set.seed(123456) # so it's replicable
 
 # make empty matrix where we can store IVs
-IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 1000))
+IVdat <-  data.frame(matrix(data = NA, ncol = 10, nrow = 40))
 IVdat <- as.data.frame(lapply(IVdat, function(x) x <- rnorm(nrow(IVdat), mean = 0, sd = 7))) #Fill that frame with data
 
 
 
 
 seq1 <- 1:nrow(IVdat)
-seq2 <- 1:nrow(IVdat) * 2
+seq2 <- sample(-5:5, nrow(IVdat), replace = T)
 negseq <- -1* 1:nrow(IVdat)
 countdown <- nrow(IVdat) + 1 + negseq
 seq7 <- seq2/2 * 7
@@ -30,7 +30,7 @@ seq7 <- seq2/2 * 7
 seqlist <- list(seq1, seq2, negseq, countdown, seq7)
 
 # IVsamp <- sample(length(IVdat), length(seqlist)) #create and store a sample of the columns equivalent to the length of seqlist, so that we can affect only those columns.
-IVsamp <- c(3,2,6,7,8) #No reason to keep generating this.
+IVsamp <- c(2,3,6,7,8) #No reason to keep generating this.
 
 
 
@@ -38,7 +38,7 @@ IVdat[, IVsamp] <-  IVdat[, IVsamp] + as.data.frame(seqlist) #and add the inform
 
 # dvdat <- dvdat + devseq
 
-relation <- IVdat[,5] + rnorm(nrow(IVdat), mean = 0, sd = .8)
+relation <- seq2 + rnorm(nrow(IVdat), mean = 0, sd = .08)
 
 dvdat <- data.frame('DV' = exp(relation)/(1 + exp(relation))) #Get into logistic form
 dvdat <-  ifelse(dvdat >= .5, 1, 0)
