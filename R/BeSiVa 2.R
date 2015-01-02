@@ -60,7 +60,7 @@ df <- fdf
 			
 			ifelse(col == '', Ivform <-  paste(aivees, collapse = ' + '), #if there's nothing in the column, paste the aivs together.
 			Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste that into Ivform
-			
+			if(is.null(aivnames) == T ) print(Ivform <-  gsub('[+]', '', Ivform)) #makes it so if there are no IVs, the extra + sign is scrubbed from Ivform
 			 
 			print(form <- paste(dvname, '~', Ivform)) #Make and store a formula with IVfom and dvname as text together
 			reg <-  glm(as.formula(form), data = alldat, family = famiglia)	#Perform the regression
