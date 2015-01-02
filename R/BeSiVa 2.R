@@ -14,7 +14,7 @@ fdf <- data.frame(dvdat, IVdat) #create full dataframe like we'd see in real lif
 head(fdf)
 Deevname <- colnames(dvdat)
 
-aivnames <- 'X5'
+aivnames <- NULL
 Ivynames <- names(IVdat)[ !names(IVdat) %in% aivnames] #Make sure that Ivynames and aivnames are mutually exclusive
 fam = 'binomial'
 niter <- 1
@@ -58,14 +58,14 @@ df <- fdf
 		#lapply function that loops over all independent variables in Ivys and makes a linear regression with them
 		singregs <-  lapply(LapIvys, FUN = function(col, dvname = Deevname, aivees = aivnames, famiglia = fam, alldat = df[-subsetter(df),], ptdat = df[subsetter(df),]){
 			
-			ifelse(col == '', Ivform <-  paste(aivees, collapse = '+'), #if there's nothing in the column, paste the aivs together.
+			ifelse(col == '', Ivform <-  paste(aivees, collapse = ' + '), #if there's nothing in the column, paste the aivs together.
 			Ivform <-  paste(paste(aivees, collapse = '+'), col, sep = ' + ')) #otherwise, add in the new column and paste that into Ivform
 			
 			 
 			print(form <- paste(dvname, '~', Ivform)) #Make and store a formula with IVfom and dvname as text together
 			reg <-  glm(as.formula(form), data = alldat, family = famiglia)	#Perform the regression
 			print(summary(reg))
-			crit <-  critergen(predict(reg, ptdat), fdf[,dvname], fulltabl = F) #generate the criterion.
+			crit <-  critergen(predict(reg, ptdat), ptdat[,dvname], fulltabl = F) #generate the criterion.
 				#Just realized, critergen will need to be changed if we ever want to use it on something else. Residuals should work for continuous, but need to brush up on deviance. 
 			rm(reg)
 			crit
@@ -74,7 +74,7 @@ df <- fdf
 		)
 	  # }	#Close NVar loop
 	aivnames
-
+print(data.frame(LapIvys, criter = unlist(singregs)))
 	# } #Close function
 	
 	
