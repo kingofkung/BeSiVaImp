@@ -2,8 +2,9 @@
 
 
 set.seed(123)
+matrows <- 1000
 
-x1 <- rnorm(1000)
+x1 <- rbinom(1000, matrows)
 x2 <- rnorm(1000)
 
 b0 <- 4
@@ -21,7 +22,6 @@ dv <- rbinom(1000, 1, pr)
 summary(glm(dv ~ x1 + x2, "binomial"))
 
 ## Simluate some data
-matrows <- 1000
 mat <- matrix(NA, nrow = matrows, ncol = 30)
 mat <- apply(mat, 2, function(x) {rnorm(matrows)})
 mat <- as.data.frame(mat)
@@ -32,3 +32,4 @@ colnames(mat)[1] <- "DV"
 
 answers <- sample(2:ncol(mat), size = 2)
 mat[, answers] <- c(x1, x2)
+colnames(mat)[answers] <- c("x1", "x2")

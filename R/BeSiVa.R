@@ -3,7 +3,7 @@
 ## holdoutrows <- sample(1:matrows, round(matrows/10))
 
 ## Nice and simple subset, to keep me same
-holdoutrows <- 900:1000
+holdoutrows <- 901:1000
 
 
 
@@ -11,21 +11,36 @@ holdoutrows <- 900:1000
 ##actually want to exclude variables
 
 dontuse <- c("V5", "V9")
-
-## Make text versions of formulae, but don't make one of the dv
-formulae <- lapply(colnames(mat), function(x, dvname = "DV", excludr = dontuse) {
+devee <- "DV"
+## Make text versions of formulae, but don't make one of with dv or the variables in dontuse on the RHS
+formulae <- lapply(colnames(mat), function(x, dvname = devee, excludr = dontuse) {
     if(dvname != x & !x %in% excludr) paste0(dvname, " ~ ", x)
 }
        )
-## Get rid of any formulae that is null
+## Turn the list into a vector, and get rid of any nulls in one easy unlist.
 formulae <- unlist(formulae)
 
-## Make the glm regressions and store them in glms
-glms <- lapply(formulae, function(x, dattouse = mat[-holdoutrows, ]){glm( as.formula(x), "binomial", dattouse) })
+## Make the glm regressions (taking care to not use the held out data) and store them in the variable glms
+glms <- lapply(formulae, function(x, dattouse = mat[-holdoutrows, ]){
+    glm( as.formula(x), "binomial", dattouse)
+})
 
 ## How to get the formula out
 glms[[1]]$formula
 
-round(predict(glms[["V16"]], newdata = mat[holdoutrows,], "response"), 2)
+## make the predictions
+predictr <- function(x, data = mat, rowstouse = holdoutrows){
+    ifelse(predict(x, newdata = data[rowstouse,], "response") >=.5, 1, 0)
+}
 
-lapply(1:length(glms), function(x) predict(glms[[x]], newdata = mat[holdoutrows,]) )
+predictions <- lapply(glms, predictr)
+
+head(glms[[1]]$data)
+## Get pcp
+
+preds <- predictions[[1]]
+realresults <- mat[holdoutrows, devee]
+
+
+
+getpcp <- function(preds, realresults) length(which(preds == realresults))/length(preds)
