@@ -1,9 +1,9 @@
 ## Subset the data
 
-## holdoutrows <- sample(1:matrows, round(matrows/10))
+holdoutrows <- sample(1:matrows, round(matrows/10))
 
 ## Nice and simple subset, to keep me same
-holdoutrows <- 901:1000
+## holdoutrows <- 901:1000
 
 
 
@@ -42,5 +42,7 @@ preds <- predictions[[1]]
 realresults <- mat[holdoutrows, devee]
 
 
-
+## Get percent correctly predicted for the
 getpcp <- function(preds, realresults) length(which(preds == realresults))/length(preds)
+
+lapply( predictions, getpcp, realresults = mat[holdoutrows,devee])
