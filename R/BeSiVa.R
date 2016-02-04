@@ -33,6 +33,8 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
     ifelse(predict(x, newdata = data[rowstouse,], "response") >=.5, 1, 0)
 }
 
+predict(glms[[1]], "response", newdata = mat[holdoutrows,])
+
 predictions <- lapply(glms, predictr)
 
 head(glms[[1]]$data)
@@ -45,4 +47,5 @@ realresults <- mat[holdoutrows, devee]
 ## Get percent correctly predicted for the
 getpcp <- function(preds, realresults) length(which(preds == realresults))/length(preds)
 
-lapply( predictions, getpcp, realresults = mat[holdoutrows,devee])
+pcps <- unlist(lapply( predictions, getpcp, realresults = mat[holdoutrows,devee]))
+data.frame(desnoms= colnames(mat)[!colnames(mat) %in% c("DV", dontuse)], pcps)

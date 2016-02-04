@@ -1,11 +1,11 @@
 ## Make a really easy data set to play with BeSiVa
-
+rm(list = ls())
 
 set.seed(123)
 matrows <- 1000
 
-x1 <- rbinom(1000, matrows)
-x2 <- rnorm(1000)
+x1 <- rbinom(1000, 1, .5)
+x2 <- rnorm(1000, 3)
 
 b0 <- 4
 b1 <- 9
@@ -18,12 +18,13 @@ pr <- 1/(1 + exp(-1*tee))
 
 dv <- rbinom(1000, 1, pr)
 
+
 ##The answer we're looking for
 summary(glm(dv ~ x1 + x2, "binomial"))
 
 ## Simluate some data
 mat <- matrix(NA, nrow = matrows, ncol = 30)
-mat <- apply(mat, 2, function(x) {rnorm(matrows)})
+mat <- apply(mat, 2, function(x) {rnorm(matrows, sd = 10)})
 mat <- as.data.frame(mat)
 
 ##Place in the DV, and call it "DV"
