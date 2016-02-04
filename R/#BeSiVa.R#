@@ -1,31 +1,3 @@
-## Make a really easy data set to play with BeSiVa
-
-
-set.seed(123)
-
-x1 <- rnorm(1000)
-x2 <- rnorm(1000)
-
-b0 <- 4
-b1 <- 9
-b2 <- -2
-tee <- b0 + b1 *x1 + b2 * x2
-
-exp(-tee)
-
-pr <- 1/(1 + exp(-1*tee))
-
-dv <- rbinom(1000, 1, pr)
-
-##The answer we're looking for
-summary(glm(dv ~ x1 + x2, "binomial"))
-
-## Simluate some data
-matrows <- 1000
-mat <- matrix(NA, nrow = matrows, ncol = 30)
-mat <- apply(mat, 2, function(x) {rnorm(matrows)})
-mat <- as.data.frame(mat)
-
 ## Subset the data
 
 ## holdoutrows <- sample(1:matrows, round(matrows/10))
