@@ -1,3 +1,11 @@
+rm(list = ls())
+
+source("Datasim2.R")
+
+source("BeSiVaFunctions.R")
+
+
+
 ## Get the data subset. holdoutrows is a sample of rows that will be
 ## kept out of the data when it is time to make the models, and used
 ## to test the models as well.
