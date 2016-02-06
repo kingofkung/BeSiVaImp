@@ -18,13 +18,18 @@ pr <- 1/(1 + exp(-1*tee))
 
 dv <- rbinom(1000, 1, pr)
 
-
 ##The answer we're looking for
 summary(glm(dv ~ x1 + x2, "binomial"))
 
 ## Simluate some data
 mat <- matrix(NA, nrow = matrows, ncol = 30)
-mat <- apply(mat, 2, function(x) {rnorm(matrows, sd = 10)})
+
+## Fill the rows I don't care about with noise
+mat <- apply(mat, 2,
+             function(x) {
+                 rnorm(1000, 27)
+             })
+
 mat <- as.data.frame(mat)
 
 ##Place in the DV, and call it "DV"
