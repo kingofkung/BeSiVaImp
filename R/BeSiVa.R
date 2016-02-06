@@ -32,13 +32,6 @@ glms <- lapply(formulae, function(x, dattouse = mat[-holdoutrows, ]){
 ## list glms with an lapply command.
 predictions <- lapply(glms, predictr)
 
-head(glms[[1]]$data)
-## Get pcp
-# get the predictions for a single
-## preds <- predictions[[1]]
-## realresults <- mat[holdoutrows, devee]
-
-
 
 ## Use the getpcp function to get the PCPs using the predictions
 ## created in predictr
@@ -49,5 +42,6 @@ pcps <- unlist(lapply(predictions, getpcp, realresults = mat[holdoutrows,devee])
 pcps <- data.frame(desnoms= colnames(mat)[!colnames(mat) %in% c(devee, dontuse)], pcps)
 print(pcps)
 
-##
-pcps[,1][pcps[,2] %in% max(pcps[,2])]
+## Get the variable that has the highest pcp. I think this might be
+## the slow way of doing it.
+bstvar <- as.character(pcps[,1][pcps[,2] %in% max(pcps[,2])])
