@@ -23,14 +23,20 @@ for(i in 1:2){
 
     ## Make text versions of formulae, but don't make one of with dv or
     ## the variables in dontuse on the RHS
-    formulae <- lapply(colnames(mat), function(x, dvname = devee, excludr = dontuse) {
-    if(dvname != x & !x %in% excludr) paste0(dvname, " ~ ", x)
-}
-                   )
+    formulae <- lapply(colnames(mat),
+                       function(x, dvname = devee, excludr = dontuse) {
+                           if(dvname != x & !x %in% excludr)
+                               paste0(dvname, " ~ ", x)
+                       }
+                       )
 
 
     ## Turn the list into a vector, and get rid of any nulls in one easy unlist command.
     formulae <- unlist(formulae)
+    ## format varstoadd so that if there's more than one var, they're separated with a + sign
+    if(i != 1) {varstoadd <- paste(bstvar, collapse = " + " )
+                formulae <- unlist(lapply(formulae,function(x) paste(x, varstoadd, sep = " + ")))
+            }
 
     ## Make the glm regressions (taking care to not use the held out data)
     ## and store them in the variable glms
@@ -56,5 +62,9 @@ for(i in 1:2){
     ## Get the variable that has the highest pcp. I think this might be
     ## the slow way of doing it.
     bstvar <- as.character(pcps[,1][pcps[,2] %in% max(pcps[,2])])
-
+    ## Take bstvar out of the running for future iterations
+    ifelse(is.null(dontuse), dontuse <- bstvar, dontuse <- c(dontuse, bstvar))
+    ifelse(i == 1, tokeep <- bstvar, tokeep <- c(tokeep, bstvar))
 }
+
+
