@@ -19,7 +19,8 @@ dontuse <- c("V6", "V9")
 devee <- "DV"
 
 ## Insert my for loop
-for(i in 1:2){
+i <- 1
+## for(i in 1:2){
 
     ## Make text versions of formulae, but don't make one of with dv or
     ## the variables in dontuse on the RHS
@@ -64,7 +65,8 @@ for(i in 1:2){
     bstvar <- as.character(pcps[,1][pcps[,2] %in% max(pcps[,2])])
     ## Take bstvar out of the running for future iterations
     ifelse(is.null(dontuse), dontuse <- bstvar, dontuse <- c(dontuse, bstvar))
-    ifelse(i == 1, tokeep <- bstvar, tokeep <- c(tokeep, bstvar))
-}
+    ifelse(i == 1,  tokeep <- bstvar, tokeep <- c(tokeep, bstvar))
+## }
+
 
 

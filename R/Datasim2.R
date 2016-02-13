@@ -5,7 +5,7 @@ set.seed(123)
 matrows <- 1000
 
 x1 <- rbinom(1000, 1, .5)
-x2 <- rnorm(1000, 3)
+x2 <- rgamma(1000, 3, .5)
 
 b0 <- 4
 b1 <- 9
@@ -27,7 +27,7 @@ mat <- matrix(NA, nrow = matrows, ncol = 30)
 ## Fill the rows I don't care about with noise
 mat <- apply(mat, 2,
              function(x) {
-                 rnorm(1000, 27)
+                 rnorm(1000, 2, 3)
              })
 
 mat <- as.data.frame(mat)
