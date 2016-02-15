@@ -49,7 +49,7 @@ i <- 1
     ## Use the predictr function on each glm created and stored in the
     ## list glms with an lapply command.
     predictions <- lapply(glms, predictr)
-
+print(predictions)
 
     ## Use the getpcp function to get the PCPs using the predictions
     ## created in predictr

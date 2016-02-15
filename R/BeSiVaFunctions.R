@@ -10,7 +10,8 @@
 ##' @return the predictions: Usually vector of 0's and 1's, but this might change in future
 ##' @author Benjamin Rogers
 predictr <- function(x, data = mat, rowstouse = holdoutrows){
-    ifelse(predict(x, newdata = data[rowstouse,], "response") >=.5, 1, 0)
+    thepreds <- predict(x, newdata = data[rowstouse,], "response")
+    ifelse(thepreds >=.5, 1, 0)
 }
 
 ##' getpcp

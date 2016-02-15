@@ -27,7 +27,7 @@ mat <- matrix(NA, nrow = matrows, ncol = 30)
 ## Fill the rows I don't care about with noise
 mat <- apply(mat, 2,
              function(x) {
-                 rnorm(1000, 2, 3)
+                 rnorm(1000, 0, 100)
              })
 
 mat <- as.data.frame(mat)
