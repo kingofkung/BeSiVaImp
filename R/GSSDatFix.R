@@ -20,3 +20,6 @@ dat$vote12bin[dat$vote12bin %in% "ineligible"] <- NA
 dat$vote12bin <- as.numeric(dat$vote12bin)
 
 table(dat$vote12, dat$vote12bin)
+
+
+unique(dat$occ10)
