@@ -1,5 +1,5 @@
 ## Open and clean all neccessities for using the GSS Data
-
+rm(list = ls())
 
 library(foreign)
 

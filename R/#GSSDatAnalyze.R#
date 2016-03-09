@@ -72,8 +72,7 @@ formulae <- lapply(colstouse, function(x) as.formula(paste0(devee, " ~ ",x, plac
 
 
 glms <- lapply(formulae, function(x){
-
-    print()
+    print("\n")
     print(x)
     try(
         y <- glm(x, family = "binomial", data = dat2[-test, ])
