@@ -17,7 +17,7 @@ dat2$vote12bin
 
 ## get the sample of rows
 set.seed(12345)
-test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
+test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/8))
 
 
 ## Figure out which rows have few categories, so we can eliminate them later.
@@ -51,8 +51,8 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)])
+varstoinc <-"vote08"
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -66,22 +66,24 @@ length(unique(colstouse))
 
 
 ## Placein will be where we store the variables we want included
-placein <- ""
+
+ifelse(varstoinc == "", placein <- "", placein <- paste("+", paste(varstoinc, collapse = " + ")))
 
 formulae <- lapply(colstouse, function(x) as.formula(paste0(devee, " ~ ",x, placein  )) )
 
-
+if(exists("glms")) rm(glms)
 glms <- lapply(formulae, function(x){
-    print("\n")
-    print(x)
+    cat("\n\n")
+     print(x)
     try(
-        y <- glm(x, family = "binomial", data = dat2[-test, ])
+        print(y <- glm(x, family = "binomial", data = dat2[-test, ]))
     )
-    print(y)
-    y
 }
                )
 
+## glm(vote12bin ~ pres08 + vote08, family = "binomial", data = dat2[-test,])
+
+## model.matrix(vote12bin ~ pres08 + vote08, data = dat2[-test,])
 
 ## formulae[[733]]
 ## dat2$relhhd8
@@ -91,15 +93,18 @@ glms <- lapply(formulae, function(x){
 
 head(glms)
 
-predictions <- lapply(glms, function(x)  try(predictr( x  , data = dat2, rowstouse = test)))
-
+if(exists("predictions")) rm(predictions)
+predictions <- lapply(glms, function(x)  try( predictr( x  , data = dat2, rowstouse = test)) )
 
 pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2$vote12bin[test]) ))
 
 IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
 
-round1output <- data.frame(IVs, "pcps" =  as.numeric(pcps))[order(pcps, decreasing = TRUE), ]
+roundoutput <- data.frame(IVs, "pcps" =  as.numeric(pcps))[order(pcps, decreasing = TRUE), ]
+
+print(roundoutput)
 
 ## badvars <- as.character(round1output[(nrow(round1output)-3):nrow(round1output),"IVs"])
 
 ## head(dat2[, badvars])
+system("say done")
