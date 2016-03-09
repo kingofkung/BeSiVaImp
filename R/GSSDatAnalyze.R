@@ -17,7 +17,7 @@ dat2$vote12bin
 
 ## get the sample of rows
 set.seed(12345)
-test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/8))
+test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
 
 
 ## Figure out which rows have few categories, so we can eliminate them later.
@@ -51,7 +51,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <-""
+varstoinc <-"vote08"
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -100,10 +100,12 @@ pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2$vote12bin[test]) 
 
 IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
 
-roundoutput <- data.frame(IVs, "pcps" =  as.numeric(pcps))[order(pcps, decreasing = TRUE), ]
+roundoutput <- data.frame(IVs, "pcps" =  as.numeric(pcps))[order(pcps, decreasing = FALSE), ]
 
 print(roundoutput)
 
 ## badvars <- as.character(round1output[(nrow(round1output)-3):nrow(round1output),"IVs"])
 
 ## head(dat2[, badvars])
+## Now it tells us when it's done!
+system("say done")
