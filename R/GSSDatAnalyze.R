@@ -27,7 +27,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb",
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb",    "vote08",
                colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
 
 
@@ -51,7 +51,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <-c("vote08","educ")
+varstoinc <-c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -108,4 +108,8 @@ print(roundoutput)
 
 ## head(dat2[, badvars])
 ## Now it tells us when it's done!
-system("say done")
+## system("say done")
+## I got tired of it telling us it's done.
+## /System/Library/PrivateFrameworks/ScreenReader.framework/Versions/A/Resources/Sounds
+
+system("afplay /System/Library/Sounds/Hero.aiff")
