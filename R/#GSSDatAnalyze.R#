@@ -27,7 +27,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb",
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb",    "vote08"
                colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
 
 

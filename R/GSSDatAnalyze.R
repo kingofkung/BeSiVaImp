@@ -51,7 +51,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <-"vote08"
+varstoinc <-c("vote08","educ")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -100,7 +100,7 @@ pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2$vote12bin[test]) 
 
 IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
 
-roundoutput <- data.frame(IVs, "pcps" =  as.numeric(pcps))[order(pcps, decreasing = FALSE), ]
+roundoutput <- data.frame(IVs, "pcps" =  as.numeric(pcps), "ncorr" = as.numeric(pcps)  *  length(dat2$vote12bin[test])) [order(pcps, decreasing = FALSE), ]
 
 print(roundoutput)
 
