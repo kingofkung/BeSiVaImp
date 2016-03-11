@@ -51,7 +51,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <-c("partyid", "degree", "sex", "race")
+varstoinc <- ""  ##c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -96,13 +96,28 @@ head(glms)
 if(exists("predictions")) rm(predictions)
 predictions <- lapply(glms, function(x)  try( predictr( x  , data = dat2, rowstouse = test)) )
 
+
+
 pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2$vote12bin[test]) ))
 
 IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
 
-roundoutput <- data.frame(IVs, "pcps" =  as.numeric(pcps), "ncorr" = as.numeric(pcps)  *  length(dat2$vote12bin[test])) [order(pcps, decreasing = FALSE), ]
+ncorr <- as.numeric(pcps)*length(dat2$vote12bin[test])
+nobserv <- unlist(lapply(predictions,function(x) length(na.omit(x)) ))
+
+
+roundoutput <- data.frame(IVs,
+                          "pcps" =  as.numeric(pcps),
+                          "ncorr" = ncorr,
+                          "nobserv" = nobserv
+                          ) [order(pcps, decreasing = FALSE), ]
 
 print(roundoutput)
+
+roundoutput[roundoutput$IVs == "zodiac",]
+prop.table(table(dat2$vote12bin))
+
+## hist(roundoutput$pcps)
 
 ## badvars <- as.character(round1output[(nrow(round1output)-3):nrow(round1output),"IVs"])
 
@@ -111,5 +126,11 @@ print(roundoutput)
 ## system("say done")
 ## I got tired of it telling us it's done.
 ## /System/Library/PrivateFrameworks/ScreenReader.framework/Versions/A/Resources/Sounds
+
+convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat2[-test,])
+
+convpreds <- predictr(convmod, dat2[], test)
+getpcp(convpreds, dat2[test,"vote12bin"])
+
 
 system("afplay /System/Library/Sounds/Hero.aiff")
