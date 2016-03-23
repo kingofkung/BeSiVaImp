@@ -3,7 +3,8 @@ rm(list = ls())
 
 library(foreign)
 
-dat <- read.dta("/Users/bjr/Desktop/R_Projects/GSSThing/GSS2014merged_R3.DTA")
+## dat <- read.dta("/Users/bjr/Desktop/R_Projects/GSSThing/GSS2014merged_R3.DTA")
+dat <- read.dta("/Users/bjr/GitHub/BeSiVaImp/Data/GSS2006.dta")
 
 ncol(dat)
 
@@ -23,3 +24,9 @@ table(dat$vote12, dat$vote12bin)
 
 
 unique(dat$occ10)
+
+## Recode trtcops
+apply(dat, 2, function(x) grep("cop",x))
+colnames(dat)[grep("cop",colnames(dat))]
+
+table(dat$acqcops)
