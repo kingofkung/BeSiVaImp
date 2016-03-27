@@ -24,6 +24,6 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
 ##' @return
 ##' @author Benjamin Rogers
 getpcp <- function(preds, realresults, fullpreds = TRUE) {
-    ifelse(fullpreds == TRUE , denom <- length(preds), denom <- length(realresults))
+    ifelse(fullpreds == TRUE , denom <- length(preds), denom <- length(na.omit(preds)))
     length(which(preds == realresults))/denom
 }

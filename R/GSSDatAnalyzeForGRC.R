@@ -102,14 +102,14 @@ head(glms)
 if(exists("predictions")) rm(predictions)
 predictions <- lapply(glms, function(x)  try( predictr( x  , data = dat2, rowstouse = test)) )
 
+lapply(predictions, function(x) length(na.omit(x)))
 
-
-pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2[test, devee]) ))
+pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2[test, devee], TRUE) ))
 
 IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
 
-ncorr <- as.numeric(pcps)*length(dat2[test, devee])
 nobserv <- unlist(lapply(predictions,function(x) length(na.omit(x)) ))
+ncorr <- round(as.numeric(pcps)*nobserv)
 
 
 roundoutput <- data.frame(IVs,
@@ -136,7 +136,7 @@ prop.table(table(dat2[, devee]))
 convmod <- glm(get(devee) ~ partyid + degree + race + age + income, data = dat2[-test,])
 
 convpreds <- predictr(convmod, dat2[], test)
-getpcp(convpreds, dat2[test, devee])
+getpcp(convpreds, dat2[test, devee], FALSE)
 
 
 system("afplay /System/Library/Sounds/Hero.aiff")
