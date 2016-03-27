@@ -6,7 +6,8 @@ library(foreign)
 ## dat <- read.dta("/Users/bjr/Desktop/R_Projects/GSSThing/GSS2014merged_R3.DTA")
 dat <- read.dta("/Users/bjr/GitHub/BeSiVaImp/Data/GSS2006.dta")
 
-ncol(dat)
+## ncol(dat)
+## head(dat)
 
 colnames(dat)[grep("Vote", colnames(dat), ignore.case = TRUE)]
 
@@ -30,8 +31,3 @@ apply(dat, 2, function(x) grep("cop",x))
 colnames(dat)[grep("cop",colnames(dat))]
 
 table(dat$acqcops)
-
-dat$acqcopsbin <- as.character(dat$acqcops)
-dat$acqcopsbin[ dat$acqcopsbin %in% c("1", "2-5", "6-10", "More than 10")] <- "1"
-dat$acqcopsbin <- as.numeric(dat$acqcopsbin)
-

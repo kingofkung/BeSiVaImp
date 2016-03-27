@@ -3,21 +3,27 @@ rm(list = ls())
 source("GSSDatFix.R")
 source("BeSiVaFunctions.R")
 
+## recode DV
+dat$acqcopsbin <- as.character(dat$trtcops)
+dat$acqcopsbin[ dat$acqcopsbin %in% c("1", "2-5", "6-10", "More than 10")] <- "1"
+dat$acqcopsbin <- as.numeric(dat$acqcopsbin)
 
-devee <- "vote12bin"
+
+devee <- "acqcopsbin"
 ## colnames(dat)
 
 
 ## Keep some data held out
 ## First, make sure our DV Is included in all cases rows
-dat2 <- dat[complete.cases(dat$vote12bin),]
-dat2$vote12bin
+
+dat2 <- dat[complete.cases(dat[, devee]),]
+
 
 
 
 ## get the sample of rows
 set.seed(12345)
-test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
+test <- sample(seq_along(dat2$acqcopsbin), size = round(nrow(dat2)/5))
 
 
 ## Figure out which rows have few categories, so we can eliminate them later.
@@ -27,7 +33,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb",    "vote08",
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb", "form", "mode",   "vote08", "acqcopsbin", "trtcops",
                colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
 
 
@@ -51,7 +57,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <- ""  ##c("partyid", "degree", "sex", "race")
+varstoinc <- "" ## c("trtwhite", "rellife")  ##c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -98,11 +104,11 @@ predictions <- lapply(glms, function(x)  try( predictr( x  , data = dat2, rowsto
 
 
 
-pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2$vote12bin[test]) ))
+pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2[test, devee]) ))
 
 IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
 
-ncorr <- as.numeric(pcps)*length(dat2$vote12bin[test])
+ncorr <- as.numeric(pcps)*length(dat2[test, devee])
 nobserv <- unlist(lapply(predictions,function(x) length(na.omit(x)) ))
 
 
@@ -115,7 +121,7 @@ roundoutput <- data.frame(IVs,
 print(roundoutput)
 
 roundoutput[roundoutput$IVs == "zodiac",]
-prop.table(table(dat2$vote12bin))
+prop.table(table(dat2[, devee]))
 
 ## hist(roundoutput$pcps)
 
@@ -127,10 +133,10 @@ prop.table(table(dat2$vote12bin))
 ## I got tired of it telling us it's done.
 ## /System/Library/PrivateFrameworks/ScreenReader.framework/Versions/A/Resources/Sounds
 
-convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat2[-test,])
+convmod <- glm(get(devee) ~ partyid + degree + race + age + income, data = dat2[-test,])
 
 convpreds <- predictr(convmod, dat2[], test)
-getpcp(convpreds, dat2[test,"vote12bin"])
+getpcp(convpreds, dat2[test, devee])
 
 
 system("afplay /System/Library/Sounds/Hero.aiff")

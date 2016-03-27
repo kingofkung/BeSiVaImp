@@ -20,6 +20,10 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
 ##' @title
 ##' @param preds
 ##' @param realresults
+##' @param fullpreds Do you use all predictions, or just the ones that were possible to predict?
 ##' @return
 ##' @author Benjamin Rogers
-getpcp <- function(preds, realresults) length(which(preds == realresults))/length(preds)
+getpcp <- function(preds, realresults, fullpreds = TRUE) {
+    ifelse(fullpreds == TRUE , denom <- length(preds), denom <- length(realresults))
+    length(which(preds == realresults))/denom
+}

@@ -4,21 +4,20 @@ source("GSSDatFix.R")
 source("BeSiVaFunctions.R")
 
 
-devee <- "acqcopsbin"
+devee <- "vote12bin"
 ## colnames(dat)
 
 
 ## Keep some data held out
 ## First, make sure our DV Is included in all cases rows
-
-dat2 <- dat[complete.cases(dat[, devee]),]
-
+dat2 <- dat[complete.cases(dat$vote12bin),]
+dat2$vote12bin
 
 
 
 ## get the sample of rows
 set.seed(12345)
-test <- sample(seq_along(dat2$acqcopsbin), size = round(nrow(dat2)/10))
+test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
 
 
 ## Figure out which rows have few categories, so we can eliminate them later.
