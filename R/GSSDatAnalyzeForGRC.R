@@ -57,7 +57,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <- "" ## c("trtwhite", "rellife")  ##c("partyid", "degree", "sex", "race")
+varstoinc <-  c("trtwhite", "rellife", "whoelse2" )#, "whoelse2")  ##c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -138,5 +138,14 @@ convmod <- glm(get(devee) ~ partyid + degree + race + age + income, data = dat2[
 convpreds <- predictr(convmod, dat2[], test)
 getpcp(convpreds, dat2[test, devee], FALSE)
 
+miter1 <- glm(get(devee) ~ trtwhite, data = dat2[-test,])
+summary(miter1)
+miter2 <- update(miter1, .~. + rellife)
+summary(miter2)
+miter3 <- update(miter2, .~. + satfin)
+summary(miter3)
+
+library(rockchalk)
+outreg(list(miter1, miter2, miter3))
 
 system("afplay /System/Library/Sounds/Hero.aiff")
