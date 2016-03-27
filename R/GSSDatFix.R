@@ -30,3 +30,8 @@ apply(dat, 2, function(x) grep("cop",x))
 colnames(dat)[grep("cop",colnames(dat))]
 
 table(dat$acqcops)
+
+dat$acqcopsbin <- as.character(dat$acqcops)
+dat$acqcopsbin[ dat$acqcopsbin %in% c("1", "2-5", "6-10", "More than 10")] <- "1"
+dat$acqcopsbin <- as.numeric(dat$acqcopsbin)
+
