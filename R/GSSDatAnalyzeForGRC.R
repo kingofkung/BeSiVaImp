@@ -146,6 +146,6 @@ miter3 <- update(miter2, .~. + satfin)
 summary(miter3)
 
 library(rockchalk)
-outreg(list(miter1, miter2, miter3))
+outreg(list(miter1, miter2, miter3), title = "This!")
 
 system("afplay /System/Library/Sounds/Hero.aiff")
