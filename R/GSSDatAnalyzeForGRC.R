@@ -33,7 +33,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb", "form", "mode",   "vote08", "acqcopsbin", "trtcops",
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb", "form", "mode",   "vote08", "acqcopsbin", "trtcops", "trtwhite",
                colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
 
 
@@ -57,7 +57,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <-  c("trtwhite", "rellife", "whoelse2" )#, "whoelse2")  ##c("partyid", "degree", "sex", "race")
+varstoinc <-  ""#, "whoelse2")  ##c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -120,7 +120,7 @@ roundoutput <- data.frame(IVs,
 
 print(roundoutput)
 
-roundoutput[roundoutput$IVs == "zodiac",]
+roundoutput[roundoutput$IVs == "race",]
 prop.table(table(dat2[, devee]))
 
 ## hist(roundoutput$pcps)
@@ -145,7 +145,30 @@ summary(miter2)
 miter3 <- update(miter2, .~. + satfin)
 summary(miter3)
 
+miter4 <- update(miter3, .~. -satfin + whoelse2)
+miter5 <- update(miter3, .~. -satfin + bible)
+miter6 <- update(miter3, .~. -satfin + acqjose)
+
 library(rockchalk)
-outreg(list(miter1, miter2, miter3), title = "This!")
+outreg(list(miter1, miter2, miter3, miter4, miter5, miter6), title = "This!")
 
 system("afplay /System/Library/Sounds/Hero.aiff")
+
+miter1mm <- model.matrix(get(devee) ~ trtwhite-1, data = dat2)
+head(miter1mm)
+length(dat2[,devee])
+
+cor(dat2[complete.cases(dat2$trtwhite),devee] , miter1mm[, 2:6])
+
+miter7 <- update(miter1, formula = .~.,  data = dat2)
+dat2$unemployment <- ifelse(dat2$wrkstat==  "UNEMPL, LAID OFF", 1, 0)
+dat2$wrkstat[is.na(dat2$wrkstat)]
+
+miter8 <- update(miter7, .~.  + sex  + age + unemployment + degree + res16, data = dat2[dat2$race %in% "white",])
+
+miter8 <- update(miter7, .~.  + sex  + age + unemployment + degree + res16 + polviews +race-trtwhite, data = dat2[-test,])
+
+preds8 <- predictr(miter8, dat2, test)
+getpcp(preds8, dat2[names(preds8), devee]  )
+
+summary(miter8)
