@@ -132,5 +132,8 @@ convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat2[-
 convpreds <- predictr(convmod, dat2[], test)
 getpcp(convpreds, dat2[test,"vote12bin"])
 
+m1 <- glm(vote12bin ~partyid, data = dat2[-test,])
+m2
+
 
 system("afplay /System/Library/Sounds/Hero.aiff")

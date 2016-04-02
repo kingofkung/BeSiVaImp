@@ -3,8 +3,8 @@ rm(list = ls())
 
 library(foreign)
 
-## dat <- read.dta("/Users/bjr/Desktop/R_Projects/GSSThing/GSS2014merged_R3.DTA")
-dat <- read.dta("/Users/bjr/GitHub/BeSiVaImp/Data/GSS2006.dta")
+dat <- read.dta("/Users/bjr/Desktop/R_Projects/GSSThing/GSS2014merged_R3.DTA")
+## dat <- read.dta("/Users/bjr/GitHub/BeSiVaImp/Data/GSS2006.dta")
 
 ## ncol(dat)
 ## head(dat)
