@@ -27,7 +27,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb",    "vote08",
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb", "vote08",
                colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
 
 
@@ -51,7 +51,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <- ""  ##c("partyid", "degree", "sex", "race")
+varstoinc <- c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -132,8 +132,17 @@ convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat2[-
 convpreds <- predictr(convmod, dat2[], test)
 getpcp(convpreds, dat2[test,"vote12bin"])
 
-m1 <- glm(vote12bin ~partyid, data = dat2[-test,])
-m2
+m1 <- glm(vote12bin ~ vote08, data = dat2[-test,])
+m2 <- update(m1, .~. + educ)
+
+m1.1 <- update(m1, .~. -vote08 + partyid)
+summary(m1.1)
+m2.1 <- update(m1.1, .~. + degree)
+m3.1 <- update(m2.1, .~. +sex + race)
+m4.1 <- update(m3.1, .~. + rplace)
+library(rockchalk)
+outreg(list("Iteration 1" = m1, "Iteration 2" = m2), title = "this is a test")
+outreg(list("Iteration 1" = m1.1, "Iteration 2" = m2.1, "Iteration 3" = m3.1, "Iteration 4" = m4.1), title = "Algorithm predictions, sans prior vote"   )
 
 
 system("afplay /System/Library/Sounds/Hero.aiff")
