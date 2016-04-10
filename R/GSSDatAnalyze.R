@@ -27,7 +27,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin","wtcomb", "vote08",
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin", "pres12", "if12who","wtcomb",
                colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
 
 
@@ -51,7 +51,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <- c("partyid", "degree", "sex", "race")
+varstoinc <- "" ##c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
 
 
@@ -97,14 +97,14 @@ if(exists("predictions")) rm(predictions)
 predictions <- lapply(glms, function(x)  try( predictr( x  , data = dat2, rowstouse = test)) )
 
 
-
-pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2$vote12bin[test]) ))
+pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2$vote12bin[test], fullpreds = FALSE) ))
 
 IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
 
-ncorr <- as.numeric(pcps)*length(dat2$vote12bin[test])
-nobserv <- unlist(lapply(predictions,function(x) length(na.omit(x)) ))
+## ncorr <- as.numeric(pcps)*length(dat2$vote12bin[test])
 
+nobserv <- unlist(lapply(predictions,function(x) length(na.omit(x)) ))
+ncorr <- as.numeric(pcps) *nobserv
 
 roundoutput <- data.frame(IVs,
                           "pcps" =  as.numeric(pcps),

@@ -11,7 +11,8 @@
 ##' @author Benjamin Rogers
 predictr <- function(x, data = mat, rowstouse = holdoutrows){
     thepreds <- predict(x, newdata = data[rowstouse,], "response")
-    ifelse(thepreds >=.5, 1, 0)
+    ## ifelse(thepreds >=.5, 1, 0)
+    unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }
 
 ##' getpcp
