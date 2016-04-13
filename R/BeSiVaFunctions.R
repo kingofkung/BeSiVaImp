@@ -28,3 +28,8 @@ getpcp <- function(preds, realresults, fullpreds = TRUE) {
     ifelse(fullpreds == TRUE , denom <- length(preds), denom <- length(na.omit(preds)))
     length(which(preds == realresults))/denom
 }
+
+## Function wishlist
+## 1. Function that is BeSiVa (duh)
+## 2. Function that displays model with/without holdout set and returns
+## both regressions side by side
