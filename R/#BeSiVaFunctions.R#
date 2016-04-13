@@ -28,3 +28,4 @@ getpcp <- function(preds, realresults, fullpreds = TRUE) {
     ifelse(fullpreds == TRUE , denom <- length(preds), denom <- length(na.omit(preds)))
     length(which(preds == realresults))/denom
 }
+
