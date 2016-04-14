@@ -33,7 +33,6 @@ avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", 
 
 ## How can I figure out if a column is now all na's?
 
-## all(is.na(dat2[,"othpolw"]))
 
 whichcols <- lapply(colnames(dat2), function(x) all(is.na(dat2[-test ,x]))) == TRUE
 
@@ -51,8 +50,9 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <- "" ##c("partyid", "degree", "sex", "race")
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)
+varstoinc <-""  ##c("partyid", "degree", "sex", "race")
+noVote08 <- "vote08"
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -93,6 +93,11 @@ glms <- lapply(formulae, function(x){
 
 head(glms)
 
+
+lapply(glms, function(x) try(coef(x)))
+
+class("try-error")
+
 if(exists("predictions")) rm(predictions)
 predictions <- lapply(glms, function(x)  try( predictr( x  , data = dat2, rowstouse = test)) )
 
@@ -104,18 +109,22 @@ IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
 ## ncorr <- as.numeric(pcps)*length(dat2$vote12bin[test])
 
 nobserv <- unlist(lapply(predictions,function(x) length(na.omit(x)) ))
-ncorr <- as.numeric(pcps) *nobserv
+ncorr <- as.numeric(pcps) * length(test)
+altpcps <- ncorr/nobserv
 
 roundoutput <- data.frame(IVs,
                           "pcps" =  as.numeric(pcps),
                           "ncorr" = ncorr,
-                          "nobserv" = nobserv
+                          "nobserv" = nobserv,
+                          "altpcps" = altpcps
                           ) [order(pcps, decreasing = FALSE), ]
 
 print(roundoutput)
 
-roundoutput[roundoutput$IVs == "zodiac",]
 prop.table(table(dat2$vote12bin))
+
+probchildren <- roundoutput[roundoutput$ncorr == 0,]
+print(probchildren)
 
 ## hist(roundoutput$pcps)
 
