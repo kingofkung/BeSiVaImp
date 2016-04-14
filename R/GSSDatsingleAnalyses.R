@@ -1,8 +1,11 @@
+## Make a file that displays single analyses instead of the full output of BeSiVa
+
+## This is where we'll also store any code needed to make outreg tables and charts.
+
+if(!exists("dat2")) source("GSSDatAnalyze.R")
+
 hist(roundoutput$pcps)
 
-badvars <- as.character(round1output[(nrow(round1output)-3):nrow(round1output),"IVs"])
-
-head(dat2[, badvars])
 
 convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat2[-test,])
 
