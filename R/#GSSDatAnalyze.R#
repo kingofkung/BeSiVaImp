@@ -130,6 +130,8 @@ prop.table(table(dat2$vote12bin))
 probchildren <- roundoutput[roundoutput$ncorr == 0,]
 print(probchildren)
 
+dispboth(glms[[22]], dat2)
+
 ## hist(roundoutput$pcps)
 
 ## badvars <- as.character(round1output[(nrow(round1output)-3):nrow(round1output),"IVs"])

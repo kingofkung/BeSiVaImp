@@ -40,6 +40,6 @@ getpcp <- function(preds, realresults, fullpreds = TRUE) {
 ##' @return a list that includes both regression models
 ##' @author Benjamin Rogers
 dispboth <- function(model, fulldata){
-    fullmod <- update(model, data = fulldata)
+    fullmod <- update(model, formula = .~. , data = fulldata)
     list(model, fullmod)
 }
