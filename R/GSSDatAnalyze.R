@@ -50,7 +50,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <-""  ##c("partyid", "degree", "sex", "race")
+varstoinc <-c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 noVote08 <- "vote08"
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
 
