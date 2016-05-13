@@ -50,9 +50,9 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
 
 
-varstoinc <-c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
+varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 noVote08 <- "vote08"
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)##, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -99,7 +99,7 @@ glms <- lapply(formulae, function(x){
 head(glms)
 
 
-lapply(glms, function(x) try(coef(x)))
+## lapply(glms, function(x) try(coef(x)))
 
 
 if(exists("predictions")) rm(predictions)
@@ -123,14 +123,41 @@ roundoutput <- data.frame(IVs,
                           "altpcps" = altpcps
                           ) [order(pcps, decreasing = FALSE), ]
 
-print(roundoutput)
+print(roundoutput[order(roundoutput$altpcps),])
 
-prop.table(table(dat2$vote12bin))
+prop.table(table(dat2$vote12bin[test]))
 
 probchildren <- roundoutput[roundoutput$ncorr == 0,]
-print(probchildren)
+## print(probchildren)
 
 
 
 
 system("afplay /System/Library/Sounds/Hero.aiff")
+## Create mobilization model based on likely contact
+## actassoc lets us discern how important being in an organization is to a person, although it might need some recodes
+## clsetown might let us say that someone is more central in their network, as feeling close to their town suggests association, more so than actassoc
+## volmonth, which is all about if a person volunteered and not for pay, useful for associating with
+## grpwork,
+colnames(dat2)[ grep("act", colnames(dat2), T)]
+varlabs
+rnhmod <- glm(vote12bin ~ wrkstat + grpsprts + grprelig + actassoc + degree + rincome, data = dat2[-test,], family = "binomial")
+summary(rnhmod)
+
+limrnhmod <- glm(vote12bin ~ actassoc+ degree, data = dat2[-test,], family = "binomial")
+bessiesmod <- glm(vote12bin ~ educ + vote08, data = dat2[-test,], family = "binomial")
+
+## Get pcp for the rosenthal and Hansen model
+ getpcp( predictr(bessiesmod, data = dat2, test), dat2[test, devee], T )
+table(predictr(rnhmod, dat2, test))
+
+summary(glms[[56]])
+pcps[[56]]
+
+library(rockchalk)
+outreg(list("party ID" = glms[[56]]), title = "this is a test")
+outreg(list(rnhmod), title = "this is a test")
+varlabs[grep("comm", varlabs, F)]
+colnames(dat2)
+
+table(dat2$vote12bin[-test], dat2$grprelig[-test])
