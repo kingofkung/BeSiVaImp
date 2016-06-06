@@ -43,3 +43,24 @@ dispboth <- function(model, fulldata){
     fullmod <- update(model, formula = .~. , data = fulldata)
     list(model, fullmod)
 }
+
+##' the besiva function
+##'
+##' this function will take data in a given dataset, and return a
+##' model based on subset selection.
+##' @title besiva
+##' @param devee The dependent variable of interest. Must be specified as 0-1
+##' @param ivs The list of independent variables. Currently, must be text
+##' @param dat The data to be considered. MUST CONTAIN DEVEE AND IVS!
+##' @param fam The family of GLM To use. Currently stays at binomial
+##' @param iters Number of iterations
+##' @return
+##' @author Benjamin Rogers
+besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1){
+    ## Make the formulas
+    ## Run the formulas
+
+
+
+
+}
