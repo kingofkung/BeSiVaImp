@@ -10,3 +10,4 @@ anes <- read.spss(paste0(loc, "anes_pilot_2016.sav"), to.data.frame = TRUE)
 head(anes)
 colnames(anes)
 anes$religpew
+table(anes$religpew)
