@@ -11,3 +11,4 @@ head(anes)
 colnames(anes)
 anes$religpew
 table(anes$religpew)
+table(anes$faminc)
