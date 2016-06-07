@@ -59,8 +59,10 @@ dispboth <- function(model, fulldata){
 besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .1, sampseed = 1234567890){
         set.seed(sampseed)
         ## divy up data
+        testrows <- sample(nrow(dat), round(nrow(dat)* perc))
+
         for(i in 1:iters){
-            testrows <- sample(nrow(dat), round(nrow(dat)* perc)) ## Make some formulas
+            ## Make some formulas
 
 
             forms <- lapply(ivs, function(x, deev = devee, invars = ""){
