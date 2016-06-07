@@ -56,7 +56,13 @@ dispboth <- function(model, fulldata){
 ##' @param iters Number of iterations
 ##' @return
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1){
+besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .1, sampseed = 1234567890){
+
+    set.seed(sampseed)
+    ## divy up data
+
+    testrows <- sample(nrow(dat), round(nrow(dat)* perc))
+
     ## Make some formulas
     forms <- lapply(ivs, function(x, deev = devee, invars = ""){
         as.formula(  paste(deev, "~", x)  )
@@ -66,10 +72,18 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1){
     ## lapply(forms, function(x) glm(as.formula(forms), family = fam))
 
     glms <- lapply(forms,
-                   function(x, thedat = dat, famille = fam){eval(bquote(
-                                                                glm(.(x),data = thedat, family = famille)
-                                                            ))}
+                   function(x, thedat = dat[-testrows, ], famille = fam){eval(bquote(
+                                                               try( glm(.(x), data = thedat, family = famille))
+                                                            ))
+                   }
                    )
-    glms
+    predvals <- lapply(glms, function(x) predictr(x, data = dat, rowstouse = testrows))
+    pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
+
+    ## So we've got the formula that yields the best predictions. This
+    ## is how we extract everything from that formula after the ~
+    ## sign.
+    as.character(forms[[which(pcps == max(pcps))]])[3]
+
 
 }
