@@ -57,33 +57,32 @@ dispboth <- function(model, fulldata){
 ##' @return
 ##' @author Benjamin Rogers
 besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .1, sampseed = 1234567890){
-
-    set.seed(sampseed)
-    ## divy up data
-
-    testrows <- sample(nrow(dat), round(nrow(dat)* perc))
-
-    ## Make some formulas
-    forms <- lapply(ivs, function(x, deev = devee, invars = ""){
-        as.formula(  paste(deev, "~", x)  )
-    })
-
-    ## Run the formulas
-    ## lapply(forms, function(x) glm(as.formula(forms), family = fam))
-
-    glms <- lapply(forms,
-                   function(x, thedat = dat[-testrows, ], famille = fam){eval(bquote(
-                                                               try( glm(.(x), data = thedat, family = famille))
-                                                            ))
-                   }
-                   )
-    predvals <- lapply(glms, function(x) predictr(x, data = dat, rowstouse = testrows))
-    pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
-
-    ## So we've got the formula that yields the best predictions. This
-    ## is how we extract everything from that formula after the ~
-    ## sign.
-    as.character(forms[[which(pcps == max(pcps))]])[3]
+        set.seed(sampseed)
+        ## divy up data
+        for(i in 1:iters){
+            testrows <- sample(nrow(dat), round(nrow(dat)* perc)) ## Make some formulas
 
 
+            forms <- lapply(ivs, function(x, deev = devee, invars = ""){
+                as.formula(  paste(deev, "~", x)  )
+            })
+
+            ## Run the formulas
+            ## lapply(forms, function(x) glm(as.formula(forms), family = fam))
+
+            glms <- lapply(forms,
+                           function(x, thedat = dat[-testrows, ], famille = fam){eval(bquote(
+                                                                                     try( glm(.(x), data = thedat, family = famille))
+                                                                                 ))
+                           }
+                           )
+            predvals <- lapply(glms, function(x) predictr(x, data = dat, rowstouse = testrows))
+            pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
+
+        ## So we've got the formula that yields the best predictions. This
+        ## is how we extract everything from that formula after the ~
+        ## sign.
+        vars <- as.character(forms[[which(pcps == max(pcps))]])[3]
+    }
+    vars
 }
