@@ -57,10 +57,19 @@ dispboth <- function(model, fulldata){
 ##' @return
 ##' @author Benjamin Rogers
 besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1){
-    ## Make the formulas
+    ## Make some formulas
+    forms <- lapply(ivs, function(x, deev = devee, invars = ""){
+        as.formula(  paste(deev, "~", x)  )
+    })
+
     ## Run the formulas
+    ## lapply(forms, function(x) glm(as.formula(forms), family = fam))
 
-
-
+    glms <- lapply(forms,
+                   function(x, thedat = dat, famille = fam){eval(bquote(
+                                                                glm(.(x),data = thedat, family = famille)
+                                                            ))}
+                   )
+    glms
 
 }

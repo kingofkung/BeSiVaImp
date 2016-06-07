@@ -3,5 +3,5 @@
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/MakeFunDataset.R")
 
-
-besiva('yvar', colnames(daf)[!colnames(daf) %in% "yvar"], daf)
+colsofint <- colnames(daf)[!colnames(daf) %in% "yvar"]
+besiva('yvar', colsofint, daf)
