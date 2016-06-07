@@ -3,7 +3,7 @@ rm(list = ls())
 
 library(foreign)
 
-dat <- read.dta("/Users/bjr/Desktop/R_Projects/GSSThing/GSS2014merged_R3.DTA")
+dat <- read.dta("/Users/bjr/Dropbox/R_Projects/GSSThing/GSS2014merged_R3.DTA")
 ## dat <- read.dta("/Users/bjr/GitHub/BeSiVaImp/Data/GSS2006.dta")
 varlabs <- attr(dat, "var.labels")
 ## ncol(dat)
