@@ -54,9 +54,12 @@ dispboth <- function(model, fulldata){
 ##' @param dat The data to be considered. MUST CONTAIN DEVEE AND IVS!
 ##' @param fam The family of GLM To use. Currently stays at binomial
 ##' @param iters Number of iterations
+##' @param perc ## The percentage of the data going into the test set Must be specified as between 0 and 1
+##' @param nfolds ## number of folds of the data. For implementing k-fold cross validation
+##' @param sampseed The seed for set.seed. Set, but could change as desired
 ##' @return
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, sampseed = 1234567890){
+besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, sampseed = 1234567890){
         set.seed(sampseed)
         ## divy up data
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
@@ -75,19 +78,25 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, samp
             ## Run the formulas
 
             glms <- lapply(forms,
-                           function(x, thedat = dat[-testrows, ], famille = fam){eval(bquote(
-                                                                      try( glm(.(x), data = thedat, family = famille))
+                           function(x, thedat = dat[-testrows, ], famille = fam){
+                               eval(bquote(
+                                   try( glm(.(x)
+                                          , data = thedat, family = famille))
                                                                                  ))
                            }
                            )
             predvals <- lapply(glms,
-                               function(x) predictr(x, data = dat, rowstouse = testrows))
+                               function(x) predictr(x,
+                                                    data = dat, rowstouse = testrows))
             pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
 
             ## So we've got the formula that yields the best
             ## predictions. This is how we extract everything from that
             ## formula after the ~ sign.
             maxpcp <- which(pcps == max(pcps))
+            ## So it turned out that if there was a tie, the code
+            ## would return an error. To remedy this, I break out of
+            ## the for loop if we get more than 1 with a maximum pcp.
             if(length(maxpcp)>1) break
             print(maxpcp)
         vars <- as.character(forms[[maxpcp]]) [3]
