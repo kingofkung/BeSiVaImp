@@ -75,8 +75,9 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
                 else {as.formula(paste(deev, "~", x, "+", vars))}
 
             })
-            ## Run the formulas
+            ##
 
+            ## Here is where the k-fold cross-validation would need to begin
             glms <- lapply(forms,
                            function(x, thedat = dat[-testrows, ], famille = fam){
                                    try( glm(x
@@ -88,6 +89,11 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
                                function(x) predictr(x,
                                                     data = dat, rowstouse = testrows))
             pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
+
+            ## Here is where it would end. Basically we'd need to run
+            ## it over the different folds of data.
+
+
 
             ## So we've got the formula that yields the best
             ## predictions. This is how we extract everything from that
