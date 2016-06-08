@@ -44,6 +44,9 @@ dispboth <- function(model, fulldata){
     list(model, fullmod)
 }
 
+## Proposed function: folder/foldmaker
+
+
 ##' the besiva function
 ##'
 ##' this function will take data in a given dataset, and return a
@@ -78,6 +81,9 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ##
 
             ## Here is where the k-fold cross-validation would need to begin
+            ## Problem: We'd need to create rows for each fold.
+            ## At this point, testrows is a single variable. Would we want it as a list? A vector?
+            ## Basically it'd be a getpcp outside of the current getpcp function.
             glms <- lapply(forms,
                            function(x, thedat = dat[-testrows, ], famille = fam){
                                    try( glm(x
