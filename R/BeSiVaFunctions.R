@@ -97,11 +97,15 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## would return an error. To remedy this, I break out of
             ## the for loop if we get more than 1 with a maximum pcp.
             if(length(maxpcp)>1) break
-            print(maxpcp)
+            ## print(maxpcp)
         vars <- as.character(forms[[maxpcp]]) [3]
         }
+
         ## What do we output?
-        ## vars
+        ## The sorted percents correctly predicted
+        ## print(sort(pcps))
+        ## This one gives the list of variables
+        ## strsplit( vars, split = "\\s[+]\\s")
 
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
 }

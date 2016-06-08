@@ -10,5 +10,6 @@ colsofint <- colnames(daf)[!colnames(daf) %in% "yvar"]
 
 ## sample( nrow(daf), round(nrow(daf)/10) )
 
-besiva('yvar', colsofint, daf, iters = 10, perc = .1)
+
+for(i in 1:10) print(besiva('yvar', colsofint, daf, iters = 5, perc = .2, sampseed = i ))
 
