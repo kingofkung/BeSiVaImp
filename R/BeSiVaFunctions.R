@@ -79,10 +79,9 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
 
             glms <- lapply(forms,
                            function(x, thedat = dat[-testrows, ], famille = fam){
-                               eval(bquote(
-                                   try( glm(.(x)
+                                   try( glm(x
                                           , data = thedat, family = famille))
-                                                                                 ))
+
                            }
                            )
             predvals <- lapply(glms,
@@ -100,6 +99,9 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             if(length(maxpcp)>1) break
             print(maxpcp)
         vars <- as.character(forms[[maxpcp]]) [3]
-    }
-    vars
+        }
+        ## What do we output?
+        ## vars
+
+        ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
 }

@@ -4,9 +4,11 @@ rm(list = ls())
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/MakeFunDataset.R")
 
+print(sampsize)
+
 colsofint <- colnames(daf)[!colnames(daf) %in% "yvar"]
 
 ## sample( nrow(daf), round(nrow(daf)/10) )
 
-besiva('yvar', colsofint, daf, iters = 2, perc = .25)
+besiva('yvar', colsofint, daf, iters = 10, perc = .1)
 
