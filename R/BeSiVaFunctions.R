@@ -56,35 +56,41 @@ dispboth <- function(model, fulldata){
 ##' @param iters Number of iterations
 ##' @return
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .1, sampseed = 1234567890){
+besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, sampseed = 1234567890){
         set.seed(sampseed)
         ## divy up data
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
 
         for(i in 1:iters){
             ## Make some formulas
+            ## Set vars as blank if i == 1
+            if(i == 1) vars <- ""
 
 
-            forms <- lapply(ivs, function(x, deev = devee, invars = ""){
-                as.formula(  paste(deev, "~", x)  )
+            forms <- lapply(ivs, function(x, deev = devee, invars = vars){
+                if(vars == ""){ as.formula(paste(deev, "~", x))}
+                else {as.formula(paste(deev, "~", x, "+", vars))}
+
             })
-
             ## Run the formulas
-            ## lapply(forms, function(x) glm(as.formula(forms), family = fam))
 
             glms <- lapply(forms,
                            function(x, thedat = dat[-testrows, ], famille = fam){eval(bquote(
-                                                                                     try( glm(.(x), data = thedat, family = famille))
+                                                                      try( glm(.(x), data = thedat, family = famille))
                                                                                  ))
                            }
                            )
-            predvals <- lapply(glms, function(x) predictr(x, data = dat, rowstouse = testrows))
+            predvals <- lapply(glms,
+                               function(x) predictr(x, data = dat, rowstouse = testrows))
             pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
 
-        ## So we've got the formula that yields the best predictions. This
-        ## is how we extract everything from that formula after the ~
-        ## sign.
-        vars <- as.character(forms[[which(pcps == max(pcps))]])[3]
+            ## So we've got the formula that yields the best
+            ## predictions. This is how we extract everything from that
+            ## formula after the ~ sign.
+            maxpcp <- which(pcps == max(pcps))
+            if(length(maxpcp)>1) break
+            print(maxpcp)
+        vars <- as.character(forms[[maxpcp]]) [3]
     }
     vars
 }
