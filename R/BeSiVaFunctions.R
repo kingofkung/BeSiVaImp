@@ -59,7 +59,7 @@ dispboth <- function(model, fulldata){
 ##' @param sampseed The seed for set.seed. Set, but could change as desired
 ##' @return
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, sampseed = 1234567890){
+besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, sampseed = 12345){
         set.seed(sampseed)
         ## divy up data
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
