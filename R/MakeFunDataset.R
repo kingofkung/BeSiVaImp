@@ -18,7 +18,7 @@ binars <- sapply(seq(0.1, .9, .1), function(x) binmaker(prob = x))
 daf <- data.frame(cats, binars, cont1, cont2)
 
 ## Make my dependent variable
-lc <- .5 + 1.3 * cont1 - 1.25 *daf[, 14]
+lc <- .5 + 1.3 * cont1 - 1.25 *daf$X6.1
 pr <- (1 + exp(-lc))^-1
 yvar <- rbinom(sampsize, 1, pr)
 

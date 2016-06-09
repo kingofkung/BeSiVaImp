@@ -117,7 +117,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
         ## The sorted percents correctly predicted
         ## print(sort(pcps))
         ## This one gives the list of variables
-        ## strsplit( vars, split = "\\s[+]\\s")
+         strsplit( vars, split = "\\s[+]\\s")
 
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
 }
