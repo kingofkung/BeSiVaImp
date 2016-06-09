@@ -69,7 +69,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
 
         ## calculate appropriate number of digits to round to
-        if(thresh != 0) digs = -1 * log(thresh, base = 10)
+        ## if(thresh != 0) digs = -1 * log(thresh, base = 10)
 
 
         for(i in 1:iters){
@@ -100,8 +100,13 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
                                function(x) predictr(x,
                                                     data = dat, rowstouse = testrows))
             pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
-
-            if(thresh != 0) pcps <- round(pcps, digs)
+            ## While I had the round command here, round_any doesn't
+            ## look that much slower, and it does exactly what I'm
+            ## looking for without needing to resort to any kind of
+            ## trick. I suppose I could use what's inside, which is just
+            ## round(pcps/thresh) * thresh, but we'll see if that's
+            ## really necessary when stress testing.
+            if(thresh != 0) pcps <- plyr::round_any(pcps, thresh)
             ## Here is where it would end. Basically we'd need to run
             ## it over the different folds of data.
 
