@@ -108,16 +108,18 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## So it turned out that if there was a tie, the code
             ## would return an error. To remedy this, I break out of
             ## the for loop if we get more than 1 with a maximum pcp.
-            if(length(maxpcp)>1) break
+            if(length(maxpcp)>1) {
+                print("We have a tie!")
+                break}
             ## print(maxpcp)
         vars <- as.character(forms[[maxpcp]]) [3]
         }
 
         ## What do we output?
         ## The sorted percents correctly predicted
-        ## print(sort(pcps))
+         print(sort(pcps))
         ## This one gives the list of variables
-         strsplit( vars, split = "\\s[+]\\s")
+         ## strsplit( vars, split = "\\s[+]\\s")
 
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
 }

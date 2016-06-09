@@ -4,7 +4,7 @@
 set.seed(123456789)
 
 ## Moving sampsize to the analyze program, so that we can run BeSiVa faster
-sampsize <- 2500
+sampsize <- 500
 
 ## Make some fake variables
 catmaker <- function(x, num = sampsize){letters[sample(x, num, replace = T)]}
@@ -14,7 +14,7 @@ cont1 <- rnorm(sampsize)
 cont2 <- sample(1:(sampsize*10), sampsize)
 
 cats <- sapply(rep(2:5,2), function(x) catmaker(1:x))
-binars <- sapply(seq(0.1, .9, .1), function(x) binmaker(prob = x))
+binars <- sapply(seq(0, .9, .1), function(x) binmaker(prob = x))
 daf <- data.frame(cats, binars, cont1, cont2)
 
 ## Make my dependent variable
