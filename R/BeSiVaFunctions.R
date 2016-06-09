@@ -59,13 +59,18 @@ dispboth <- function(model, fulldata){
 ##' @param iters Number of iterations
 ##' @param perc ## The percentage of the data going into the test set Must be specified as between 0 and 1
 ##' @param nfolds ## number of folds of the data. For implementing k-fold cross validation
+##' @param thresh The threshold by an improvement must be made to be considered important. Currently quite small
 ##' @param sampseed The seed for set.seed. Set, but could change as desired
 ##' @return
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, sampseed = 12345){
+besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345){
         set.seed(sampseed)
         ## divy up data
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
+
+        ## calculate appropriate number of digits to round to
+        if(thresh != 0) digs = -1 * log(thresh, base = 10)
+
 
         for(i in 1:iters){
             ## Make some formulas
@@ -96,6 +101,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
                                                     data = dat, rowstouse = testrows))
             pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
 
+            if(thresh != 0) pcps <- round(pcps, digs)
             ## Here is where it would end. Basically we'd need to run
             ## it over the different folds of data.
 
@@ -117,9 +123,9 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
 
         ## What do we output?
         ## The sorted percents correctly predicted
-         print(sort(pcps))
+         print(sort(pcps), digits = 10)
         ## This one gives the list of variables
-         ## strsplit( vars, split = "\\s[+]\\s")
+         strsplit( vars, split = "\\s[+]\\s")
 
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
 }
