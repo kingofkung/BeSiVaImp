@@ -64,103 +64,11 @@ length(unique(colstouse))
 
 colstoreallyuse <- colstouse
 
-mods <- besiva("vote12bin", colstoreallyuse, dat2, iters = 2, perc = .1, thresh = 0)
+mods <- besiva("vote12bin", colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
+str(mods)
+
+## find the columns that are giving us grief
+colstouse[ which(lapply(mods, class) == "try-error")]
+## I understand why pres08 and othlang1 might give us trouble. relhhd2, relhh2, and relsp3 aren't so clear
 
 
-
-## Placein will be where we store the variables we want included
-
-## ifelse(varstoinc == "", placein <- "", placein <- paste("+", paste(varstoinc, collapse = " + ")))
-
-## formulae <- lapply(colstouse, function(x) as.formula(paste0(devee, " ~ ",x, placein  )) )
-
-## if(exists("glms")) rm(glms)
-## glms <- lapply(formulae, function(x){
-##     ## cat("\n\n")
-##     ## print(x)
-
-##     try(
-##         y <- glm(x, family = "binomial", data = dat2[-test, ])
-##         ## y <- eval(bquote(glm(.(x), data = dat2[-test,])))
-##         ## y <- glm(eval(bquote(.(as.formula(charform)))) , data = dat2[-test,])
-
-##     )
-##     ## try(print(y))
-## }
-##                )
-
-## ## glm(vote12bin ~ pres08 + vote08, family = "binomial", data = dat2[-test,])
-
-## ## model.matrix(vote12bin ~ pres08 + vote08, data = dat2[-test,])
-
-## ## formulae[[733]]
-## ## dat2$relhhd8
-
-
-## ## print(glms)
-
-## head(glms)
-
-
-## ## lapply(glms, function(x) try(coef(x)))
-
-
-## if(exists("predictions")) rm(predictions)
-## predictions <- lapply(glms, function(x)  try( predictr( x  , data = dat2, rowstouse = test)) )
-
-
-## pcps <- unlist(lapply(predictions, function(x)  getpcp(x, dat2$vote12bin[test], fullpreds = TRUE) ))
-
-## IVs <- unlist(lapply(formulae, function(x) as.character(x)[3]))
-
-## ## ncorr <- as.numeric(pcps)*length(dat2$vote12bin[test])
-
-## nobserv <- unlist(lapply(predictions,function(x) length(na.omit(x)) ))
-## ncorr <- as.numeric(pcps) * length(test)
-## altpcps <- ncorr/nobserv
-
-## roundoutput <- data.frame(IVs,
-##                           "pcps" =  as.numeric(pcps),
-##                           "ncorr" = ncorr,
-##                           "nobserv" = nobserv,
-##                           "altpcps" = altpcps
-##                           ) [order(pcps, decreasing = FALSE), ]
-
-## print(roundoutput[order(roundoutput$altpcps),])
-
-## prop.table(table(dat2$vote12bin[test]))
-
-## probchildren <- roundoutput[roundoutput$ncorr == 0,]
-## ## print(probchildren)
-
-
-
-
-## system("afplay /System/Library/Sounds/Hero.aiff")
-## ## Create mobilization model based on likely contact
-## ## actassoc lets us discern how important being in an organization is to a person, although it might need some recodes
-## ## clsetown might let us say that someone is more central in their network, as feeling close to their town suggests association, more so than actassoc
-## ## volmonth, which is all about if a person volunteered and not for pay, useful for associating with
-## ## grpwork,
-## colnames(dat2)[ grep("act", colnames(dat2), T)]
-## varlabs
-## rnhmod <- glm(vote12bin ~ wrkstat + grpsprts + grprelig + actassoc + degree + rincome, data = dat2[-test,], family = "binomial")
-## summary(rnhmod)
-
-## limrnhmod <- glm(vote12bin ~ actassoc+ degree, data = dat2[-test,], family = "binomial")
-## bessiesmod <- glm(vote12bin ~ educ + vote08, data = dat2[-test,], family = "binomial")
-
-## ## Get pcp for the rosenthal and Hansen model
-##  getpcp( predictr(bessiesmod, data = dat2, test), dat2[test, devee], T )
-## table(predictr(rnhmod, dat2, test))
-
-## summary(glms[[56]])
-## pcps[[56]]
-
-## library(rockchalk)
-## outreg(list("party ID" = glms[[56]]), title = "this is a test")
-## outreg(list(rnhmod), title = "this is a test")
-## varlabs[grep("comm", varlabs, F)]
-## colnames(dat2)
-
-## table(dat2$vote12bin[-test], dat2$grprelig[-test])
