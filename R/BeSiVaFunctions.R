@@ -93,15 +93,17 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## Basically it'd be a getpcp outside of the current getpcp function.
             glms <- lapply(forms,
                            function(x, thedat = dat[-testrows, ], famille = fam){
-                                   try( glm(x
+                                   try(junker <- glm(x
                                           , data = thedat, family = famille))
+                                   ## try(print(summary(junker)))
+                                   ## try(junker)
 
                            }
                            )
             predvals <- lapply(glms,
-                               function(x) predictr(x,
-                                                    data = dat, rowstouse = testrows))
-            pcps <- sapply(predvals, function(x) getpcp(x, dat[testrows, devee]))
+                               function(x) try(predictr(x,
+                                                    data = dat, rowstouse = testrows)))
+            pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))
             ## While I had the round command here, round_any doesn't
             ## look that much slower, and it does exactly what I'm
             ## looking for without needing to resort to any kind of
@@ -130,9 +132,12 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
 
         ## What do we output?
         ## The sorted percents correctly predicted
-         print(sort(pcps), digits = 10)
+        ## print(sort(pcps), digits = 10)
+        ## print(predvals)
         ## This one gives the list of variables
-         ## strsplit( vars, split = "\\s[+]\\s")
-        glms
+        print( strsplit( vars, split = "\\s[+]\\s"))
+        ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
+        ## strsplit( vars, split = "\\s[+]\\s")
+        predvals
 }

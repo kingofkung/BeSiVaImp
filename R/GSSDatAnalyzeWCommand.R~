@@ -62,9 +62,9 @@ length(colnames(dat2)) -  length(unique(avoidcols))
 
 length(unique(colstouse))
 
-colstoreallyuse <- colstouse
+colstoreallyuse <- colstouse[1:30]
 
-mods <- besiva("vote12bin", colstoreallyuse, dat2, iters = 2, perc = .1, thresh = 0)
+besiva("vote12bin", colstoreallyuse, dat2, iters = 1, perc = .1, thresh = 0)
 
 
 
