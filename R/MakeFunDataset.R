@@ -4,7 +4,7 @@
 set.seed(123456789)
 
 ## Moving sampsize to the analyze program, so that we can run BeSiVa faster
-sampsize <- 5E2
+sampsize <- 5000
 
 ## Make some fake variables
 catmaker <- function(x, num = sampsize){letters[sample(x, num, replace = T)]}

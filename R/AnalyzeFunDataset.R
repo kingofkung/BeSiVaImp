@@ -11,4 +11,13 @@ colsofint <- colnames(daf)[!colnames(daf) %in% "yvar"]
 ## sample( nrow(daf), round(nrow(daf)/10) )
 
 
-for(i in 1:10) print(besiva('yvar', colsofint, daf, iters = 5, perc = .25, sampseed = i, thresh = 0.001 ))
+## for(i in 1:10)
+
+besiva('yvar', colsofint, daf, iters = 5, perc = .25, thresh = 0.0 )
+
+## corrmod <- glm(yvar ~ X6.1 + cont1, data = daf, family = "binomial")
+## summary(corrmod)
+
+
+## look at any dataset
+## get a dataset and impute
