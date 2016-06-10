@@ -47,7 +47,7 @@ dispboth <- function(model, fulldata){
 ##' Proposed function: folder/foldmaker.
 ##' The function will take the DV, IV(s), data, and number of folds you'd like, and return the mean/median pcps for each fold
 
-foldmaker <- function(foldnum = 3)
+foldmaker <- function(foldnum = 3){}
 
 
 ##' the besiva function
