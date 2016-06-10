@@ -44,13 +44,15 @@ dispboth <- function(model, fulldata){
     list(model, fullmod)
 }
 
-## Proposed function: folder/foldmaker
+##' Proposed function: folder/foldmaker.
+##' The function will take the DV, IV(s), data, and number of folds you'd like, and return the mean/median pcps for each fold
+
+foldmaker <- function(foldnum = 3)
 
 
 ##' the besiva function
 ##'
-##' this function will take data in a given dataset, and return a
-##' model based on subset selection.
+##' this function will take data in a given dataset, and return
 ##' @title besiva
 ##' @param devee The dependent variable of interest. Must be specified as 0-1
 ##' @param ivs The list of independent variables. Currently, must be text
@@ -61,7 +63,7 @@ dispboth <- function(model, fulldata){
 ##' @param nfolds ## number of folds of the data. For implementing k-fold cross validation
 ##' @param thresh The threshold by an improvement must be made to be considered important. Currently quite small
 ##' @param sampseed The seed for set.seed. Set, but could change as desired
-##' @return
+##' @return  the IVs of the best model based on subset selection, as well as the percent correctly predicted by that model.
 ##' @author Benjamin Rogers
 besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345){
         set.seed(sampseed)
