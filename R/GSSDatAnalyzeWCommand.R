@@ -4,20 +4,20 @@ source("GSSDatFix.R")
 source("BeSiVaFunctions.R")
 
 
-devee <- "vote12bin"
+devee <- "vote08bin"
 ## colnames(dat)
 
 
 ## Keep some data held out
 ## First, make sure our DV Is included in all cases rows
-dat2 <- dat[complete.cases(dat$vote12bin),]
-dat2$vote12bin
+dat2 <- dat[complete.cases(dat$vote08bin),]
+## dat2$vote08bin
 
 
 
 ## get the sample of rows
-## set.seed(12345)
-## test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
+set.seed(12345)
+test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
 
 
 ## Figure out which rows have few categories, so we can eliminate them later.
@@ -27,7 +27,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote12bin", "pres12", "if12who","wtcomb",
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote08bin", "vote12bin", "pres12", "if12who","wtcomb",
                colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
 
 
@@ -52,7 +52,7 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 noVote08 <- "vote08"
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc) ##, noVote08)
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -64,10 +64,12 @@ length(unique(colstouse))
 
 colstoreallyuse <- colstouse
 
-mods <- besiva("vote12bin", colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
+mods <- besiva("vote08bin", colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
 str(mods)
 names(mods)
-
+mods$intvars
+mods$tieforms
+mods$pcps
 ## find the columns that are giving us grief
 probkids <- colstouse[ which(lapply(mods$predvals, class) == "try-error")]
 print(probkids)

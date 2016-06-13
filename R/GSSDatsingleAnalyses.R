@@ -7,7 +7,9 @@ if(!exists("dat2")) source("GSSDatAnalyze.R")
 hist(roundoutput$pcps)
 
 
-convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat2[-test,])
+convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat[,])
+
+mod08 <- glm(vote08bin ~ hhtype1 + race + wrkstat + educ, data = dat)
 
 convpreds <- predictr(convmod, dat2[], test)
 getpcp(convpreds, dat2[test,"vote12bin"])
