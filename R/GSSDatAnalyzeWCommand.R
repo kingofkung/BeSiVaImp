@@ -40,6 +40,10 @@ allnas <- colnames(dat2)[whichcols]
 library(caret)
 mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 
+probvars <- read.csv("/Users/bjr/Dropbox/R_Projects/GSSThing/probkids.csv", stringsAsFactors = F)
+
+
+dat2[, probvars$x] <- apply(probvars, 1, function(x) rmnewCats(dat2[,x], test))
 
 ## dat2[-test, 3]
 
@@ -72,6 +76,7 @@ mods$pcps
 ## find the columns that are giving us grief
 probkids <- colstouse[ which(lapply(mods$predvals, class) == "try-error")]
 print(probkids)
+## write.csv(probkids, paste0("/Users/bjr/Dropbox/R_Projects/GSSThing/","probkids.csv"), row.names = F)
 
 ## I understand why pres08 and othlang1 might give us trouble. relhhd2, relhh2, and relsp3 aren't so clear
 
