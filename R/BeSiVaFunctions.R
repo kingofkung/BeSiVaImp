@@ -124,7 +124,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## would return an error. To remedy this, I break out of
             ## the for loop if we get more than 1 with a maximum pcp.
             if(length(maxpcp)>1) {
-                print("We have a tie!")
+                print(paste("We have a tie between ", forms[maxpcp], "!", sep = ""))
                 break}
             ## print(maxpcp)
         vars <- as.character(forms[[maxpcp]]) [3]
