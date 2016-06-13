@@ -11,6 +11,10 @@ convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat[,]
 
 mod08 <- glm(vote08bin ~ hhtype1 + race + wrkstat + educ, data = dat)
 
+mod12 <- glm(vote12bin ~ relhhd2, family = "binomial", data = dat2[-test,])
+predictr(mod12, dat2, test)
+
+
 convpreds <- predictr(convmod, dat2[], test)
 getpcp(convpreds, dat2[test,"vote12bin"])
 
