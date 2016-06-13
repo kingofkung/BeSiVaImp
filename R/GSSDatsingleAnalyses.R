@@ -25,6 +25,15 @@ dat2$relhhd2[ dat2$relhhd2 %in% id] <- NA
 
 predictr(mod12, dat2[,], test)
 
+facvar <- factor(dat2$othlang1)
+
+uniquecats <- unique(facvar[test]) [ !unique(facvar[test]) %in% (facvar[-test])]
+facvar[ facvar%in% uniquecats ] <- NA
+
+dat2$othlang2 <- facvar
+modrmcats <- glm(vote12bin ~othlang2, data = dat2[-test,])
+getpcp(predictr(modrmcats, dat2[], test), dat2$vote12bin[test])
+
 
 ## Best thing to do would be create a function called KillNewLevels, which can be used to do exactly what it says in the test set.
 
