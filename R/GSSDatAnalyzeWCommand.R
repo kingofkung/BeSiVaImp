@@ -69,7 +69,7 @@ str(mods)
 names(mods)
 
 ## find the columns that are giving us grief
-probkids <- colstouse[ which(lapply(mods, class) == "try-error")]
+probkids <- colstouse[ which(lapply(mods$predvals, class) == "try-error")]
 print(probkids)
 
 ## I understand why pres08 and othlang1 might give us trouble. relhhd2, relhh2, and relsp3 aren't so clear
