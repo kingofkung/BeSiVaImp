@@ -4,7 +4,7 @@ source("GSSDatFix.R")
 source("BeSiVaFunctions.R")
 
 
-devee <- "vote08bin"
+devee <- "vote12bin"
 ## colnames(dat)
 
 
@@ -18,7 +18,6 @@ dat2 <- dat[complete.cases(dat$vote08bin),]
 ## get the sample of rows
 set.seed(12345)
 test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
-
 
 ## Figure out which rows have few categories, so we can eliminate them later.
 ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
@@ -47,7 +46,7 @@ mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
 
 
 
-napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  )
+napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/nrow(dat2)  )
 
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
