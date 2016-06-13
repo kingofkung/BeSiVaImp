@@ -4,13 +4,13 @@ source("GSSDatFix.R")
 source("BeSiVaFunctions.R")
 
 
-devee <- "vote12bin"
+devee <- "vote08bin"
 ## colnames(dat)
 
 
 ## Keep some data held out
 ## First, make sure our DV Is included in all cases rows
-dat2 <- dat[complete.cases(dat$vote08bin),]
+dat2 <- dat[complete.cases(dat[,devee]),]
 ## dat2$vote08bin
 
 
@@ -63,7 +63,8 @@ length(unique(colstouse))
 
 colstoreallyuse <- colstouse
 
-mods <- besiva("vote08bin", colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
+mods <- besiva(devee, colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
+
 str(mods)
 names(mods)
 mods$intvars
