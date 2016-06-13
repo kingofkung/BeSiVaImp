@@ -30,4 +30,15 @@ unique(dat$occ10)
 apply(dat, 2, function(x) grep("cop",x))
 colnames(dat)[grep("cop",colnames(dat))]
 
-table(dat$acqcops)
+
+## recode dat$vote08
+dat$vote08
+
+dat$vote08bin <- as.character(dat$vote08)
+unique(as.character(dat$vote08))
+dat$vote08bin[dat$vote08bin %in% "did not vote"] <- "0"
+dat$vote08bin[dat$vote08bin %in% "voted"] <- "1"
+dat$vote08bin[dat$vote08bin %in% "ineligible"] <- NA
+
+dat$vote08bin <- as.numeric(dat$vote08bin)
+## table(dat$vote08, dat$vote08bin, useNA= "ifany")
