@@ -26,7 +26,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "vote08bin", "vote12bin", "pres12", "if12who","wtcomb", colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "vote08bin", "vote12bin", "pres12", "if12who","wtcomb",  colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
 
 
 ## How can I figure out if a column is now all na's?
@@ -50,7 +50,7 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/nrow(d
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 noVote08 <- "vote08"
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc) #, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -64,11 +64,11 @@ colstoreallyuse <- colstouse
 
 mods <- besiva(devee, colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
 
-str(mods)
+## str(mods)
 names(mods)
 mods$intvars
 mods$tieforms
- mods$pcps
+mods$pcps
 ## find the columns that are giving us grief
 probkids <- colstouse[ which(lapply(mods$predvals, class) == "try-error")]
 print(probkids)

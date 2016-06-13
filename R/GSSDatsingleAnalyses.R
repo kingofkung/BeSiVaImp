@@ -11,8 +11,23 @@ convmod <- glm(vote12bin ~ partyid + degree + race + age + income, data = dat[,]
 
 mod08 <- glm(vote08bin ~ hhtype1 + race + wrkstat + educ, data = dat)
 
-mod12 <- glm(vote12bin ~ relhhd2, family = "binomial", data = dat2[-test,])
-predictr(mod12, dat2, test)
+mod12 <- glm(vote12bin ~ othlang1, family = "binomial", data = dat2[-test,])
+getpcp(predictr(mod12, dat2, test), dat2$vote12bin[test])
+
+
+## The problem:  other relative-great-aunt,grandniece,etc.- is included in the test, but not the training set...
+data.frame(table(dat2$relhhd2[-test]),table( dat2$relhhd2[test]))[,c(1,2,4)]
+
+id <- levels(factor(dat2$relhhd2[test]))[!levels(factor(dat2[test, "relhhd2"])) %in%
+                                       levels(factor(dat2[-test, "relhhd2"]))
+                                       ]
+dat2$relhhd2[ dat2$relhhd2 %in% id] <- NA
+
+predictr(mod12, dat2[,], test)
+
+
+## Best thing to do would be create a function called KillNewLevels, which can be used to do exactly what it says in the test set.
+
 
 
 convpreds <- predictr(convmod, dat2[], test)
