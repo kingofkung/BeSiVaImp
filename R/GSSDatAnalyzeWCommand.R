@@ -16,8 +16,8 @@ dat2$vote12bin
 
 
 ## get the sample of rows
-set.seed(12345)
-test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
+## set.seed(12345)
+## test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
 
 
 ## Figure out which rows have few categories, so we can eliminate them later.
@@ -52,7 +52,7 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/2137  
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 noVote08 <- "vote08"
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc)##, noVote08)
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc) ##, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -66,9 +66,12 @@ colstoreallyuse <- colstouse
 
 mods <- besiva("vote12bin", colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
 str(mods)
+names(mods)
 
 ## find the columns that are giving us grief
-colstouse[ which(lapply(mods, class) == "try-error")]
+probkids <- colstouse[ which(lapply(mods, class) == "try-error")]
+print(probkids)
+
 ## I understand why pres08 and othlang1 might give us trouble. relhhd2, relhh2, and relsp3 aren't so clear
 
 

@@ -124,7 +124,8 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## would return an error. To remedy this, I break out of
             ## the for loop if we get more than 1 with a maximum pcp.
             if(length(maxpcp)>1) {
-                print(paste("We have a tie between ", forms[maxpcp], "!", sep = ""))
+                tieforms <- forms[maxpcp]
+                print(paste("We have a tie between ", paste(tieforms, collapse = ", "), "!", sep = ""))
                 break}
             ## print(maxpcp)
         vars <- as.character(forms[[maxpcp]]) [3]
@@ -135,9 +136,10 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
         ## print(sort(pcps), digits = 10)
         ## print(predvals)
         ## This one gives the list of variables
-        print( strsplit( vars, split = "\\s[+]\\s"))
+        intvars <- strsplit( vars, split = "\\s[+]\\s")
+        print( intvars)
         ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
         ## strsplit( vars, split = "\\s[+]\\s")
-        predvals
+        list("intvars" = intvars, "tieforms" = tieforms, "predvals" = predvals)
 }
