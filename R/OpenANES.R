@@ -2,12 +2,17 @@
 
 loc <- "/Users/bjr/Dropbox/R_Projects/GSSThing/anes_timeseries_cdf_sav/"
 
-library(foreign)
+## library(foreign)
+library(memisc)
 
-anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"), to.data.frame = T)
-dim(anes)
+## anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"), to.data.frame = T)
+anes <- as.data.set(spss.system.file(paste0(loc,"anes_timseries_cdf.sav")))
 
-anes48 <-anes[ anes$VCF0004 == 1948,]
+anes <- as.data.frame(anes)
+str(anes)
+
+
+anes48 <-anes[ anes$vcf0004 == 1948,]
 
 dim(anes48)
 

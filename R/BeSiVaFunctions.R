@@ -109,8 +109,9 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## Basically it'd be a getpcp outside of the current getpcp function.
             glms <- lapply(forms,
                            function(x, thedat = dat[-testrows, ], famille = fam){
-                                   try(junker <- glm(x
-                                          , data = thedat, family = famille))
+                                   eval(bquote(try(junker <- glm(.(x)
+                                                               , data = thedat, family = famille))
+                                               ))
                                    ## try(print(summary(junker)))
                                    ## try(junker)
 
@@ -142,7 +143,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             if(length(maxpcp)>1) {
                 tieforms <- forms[maxpcp]
                 print(paste("We have a tie between ", paste(tieforms, collapse = ", "), "!", sep = ""))
-                break}
+                break} else tieforms <- NA
             ## print(maxpcp)
         vars <- as.character(forms[[maxpcp]]) [3]
         }
@@ -157,5 +158,5 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
         ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
         ## strsplit( vars, split = "\\s[+]\\s")
-        list("intvars" = intvars, "tieforms" = tieforms,"glms" = glms, "predvals" = predvals, "pcps" = pcps)
+        list("intvars" = intvars, "tieforms" = tieforms, "glms" = glms, "predvals" = predvals, "pcps" = pcps)
 }
