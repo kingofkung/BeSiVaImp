@@ -34,7 +34,5 @@ anes52$vcf0009x
 avoidcols2 <- c(avoidcols, "vcf0703", fewcats)
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
 bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .33)
-sort(bes2$pcps)
-data.frame(colstouse, bes2$pcps)[bes2$pcps==0,]
-data.frame(colstouse, bes2$pcps)[order(bes2$pcps),]
 
+glm(bindep ~ vcf0378d, "binomial",

@@ -159,5 +159,5 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
         ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
         ## strsplit( vars, split = "\\s[+]\\s")
-        list("intvars" = intvars, "tieforms" = tieforms, "glms" = glms, "predvals" = predvals, "pcps" = pcps)
+        list("intvars" = intvars, "tieforms" = tieforms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows)
 }
