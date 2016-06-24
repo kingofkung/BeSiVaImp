@@ -46,7 +46,6 @@ getpcp <- function(preds, realresults, fullpreds = TRUE) {
 }
 
 ## Function wishlist
-## 1. Function that is BeSiVa (duh)
 
 ##' Display the full model and that with just training data
 ##'
@@ -102,6 +101,8 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
 
             })
             ##
+
+
 
             ## Here is where the k-fold cross-validation would need to begin
             ## Problem: We'd need to create rows for each fold.

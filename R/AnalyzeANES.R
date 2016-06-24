@@ -14,7 +14,7 @@ anes48 <- anes48[, multiunique]
 
 sapply(anes48, function(x) length(unique(x)))
 
-avoidcols <- c("vcf0702", "bindep", "vcf0706", "vcf0704", "vcf0704a", "vcf0705", "vcf0734", "vcf0716", "vcf0015a")
+avoidcols <- c("vcf0702", "bindep", "vcf0706", "vcf0704", "vcf0704a", "vcf0705", "vcf0734", "vcf0716", "vcf0015a", "vcf0712", "vcf0737")
 colstouse <- colnames(anes48)[ !colnames(anes48) %in% avoidcols]
 length(colstouse)
 ## View(anes48)
@@ -28,12 +28,13 @@ str(anes52)
 
 nrow(anes52)
 
-fewcats <- names(which(!sapply(anes52, function(x) length(unique(na.omit(x))))>1 ))
+fewcats <- names(which(!sapply(anes52, function(x) length(unique(na.omit(x)))) > 1))
 anes52$vcf0009x
 
 avoidcols2 <- c(avoidcols, "vcf0703", fewcats)
-colstouse <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
-bes2 <- besiva("bindep", colstouse, dat = anes52, perc = .25)
+colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
+bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .33)
 sort(bes2$pcps)
 data.frame(colstouse, bes2$pcps)[bes2$pcps==0,]
+data.frame(colstouse, bes2$pcps)[order(bes2$pcps),]
 
