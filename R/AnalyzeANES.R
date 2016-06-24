@@ -11,11 +11,17 @@ multiunique <- unlist(lapply(anes48[, ],function(x) length(unique(x))>1))
 
 anes48 <- anes48[, multiunique]
 
+sapply(anes48, function(x) length(unique(x)))
 
-colstouse <- colnames(anes48)
-colstouse <- colstouse[ !colstouse %in% c("vcf0702", "bindep", "vcf0704", "vcf0704a", "vcf0705", "vcf0706", "vcf0734")]
+avoidcols <- c("vcf0702", "bindep", "vcf0706", "vcf0704", "vcf0704a", "vcf0705", "vcf0734", "vcf0716", "vcf0015a")
+colstouse <- colnames(anes48)[ !colnames(anes48) %in% avoidcols]
+length(colstouse)
+## View(anes48)
 
-bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 3, perc = .33)
-bes1$pcps
+lapply(
 
-glm(bindep ~ vcf0737, data = anes48)
+
+bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 3, perc = .1)
+names(bes1)
+bes1$glms[[5]]
+

@@ -142,7 +142,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## the for loop if we get more than 1 with a maximum pcp.
             if(length(maxpcp)>1) {
                 tieforms <- forms[maxpcp]
-                print(paste("We have a tie between ", paste(tieforms, collapse = ", "), "!", sep = ""))
+                print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
                 break} else tieforms <- NA
             ## print(maxpcp)
         vars <- as.character(forms[[maxpcp]]) [3]
@@ -154,7 +154,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
         ## print(predvals)
         ## This one gives the list of variables
         intvars <- strsplit( vars, split = "\\s[+]\\s")
-        print( intvars)
+        print(intvars)
         ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
         ## strsplit( vars, split = "\\s[+]\\s")

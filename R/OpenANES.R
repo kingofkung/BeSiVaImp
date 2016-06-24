@@ -14,9 +14,10 @@ if(!exists("anes")){
 str(anes)
 
 
-anes48 <-anes[ anes$vcf0004 == 1948,]
+anes48 <- anes[ anes$vcf0004 == 1948,]
 anes48$vcf0006a
 
+anes52 <- anes[anes$vcf0004 == 1952,]
 
 dim(anes48)
 
