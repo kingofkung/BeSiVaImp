@@ -6,10 +6,11 @@
 ##' .. content for \details{} ..
 ##' @title rmNewCats
 ##' @param var The categorical variable whose categories must be excised
+##' @param mod The model with the potential extra values
 ##' @param tst the index that divides the two subsets of data
 ##' @return the variable, but with NA's where the categories that didn't appear in -tst
 ##' @author Benjamin Rogers
-rmnewCats <- function(var, tst){
+rmnewCats <- function(var, mod, tst){
     facvar <- factor(var)
     uniquecats <- unique(facvar[tst]) [ !unique(facvar[tst]) %in% (facvar[-tst])]
     facvar[ facvar%in% uniquecats ] <- NA
@@ -26,6 +27,12 @@ rmnewCats <- function(var, tst){
 ##' @return the predictions: Usually vector of 0's and 1's, but this might change in future
 ##' @author Benjamin Rogers
 predictr <- function(x, data = mat, rowstouse = holdoutrows){
+
+    ## So right here: Somewhere between where the data in newdata
+    ## comes in and the predict function is where we could place our
+    ## variables.
+
+
     thepreds <- predict(x, newdata = data[rowstouse,], "response")
     ifelse(thepreds >=.5, 1, 0)
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))

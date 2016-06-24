@@ -35,4 +35,31 @@ avoidcols2 <- c(avoidcols, "vcf0703", fewcats)
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
 bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .33)
 
-glm(bindep ~ vcf0378d, "binomial",
+
+## The problem, illustrated
+mod <- glm(bindep ~ vcf0378d + vcf0127, "binomial", data = anes52[-bes2$tstrows,])
+predictr(mod, anes52, bes2$tstrows)
+
+## working on a fix
+ivsused <- as.character(formula(mod)[[3]][-1])
+
+testuniques <- sapply(anes52[bes2$tstrows, ivsused ], unique )
+moduniques <- sapply(model.frame(mod)[ , -1], unique)
+
+
+findnew <- function(x, testvals = testuniques , modvals = moduniques){
+    jn <- testvals[[x]][ !testvals[[x]] %in% modvals[[x]] ]
+    jn <- jn[!is.na(jn)]
+    jn
+    }
+
+newlvls <- lapply(1:2, findnew)
+
+newlvls[[2]] ==0
+
+lapply(newlvls, function(x) as.character(x))
+
+ testuniques[ !testuniques[i] %in% moduniques[i]])
+
+
+predictr( jnk, data = anes52, bes2$tstrows)
