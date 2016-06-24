@@ -13,7 +13,7 @@ anes48 <- anes48[, multiunique]
 
 
 colstouse <- colnames(anes48)
-colstouse <- colstouse[ !colstouse %in% c("vcf0702", "bindep")]
+colstouse <- colstouse[ !colstouse %in% c("vcf0702", "bindep", "vcf0704", "vcf0704a", "vcf0705", "vcf0706", "vcf0734")]
 
 bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 3, perc = .33)
 bes1$pcps

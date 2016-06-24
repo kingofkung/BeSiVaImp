@@ -6,13 +6,17 @@ loc <- "/Users/bjr/Dropbox/R_Projects/GSSThing/anes_timeseries_cdf_sav/"
 library(memisc)
 
 ## anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"), to.data.frame = T)
-anes <- as.data.set(spss.system.file(paste0(loc,"anes_timseries_cdf.sav")))
+if(!exists("anes")){
+    anes <- as.data.set(spss.system.file(paste0(loc,"anes_timseries_cdf.sav")))
+    anes <- as.data.frame(anes)
+}
 
-anes <- as.data.frame(anes)
 str(anes)
 
 
 anes48 <-anes[ anes$vcf0004 == 1948,]
+anes48$vcf0006a
+
 
 dim(anes48)
 
@@ -21,3 +25,4 @@ notmissing <- colSums(!is.na(anes48)) > 0
 
 
 anes48 <- anes48[,notmissing]
+colnames(anes48)
