@@ -48,7 +48,7 @@ bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
 
 
 ## The problem, illustrated
-mod <- glm(bindep ~ vcf0378d, "binomial", data = anes52[-bes2$tstrows,])
+mod <- glm(bindep ~ vcf0396d + vcf0498d, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 
@@ -76,15 +76,17 @@ findnew <- function(x, testvals = testuniques , modvals = moduniques){
     jn <- testvals[[x]][ !testvals[[x]] %in% modvals[[x]] ]
     jn <- jn[!is.na(jn)]
     jn
-    }
+}
 
-newlvls <- findnew(seq_along(1:ncol(tdat)))
+findnew(2)
 
-tdat[tdat[,1] %in%   newlvls[[1]], 1] <- NA
+newlvls <- lapply(1:length(testuniques), findnew)
 
-predict(mod, newdata = tdat[ ,], 'response')
 
-tdat[1:nrow(tdat),]
-colnames(tdat[1:nrow(tdat), ])
+tdat <- as.data.frame(sapply(seq_along(newlvls), function(i){
+    tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
+    tdat[,i]}
+    ))
+colnames(tdat) <- ivsused
 
 predictr( mod, data = tdat, rowstouse= seq_along(rownames(tdat)))
