@@ -1,22 +1,6 @@
 ## Any functions that were created will be kept separate here
 
 
-##' .. content for \description{} (no empty lines) ..
-##'
-##' .. content for \details{} ..
-##' @title rmNewCats
-##' @param var The categorical variable whose categories must be excised
-##' @param mod The model with the potential extra values
-##' @param tst the index that divides the two subsets of data
-##' @return the variable, but with NA's where the categories that didn't appear in -tst
-##' @author Benjamin Rogers
-rmnewCats <- function(var, mod, tst){
-    facvar <- factor(var)
-    uniquecats <- unique(facvar[tst]) [ !unique(facvar[tst]) %in% (facvar[-tst])]
-    facvar[ facvar%in% uniquecats ] <- NA
-    facvar
-}
-
 ##' predictr
 ##'
 ##' make predictions for the glm models of BeSiVa

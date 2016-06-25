@@ -49,7 +49,7 @@ bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
 ## The problem, illustrated
 ## two variables that have the issue: vcf0396d, vcf0498d
 ## three variables that do not: vcf0711, vcf0701, vcf0411
-mod <- glm(bindep ~ vcf0701  + vcf0411, "binomial", data = anes52[-bes2$tstrows,])
+mod <- glm(bindep ~ vcf0701  + vcf0396d, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 ## predictr(mod, anes52, bes2$tstrows)
