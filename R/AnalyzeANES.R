@@ -49,7 +49,7 @@ bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
 ## The problem, illustrated
 ## two variables that have the issue: vcf0396d, vcf0498d
 ## three variables that do not: vcf0711, vcf0701, vcf0411
-u <- glm(bindep ~ vcf0498d + vcf0396d , "binomial", data = anes52[-bes2$tstrows,])
+u <- glm(bindep ~  vcf0498d + vcf0396d, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 ## predictr(mod, anes52, bes2$tstrows)
@@ -69,11 +69,14 @@ if(exists("ivsused")) rm(ivsused)
 ivsused <- all.vars(formula(u))[-1]
 print(ivsused)
 
-## BIG NOTE: When using drop = false in [], it preserves the
-## dimensional structure of the object.
+## BIG NOTE: When using drop = false as an argument in the extract
+## operator [], it preserves the dimensional structure of the object.
+## I use this because if it's a 1d vector, R will drop the structure
+## otherwise.
+
 ## Get the unique values in each of the columns of the test and
 ## training data, and store them as list objects.
-tdat <- dat[examrw, ivsused, drop = FALSE ]
+tdat <- dat[examrw, ivsused, drop = FALSE]
 testuniques <- lapply(tdat, unique )
 
 mdat <- model.frame(u)[, -1, drop = FALSE]
@@ -85,9 +88,9 @@ findnew <- function(x, testvals = testuniques , modvals = moduniques){
     jn <- jn[!is.na(jn)]
     jn
 }
-
-
 newlvls <- lapply(1:length(testuniques), findnew)
+
+
 ## if we have no missing levels, we get back factor(0) in a list
 ## element. Since the length of factor(0) is 0, we can catch it with
 ## the following.  If the sum of the levels is zero, then we don't
@@ -110,5 +113,6 @@ tdat <- as.data.frame(sapply(seq_along(newlvls), function(i){
     tdat[,i]}
     ))
 colnames(tdat) <- ivsused
+na.omit(tdat)
 
-predictr( mod, data = tdat, rowstouse= seq_along(rownames(tdat)))
+predictr( u, data = tdat, rowstouse= seq_along(rownames(tdat)))
