@@ -41,14 +41,14 @@ anes52$vcf0009x
 
 avoidcols2 <- c(avoidcols, "vcf0703", fewcats)
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
-bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25)
+bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
 
 
 
 
 
 ## The problem, illustrated
-mod <- glm(bindep ~ vcf0378d + vcf0127, "binomial", data = anes52[-bes2$tstrows,])
+mod <- glm(bindep ~ vcf0378d, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 
@@ -56,10 +56,20 @@ mod <- glm(bindep ~ vcf0378d + vcf0127, "binomial", data = anes52[-bes2$tstrows,
 ## predictr(mod, anes52, bes2$tstrows)
 
 ## working on a fix
-ivsused <- as.character(formula(mod)[[3]][-1])
+ifelse(length(formula(mod)[[3]]) == 1,
+       ivsused <- as.character(formula(mod)[[3]]),
+       ivsused <- as.character(formula(mod)[[3]][-1])
+       )
 
-testuniques <- sapply(anes52[bes2$tstrows, ivsused ], unique )
-moduniques <- sapply(model.frame(mod)[ , -1], unique)
+## when using drop = false in [], it preserves the dimensional structure
+tdat <- anes52[bes2$tstrows, ivsused, drop = FALSE ]
+
+## Weirdly, unless you literally declare it to be a data frame in the
+## lapply command, lapply thinks you want it treated as a vector.
+testuniques <- lapply(as.data.frame(tdat), unique )
+mdat <- model.frame(mod)[, -1, drop = FALSE]
+## colnames(mdat) <- ivsused
+moduniques <- lapply(as.data.frame(mdat), unique)
 
 
 findnew <- function(x, testvals = testuniques , modvals = moduniques){
@@ -68,12 +78,13 @@ findnew <- function(x, testvals = testuniques , modvals = moduniques){
     jn
     }
 
-newlvls <- lapply(1:2, findnew)
+newlvls <- findnew(seq_along(1:ncol(tdat)))
 
+tdat[tdat[,1] %in%   newlvls[[1]], 1] <- NA
 
-lapply(newlvls, function(x) as.character(x))
+predict(mod, newdata = tdat[ ,], 'response')
 
-testuniques[ !testuniques[i] %in% moduniques[i]])
+tdat[1:nrow(tdat),]
+colnames(tdat[1:nrow(tdat), ])
 
-
-predictr( jnk, data = anes52, bes2$tstrows)
+predictr( mod, data = tdat, rowstouse= seq_along(rownames(tdat)))

@@ -33,7 +33,7 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
     ## variables.
 
 
-    thepreds <- predict(x, newdata = data[rowstouse,], "response")
+    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
     ifelse(thepreds >=.5, 1, 0)
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }
