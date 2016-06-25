@@ -49,10 +49,14 @@ bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
 ## The problem, illustrated
 ## two variables that have the issue: vcf0396d, vcf0498d
 ## three variables that do not: vcf0711, vcf0701, vcf0411
-mod <- glm(bindep ~ vcf0701  + vcf0711, "binomial", data = anes52[-bes2$tstrows,])
+u <- glm(bindep ~ vcf0498d + vcf0396d , "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 ## predictr(mod, anes52, bes2$tstrows)
+
+## Begin preparations to turn these commands into functions:
+dat <- anes52
+examrw <- bes2$tstrows
 
 ## I think I want two functions. One of the functions should analyze
 ## the categories in both training and test set variables and tell us
@@ -62,20 +66,18 @@ mod <- glm(bindep ~ vcf0701  + vcf0711, "binomial", data = anes52[-bes2$tstrows,
 ## get the IVs used in any model as a list of variables
 
 if(exists("ivsused")) rm(ivsused)
-ivsused <- all.vars(formula(mod))[-1]
- print(ivsused)
+ivsused <- all.vars(formula(u))[-1]
+print(ivsused)
 
+## BIG NOTE: When using drop = false in [], it preserves the
+## dimensional structure of the object.
+## Get the unique values in each of the columns of the test and
+## training data, and store them as list objects.
+tdat <- dat[examrw, ivsused, drop = FALSE ]
+testuniques <- lapply(tdat, unique )
 
-
-## when using drop = false in [], it preserves the dimensional structure
-tdat <- anes52[bes2$tstrows, ivsused, drop = FALSE ]
-
-## Weirdly, unless you literally declare it to be a data frame in the
-## lapply command, lapply thinks you want it treated as a vector.
-testuniques <- lapply(as.data.frame(tdat), unique )
-mdat <- model.frame(mod)[, -1, drop = FALSE]
-## colnames(mdat) <- ivsused
-moduniques <- lapply(as.data.frame(mdat), unique)
+mdat <- model.frame(u)[, -1, drop = FALSE]
+moduniques <- lapply(mdat, unique)
 
 
 findnew <- function(x, testvals = testuniques , modvals = moduniques){
@@ -86,11 +88,22 @@ findnew <- function(x, testvals = testuniques , modvals = moduniques){
 
 
 newlvls <- lapply(1:length(testuniques), findnew)
-## if we  have a problem, we  get back factor(0). Since  the length of
-## factor(0) is 0, we  can catch  it with  the following.  If they're
-## zero, then we don't have to do the rest.
+## if we have no missing levels, we get back factor(0) in a list
+## element. Since the length of factor(0) is 0, we can catch it with
+## the following.  If the sum of the levels is zero, then we don't
+## have to remove anything.
+
+## Note to self: the levels are subject to change as variables are
+## added, and later variables can actually eliminate categories in the
+## training set, creating new novel categories in the test set and
+## making this endeavor even more necessary!!
 
 sum(unlist(lapply( newlvls, length)))
+
+##################################################################
+## It is at this point that we go from simply detecting whether levels
+## are new to removing those new levels.
+## Need to provide: The test data and the new levels
 
 tdat <- as.data.frame(sapply(seq_along(newlvls), function(i){
     tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
