@@ -49,21 +49,21 @@ bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
 ## The problem, illustrated
 ## two variables that have the issue: vcf0396d, vcf0498d
 ## three variables that do not: vcf0711, vcf0701, vcf0411
-mod <- glm(bindep ~ vcf0701  + vcf0711, "binomial", data = anes52[-bes2$tstrows,])
+mod <- glm(bindep ~ vcf0701  + vcf0396d, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 ## predictr(mod, anes52, bes2$tstrows)
-
-## I think I want two functions. One of the functions should analyze
-## the categories in both training and test set variables and tell us
-## whether we need to go in and set observations in a variable to NA. The other
-## should remove those observations if the first tells us it's needed.
-
-## get the IVs used in any model as a list of variables
-
+##
+##
+##
+## working on a fix
 if(exists("ivsused")) rm(ivsused)
-ivsused <- all.vars(formula(mod))[-1]
- print(ivsused)
+if(length(formula(mod)[[3]]) == 1){
+    ivsused <- as.character(formula(mod)[[3]])
+} else {
+    ivsused <- unlist(lapply(as.character(formula(mod)[[3]][-1]), strsplit, "\\s[+]\\s"))
+}
+print(ivsused)
 
 
 
