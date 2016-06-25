@@ -49,6 +49,10 @@ bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25)
 
 ## The problem, illustrated
 mod <- glm(bindep ~ vcf0378d + vcf0127, "binomial", data = anes52[-bes2$tstrows,])
+## if you run the line below, it'll return an error instead of
+## predictions due to the new categories in vcf0378d's test set
+
+
 ## predictr(mod, anes52, bes2$tstrows)
 
 ## working on a fix

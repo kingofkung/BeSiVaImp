@@ -1,5 +1,5 @@
 ## Here's the script where we open the american national election survey data
-
+rm(list = ls()[!ls() %in% "anes"])
 loc <- "/Users/bjr/Dropbox/R_Projects/GSSThing/anes_timeseries_cdf_sav/"
 
 ## library(foreign)
