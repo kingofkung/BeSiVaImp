@@ -46,20 +46,26 @@ bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
 
 
 
-
 ## The problem, illustrated
-mod <- glm(bindep ~ vcf0396d + vcf0498d, "binomial", data = anes52[-bes2$tstrows,])
-## if you run the line below, it'll return an error instead of
+## two variables that have the issue: vcf0396d, vcf0498d
+## three variables that do not: vcf0711, vcf0701, vcf0411
+mod <- glm(bindep ~ vcf0701  + vcf0411, "binomial", data = anes52[-bes2$tstrows,])
+## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
-
-
 ## predictr(mod, anes52, bes2$tstrows)
-
+##
+##
+##
 ## working on a fix
-ifelse(length(formula(mod)[[3]]) == 1,
-       ivsused <- as.character(formula(mod)[[3]]),
-       ivsused <- as.character(formula(mod)[[3]][-1])
-       )
+if(exists("ivsused")) rm(ivsused)
+if(length(formula(mod)[[3]]) == 1){
+    ivsused <- as.character(formula(mod)[[3]])
+} else {
+    ivsused <- unlist(lapply(as.character(formula(mod)[[3]][-1]), strsplit, "\\s[+]\\s"))
+}
+print(ivsused)
+
+
 
 ## when using drop = false in [], it preserves the dimensional structure
 tdat <- anes52[bes2$tstrows, ivsused, drop = FALSE ]
@@ -78,10 +84,13 @@ findnew <- function(x, testvals = testuniques , modvals = moduniques){
     jn
 }
 
-findnew(2)
 
 newlvls <- lapply(1:length(testuniques), findnew)
+## if we  have a problem, we  get back factor(0). Since  the length of
+## factor(0) is 0, we  can catch  it with  the following.  If they're
+## zero, then we don't have to do the rest.
 
+sum(unlist(lapply( newlvls, length)))
 
 tdat <- as.data.frame(sapply(seq_along(newlvls), function(i){
     tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
