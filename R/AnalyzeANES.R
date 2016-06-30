@@ -41,15 +41,14 @@ anes52$vcf0009x
 
 avoidcols2 <- c(avoidcols, "vcf0703", fewcats)
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
-bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
-
-
-
+bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .1, sampseed = 12345)
+sort(bes2$pcps)
+bes2$tieforms
 
 ## The problem, illustrated
 ## two variables that have the issue: vcf0396d, vcf0498d
 ## three variables that do not: vcf0711, vcf0701, vcf0411
-u <- glm(bindep ~  vcf0498d, "binomial", data = anes52[-bes2$tstrows,])
+u <- glm(bindep ~ vcf0701 +  vcf0396d, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 ## predictr(mod, anes52, bes2$tstrows)
@@ -83,8 +82,8 @@ mdat <- model.frame(u)[, -1, drop = FALSE]
 moduniques <- lapply(mdat, unique)
 
 
-findnew <- function(x, testvals = testuniques , modvals = moduniques){
-    jn <- testvals[[x]][ !testvals[[x]] %in% modvals[[x]] ]
+findnew <- function(x, testlist = testuniques , modlist = moduniques){
+    jn <- testlist[[x]][ !testlist[[x]] %in% modlist[[x]] ]
     jn <- jn[!is.na(jn)]
     jn
 }
@@ -102,6 +101,7 @@ newlvls <- lapply(1:length(testuniques), findnew)
 ## making this endeavor even more necessary!!
 
 sum(unlist(lapply( newlvls, length)))
+catfinder(u, anes52, bes2$tstrows)
 
 ##################################################################
 ## It is at this point that we go from simply detecting whether levels

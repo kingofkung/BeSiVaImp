@@ -1,5 +1,57 @@
 ## Any functions that were created will be kept separate here
 
+##' findnew takes two lists, testlist and modlist, and sees
+##' whether there is a difference in the categories in the two lists.
+##' @title findnew
+##' @param r the list element to be considered. An integer
+##' @param testlist a list of unique elements in categorical variables in the test set
+##' @param modlist a list of unique elements in categorical variables in the model data
+##' @return a list of new elements in each list element
+##' @author Benjamin Rogers
+findnew <- function(r, testlist = testuniques , modlist = moduniques){
+    jn <- testlist[[r]][ !testlist[[r]] %in% modlist[[r]] ]
+    jn <- jn[!is.na(jn)]
+    jn
+}
+
+
+
+##' .. content for \description{} (no empty lines) ..
+##'
+##' .. content for \details{} ..
+##' @title
+##' @param nx the glm model we'll be using
+##' @param data The dataset from the models
+##' @param testrows The rows designating the test set
+##' @return
+##' @author Benjamin Rogers
+catfinder <- function(nx, data, testrows){
+
+    ivsused <- all.vars(formula(nx))[-1]
+    ## print(ivsused)
+
+    tdat <- data[testrows, ivsused, drop = FALSE]
+    testuniques <- lapply(tdat, unique)
+
+    mdat <- model.frame(nx)[, -1, drop = FALSE]
+    moduniques <- lapply(mdat, unique)
+
+    newlvls <- lapply(1:length(testuniques), findnew)
+
+    nNewcats <- sum(unlist(lapply(newlvls, length)))
+    list("newlevels" = newlvls, "numnewcats" = nNewcats, "muniques" = moduniques, "tuniques" = testuniques)
+
+}
+
+catremover <- function(){
+
+tdatnu <- as.data.frame(sapply(seq_along(newlvls), function(i){
+    tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
+    tdat[,i]}
+    ))
+
+
+}
 
 ##' predictr
 ##'
@@ -14,8 +66,8 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
 
     ## So right here: Somewhere between where the data in newdata
     ## comes in and the predict function is where we could place our
-    ## variables.
-
+    ## variables
+    catfinder(nx = x, data, rowstouse  )
 
     thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
     ifelse(thepreds >=.5, 1, 0)
@@ -137,7 +189,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
                 print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
                 break} else tieforms <- NA
             ## print(maxpcp)
-        vars <- as.character(forms[[maxpcp]]) [3]
+            vars <- as.character(forms[[maxpcp]]) [3]
         }
 
         ## What do we output?
