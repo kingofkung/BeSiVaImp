@@ -49,7 +49,7 @@ bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, sampseed = 12345)
 ## The problem, illustrated
 ## two variables that have the issue: vcf0396d, vcf0498d
 ## three variables that do not: vcf0711, vcf0701, vcf0411
-u <- glm(bindep ~  vcf0498d + vcf0396d, "binomial", data = anes52[-bes2$tstrows,])
+u <- glm(bindep ~  vcf0498d, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 ## predictr(mod, anes52, bes2$tstrows)
@@ -108,11 +108,14 @@ sum(unlist(lapply( newlvls, length)))
 ## are new to removing those new levels.
 ## Need to provide: The test data and the new levels
 
-tdat <- as.data.frame(sapply(seq_along(newlvls), function(i){
+tdatnu <- as.data.frame(sapply(seq_along(newlvls), function(i){
     tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
     tdat[,i]}
     ))
-colnames(tdat) <- ivsused
-na.omit(tdat)
+colnames(tdatnu) <- ivsused
+na.omit(tdatnu)
+## table(factor(tdat[,1]), factor(tdatnu[,1]))
 
-predictr( u, data = tdat, rowstouse= seq_along(rownames(tdat)))
+predout <- predictr( u, data = tdatnu, rowstouse= seq_along(rownames(tdat)))
+print(predout)
+## getpcp(predout, anes52$bindep[examrw])
