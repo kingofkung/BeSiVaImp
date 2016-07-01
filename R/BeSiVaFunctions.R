@@ -19,13 +19,14 @@ findnew <- function(r, testlist = testuniques , modlist = moduniques){
 ##' .. content for \description{} (no empty lines) ..
 ##'
 ##' .. content for \details{} ..
-##' @title
+##' @title catprobfinder
 ##' @param nx the glm model we'll be using
 ##' @param data The dataset from the models
 ##' @param testrows The rows designating the test set
-##' @return
+##' @return the test data set with the new categories set as NA's,
+##'     ready to be plugged into the predict function in predictr
 ##' @author Benjamin Rogers
-catfinder <- function(nx, data, testrows){
+catprobfinder <- function(nx, data, testrows){
 
     ivsused <- all.vars(formula(nx))[-1]
     ## print(ivsused)
@@ -36,22 +37,25 @@ catfinder <- function(nx, data, testrows){
     mdat <- model.frame(nx)[, -1, drop = FALSE]
     moduniques <- lapply(mdat, unique)
 
-    newlvls <- lapply(1:length(testuniques), findnew)
+    newlvls <- lapply(1:length(testuniques), findnew, testuniques, moduniques)
 
     nNewcats <- sum(unlist(lapply(newlvls, length)))
-    list("newlevels" = newlvls, "numnewcats" = nNewcats, "muniques" = moduniques, "tuniques" = testuniques)
+
+    if(nNewcats > 0){
+        tdatnu <- data.frame(sapply(seq_along(newlvls), function(i){
+            tdat[tdat[,i] %in% newlvls[[i]], i] <- NA
+            tdat[,i]}
+            ))
+        colnames(tdatnu) <- ivsused
+
+    } else tdatnu <- NULL
+
+    list("newlevels" = newlvls, "numnewcats" = nNewcats,
+         "muniques" = moduniques, "tuniques" = testuniques,
+         "tstdatnu" = tdatnu)
 
 }
 
-catremover <- function(){
-
-tdatnu <- as.data.frame(sapply(seq_along(newlvls), function(i){
-    tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
-    tdat[,i]}
-    ))
-
-
-}
 
 ##' predictr
 ##'
@@ -67,7 +71,7 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
     ## So right here: Somewhere between where the data in newdata
     ## comes in and the predict function is where we could place our
     ## variables
-    catfinder(nx = x, data, rowstouse  )
+    try(catprobfinder(nx = x, data, rowstouse ))
 
     thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
     ifelse(thepreds >=.5, 1, 0)

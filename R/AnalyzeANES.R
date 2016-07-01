@@ -41,7 +41,7 @@ anes52$vcf0009x
 
 avoidcols2 <- c(avoidcols, "vcf0703", fewcats)
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
-bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .1, sampseed = 12345)
+bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .2, sampseed = 12345)
 sort(bes2$pcps)
 bes2$tieforms
 
@@ -51,7 +51,7 @@ bes2$tieforms
 u <- glm(bindep ~ vcf0701 +  vcf0396d, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
-## predictr(mod, anes52, bes2$tstrows)
+## predictr(u, anes52, bes2$tstrows)
 
 ## Begin preparations to turn these commands into functions:
 dat <- anes52
@@ -101,21 +101,32 @@ newlvls <- lapply(1:length(testuniques), findnew)
 ## making this endeavor even more necessary!!
 
 sum(unlist(lapply( newlvls, length)))
-catfinder(u, anes52, bes2$tstrows)
+
+
+diagn <- catprobfinder(u, anes52, bes2$tstrows)
+compdf <- data.frame(
+    anes52[bes2$tstrows, ivsused[1], drop = F],
+    diagn$tstdatnu[, 1]
+)
+
+table(compdf[,1], compdf[,2])
+
+str(anes52[bes2$tstrows, ivsused])##, diagn$testdatnu)
+str(diagn$tstdatnu)
 
 ##################################################################
 ## It is at this point that we go from simply detecting whether levels
 ## are new to removing those new levels.
 ## Need to provide: The test data and the new levels
 
-tdatnu <- as.data.frame(sapply(seq_along(newlvls), function(i){
-    tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
-    tdat[,i]}
-    ))
-colnames(tdatnu) <- ivsused
-na.omit(tdatnu)
-## table(factor(tdat[,1]), factor(tdatnu[,1]))
+## tdatnu <- as.data.frame(sapply(seq_along(newlvls), function(i){
+##     tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
+##     tdat[,i]}
+##     ))
+## colnames(tdatnu) <- ivsused
+## na.omit(tdatnu)
+## ## table(factor(tdat[,1]), factor(tdatnu[,1]))
 
-predout <- predictr( u, data = tdatnu, rowstouse= seq_along(rownames(tdat)))
-print(predout)
-## getpcp(predout, anes52$bindep[examrw])
+## predout <- predictr( u, data = tdatnu, rowstouse= seq_along(rownames(tdat)))
+## print(predout)
+## ## getpcp(predout, anes52$bindep[examrw])
