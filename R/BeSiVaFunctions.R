@@ -71,9 +71,11 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
     ## So right here: Somewhere between where the data in newdata
     ## comes in and the predict function is where we could place our
     ## variables
-    try(catprobfinder(nx = x, data, rowstouse ))
-
-    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
+    try(cpf <- catprobfinder(nx = x, data, rowstouse ))
+    ## ifelse(!is.null(cpf$tstdatnu),
+           ## thepreds <- predict(x, newdata =  cpf$tstdatnu, "response"),
+           thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
+           ## )
     ifelse(thepreds >=.5, 1, 0)
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }

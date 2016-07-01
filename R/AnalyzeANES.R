@@ -25,7 +25,7 @@ length(colstouse)
 ## View(anes48)
 
 bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 5, perc = .25)
-names(bes1)
+## names(bes1)
 bes1$tieforms
 
 glm(bindep ~ vcf0127 + vcf9027 + vcf0713, data = anes48)
@@ -41,14 +41,14 @@ anes52$vcf0009x
 
 avoidcols2 <- c(avoidcols, "vcf0703", fewcats)
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
-bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .2, sampseed = 12345)
+bes2 <- besiva("bindep", colstouse2, dat = anes52, iters = 2, perc = .2, sampseed = 12345)
 sort(bes2$pcps)
 bes2$tieforms
 
 ## The problem, illustrated
 ## two variables that have the issue: vcf0396d, vcf0498d
 ## three variables that do not: vcf0711, vcf0701, vcf0411
-u <- glm(bindep ~ vcf0701 +  vcf0396d, "binomial", data = anes52[-bes2$tstrows,])
+u <- glm(bindep ~ vcf0711 +  vcf0701, "binomial", data = anes52[-bes2$tstrows,])
 ## if you run the line predictr() below, it'll return an error instead of
 ## predictions due to the new categories in vcf0378d's test set
 ## predictr(u, anes52, bes2$tstrows)
@@ -108,6 +108,8 @@ compdf <- data.frame(
     anes52[bes2$tstrows, ivsused[1], drop = F],
     diagn$tstdatnu[, 1]
 )
+
+is.null(diagn$tstdatnu)
 
 table(compdf[,1], compdf[,2])
 
