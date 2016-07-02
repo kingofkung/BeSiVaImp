@@ -21,10 +21,14 @@ head(cb, 100)
 
 cb <- gsub("VCF", "vcf", cb)
 
+divider <- "============================================================================="
+
+cb[grep(divider, cb)]
+
 cb[grep("MISSING_CODES", cb, T)]
 
 anes$vcf0012a
-anes$vcf0872
+unique(anes$vcf0873)
 
 str(anes)
 
