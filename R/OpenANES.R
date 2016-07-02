@@ -11,6 +11,21 @@ if(!exists("anes")){
     anes <- as.data.frame(anes)
 }
 
+
+
+## Work on dealing with missing data, according to the codebook
+codeloc <- "/Users/bjr/GitHub/BeSiVaImp/Data/anes_timeseries_cdf_codebook/"
+
+cb <- readLines(paste0(codeloc, "anes_timeseries_cdf_codebook_var.txt"))
+head(cb, 100)
+
+cb <- gsub("VCF", "vcf", cb)
+
+cb[grep("MISSING_CODES", cb, T)]
+
+anes$vcf0012a
+anes$vcf0872
+
 str(anes)
 
 
