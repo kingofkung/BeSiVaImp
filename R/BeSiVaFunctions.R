@@ -9,8 +9,11 @@
 ##' @return a list of new elements in each list element
 ##' @author Benjamin Rogers
 findnew <- function(r, testlist = testuniques , modlist = moduniques){
-    jn <- testlist[[r]][ !testlist[[r]] %in% modlist[[r]] ]
-    jn <- jn[!is.na(jn)]
+    if(is.factor(testlist[[r]])){
+        jn <- testlist[[r]][ !testlist[[r]] %in% modlist[[r]] ]
+        jn <- jn[!is.na(jn)]
+    } else jn <- 0
+
     jn
 }
 
@@ -32,17 +35,17 @@ catprobfinder <- function(nx, data, testrows){
     ## print(ivsused)
 
     tdat <- data[testrows, ivsused, drop = FALSE]
-    testuniques <- lapply(tdat, unique)
+    testuniques <- lapply(tdat, function(x) unique(na.omit(x)))
 
     mdat <- model.frame(nx)[, -1, drop = FALSE]
-    moduniques <- lapply(mdat, unique)
+    moduniques <- lapply(mdat, function(x) unique(na.omit(x)))
 
     newlvls <- lapply(1:length(testuniques), findnew, testuniques, moduniques)
 
     nNewcats <- sum(unlist(lapply(newlvls, length)))
 
     if(nNewcats > 0){
-        tdatnu <- data.frame(sapply(seq_along(newlvls), function(i){
+        tdatnu <- data.frame(lapply(seq_along(newlvls), function(i){
             tdat[tdat[,i] %in% newlvls[[i]], i] <- NA
             tdat[,i]}
             ))
@@ -71,11 +74,12 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
     ## So right here: Somewhere between where the data in newdata
     ## comes in and the predict function is where we could place our
     ## variables
-    try(cpf <- catprobfinder(nx = x, data, rowstouse ))
-    ## ifelse(!is.null(cpf$tstdatnu),
-           ## thepreds <- predict(x, newdata =  cpf$tstdatnu, "response"),
-           thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-           ## )
+
+    tryCatch(cpf <- catprobfinder(nx = x, data, rowstouse ), warning = "nu")
+    if(!is.null(cpf$tstdatnu)){
+        thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
+    } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
+
     ifelse(thepreds >=.5, 1, 0)
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }
@@ -196,6 +200,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
                 break} else tieforms <- NA
             ## print(maxpcp)
             vars <- as.character(forms[[maxpcp]]) [3]
+            print(i)
         }
 
         ## What do we output?
@@ -208,5 +213,5 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
         ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
         ## strsplit( vars, split = "\\s[+]\\s")
-        list("intvars" = intvars, "tieforms" = tieforms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows)
+        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows)
 }
