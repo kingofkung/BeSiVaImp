@@ -13,7 +13,25 @@ cb <- gsub("VCF", "vcf", cb)
 
 divider <- "============================================================================="
 
-cb[grep(divider, cb)]
+divlocations <- grep(divider, cb)
+varnames <- unique(cb[ divlocations + 1])
+## get rid of the value that's all spaces
+varnames <- varnames[-grep("\\s+", varnames)]
+
+cb[grep("MISSING_CODES", cb, T)]
+
+
+
+
+####
+
+allvcfs <- "vcf\\d+[a-z]*"
+findme <- paste0(divider, "[\n]", allvcfs)
+
+
+varrxp <- regexpr(findme, cb)
+vnames1 <- cb[varrxp==1]
+vnames1[grep("[:/:]", vnames1, invert = T)]
 
 cb[grep("MISSING_CODES", cb, T)]
 
