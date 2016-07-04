@@ -14,21 +14,8 @@ if(!exists("anes")){
 
 
 ## Work on dealing with missing data, according to the codebook
-codeloc <- "/Users/bjr/GitHub/BeSiVaImp/Data/anes_timeseries_cdf_codebook/"
 
-cb <- readLines(paste0(codeloc, "anes_timeseries_cdf_codebook_var.txt"))
-head(cb, 100)
-
-cb <- gsub("VCF", "vcf", cb)
-
-divider <- "============================================================================="
-
-cb[grep(divider, cb)]
-
-cb[grep("MISSING_CODES", cb, T)]
-
-anes$vcf0012a
-unique(anes$vcf0873)
+source(rmMissings.R)
 
 str(anes)
 
