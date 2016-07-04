@@ -18,9 +18,29 @@ varnames <- unique(cb[ divlocations + 1])
 ## get rid of the value that's all spaces
 varnames <- varnames[-grep("\\s+", varnames)]
 
-cb[grep("MISSING_CODES", cb, T)]
+missingbeg <- grep("MISSING_CODES", cb, T)
+
+cb[]
+## Figure out how to get all lines between missingbeg and the next blank line
+cb[missingbeg[700] + 1:10]
+
+## Write a function to get the next blank line after missingbeg
 
 
+## note to you: You cannot use a vector of numbers as its index without seq_along
+missingend <- unlist(lapply(seq_along(missingbeg), function(x){
+    missingbeg[x] + which(cb[missingbeg[x]+ 1:100] %in% "")[1]
+              }))
+
+cb[missingend]
+missingind <- data.frame(missingbeg, missingend)
+
+
+getthemissings <- function(x){
+    cb[missingind$missingbeg[x]:missingind$missingend[x]]
+}
+
+lapply(seq_along(missingind$missingbeg), getthemissings)
 
 
 ####
