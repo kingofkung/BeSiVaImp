@@ -15,7 +15,7 @@ if(!exists("anes")){
 
 ## Work on dealing with missing data, according to the codebook
 
-source(rmMissings.R)
+source("rmMissings.R")
 
 str(anes)
 
