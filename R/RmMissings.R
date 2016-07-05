@@ -90,22 +90,25 @@ justcodes <- lapply(missinglist,function(x) grep("^\\d+\\.", x, value = T))
 ## This is how I find that first period and grab everything before it.
 missingvals <- lapply(justcodes, function(avar){
     endpt <- unlist(regexec("\\.", avar)) -1
-    substring(avar, 1, endpt)
+    as.numeric(substring(avar, 1, endpt))
 })
 
 
-lapply(missingvals, function(x) nchar(as.numeric(x)))
+## Good news: With the removal of the as.character command from the
+## above section, we don't have to worry about different length
+## missing values. This can be confirmed with the line below.
+## which(unlist(lapply(missingvals, function(x) all(nchar(x) == nchar(x[1]))) == F) )
 
-x <- names(missingvals)[8]
-missingvals[[x]]
-substr(anes[,x], 1, 1) %in% missingvals[[x]]
+## So we'll just get that character length and use it when trying to
+## get the length of the strings of our categorical variables.
+strlen <- lapply(missingvals, function(x) nchar(x[1]))
 
-is.factor(anes[,x])
+x <- names(missingvals)[which( names(missingvals) == "vcf0120")]
 
-## remove missing data from anes
-lapply(names(missingvals), function(x){
-anes[,x] %in% missingvals[[x]]
-})
 
-anes[  anes[,x] %in% missingvals[[x]] ,x] <- NA
+anes2 <- anes
+ for(x in names(missingvals))   anes2[ substr(anes2[,x], 1, strlen[[x]]) %in% missingvals[[x]], x] <- NA
+
+anothervar <- names(missingvals)[sample(seq_along(missingvals), 1)]
+table(anes2[, anothervar], anes[, anothervar], useNA = "always")
 

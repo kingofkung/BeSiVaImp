@@ -78,14 +78,34 @@ getvarmissings <- function(x, divrange = 200:1){
 tst <- getvarmissings(4)
 
 names(missinglist) <- lapply(seq_along(missingind$missingbeg), getvarmissings)
-missinglist
+## missinglist
 
 
-## remove the first set of missings from anes
-justcodes <- lapply(missinglist[1:50],function(x) grep("\\d+\\.", x, value = T))
-## now how can I find the first period and grab everything before it?
+## remove the first set of missings from anes. The ^ means beginning of
+## the line. Before we were getting a digit followed by a period just
+## anywhere in the line, which was giving us trouble.
+justcodes <- lapply(missinglist,function(x) grep("^\\d+\\.", x, value = T))
 
 
-missinglist$vcf0012a
+## This is how I find that first period and grab everything before it.
+missingvals <- lapply(justcodes, function(avar){
+    endpt <- unlist(regexec("\\.", avar)) -1
+    substring(avar, 1, endpt)
+})
 
-anes$vcf0012[!is.na(anes$vcf0012)]
+
+lapply(missingvals, function(x) nchar(as.numeric(x)))
+
+x <- names(missingvals)[8]
+missingvals[[x]]
+substr(anes[,x], 1, 1) %in% missingvals[[x]]
+
+is.factor(anes[,x])
+
+## remove missing data from anes
+lapply(names(missingvals), function(x){
+anes[,x] %in% missingvals[[x]]
+})
+
+anes[  anes[,x] %in% missingvals[[x]] ,x] <- NA
+
