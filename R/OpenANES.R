@@ -2,14 +2,34 @@
 rm(list = ls()[!ls() %in% "anes"])
 loc <- "/Users/bjr/Dropbox/R_Projects/GSSThing/anes_timeseries_cdf_sav/"
 
-## library(foreign)
+library(foreign)
+library(readstata13)
 library(memisc)
 
-## anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"), to.data.frame = T)
+anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"))
 if(!exists("anes")){
     anes <- as.data.set(spss.system.file(paste0(loc,"anes_timseries_cdf.sav")))
-    anes <- as.data.frame(anes)
+    ## anes <- as.data.frame(anes)
 }
+
+
+str(anes)
+unlist(lapply(anes, length))
+
+anes$VCF0117[!is.na(anes$VCF0117)]
+
+table(as.vector(anes$VCF0202[!is.na(anes$VCF0202)]))
+anesdf <- as.data.frame(anes)
+table(as.vector(anesdf$vcf0202[!is.na(anesdf$vcf0202)]))
+
+anes2$VCF0202[!is.na(anes2$VCF0202)]
+
+
+
+
+
+
+## anes2 <- read.dta13("/Users/bjr/GitHub/BeSiVaImp/Data/anes_timeseries_cdf_dta/anes_timeseries_cdf.dta")
 
 
 
