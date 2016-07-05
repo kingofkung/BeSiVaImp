@@ -2,21 +2,6 @@
 ## data from the anes.  Right now, there are a series of codings that
 ## anes claims are missing, but are treated as categorical variables.
 
-## Here's the script where we open the american national election survey data
-rm(list = ls()[!ls() %in% "anes"])
-loc <- "/Users/bjr/Dropbox/R_Projects/GSSThing/anes_timeseries_cdf_sav/"
-
-library(foreign)
-library(memisc)
-
-## anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"), to.data.frame = T)
-if(!exists("anes")){
-    anes <- as.data.set(spss.system.file(paste0(loc,"anes_timseries_cdf.sav")))
-    ## anes <- as.data.frame(anes)
-}
-
-anes$vcf0202[!is.na(anes$vcf0202)]
-
 ## The goal is to get the missing data categories into a spreadsheet, so we can easily recode the missings as such.
 
 codeloc <- "/Users/bjr/GitHub/BeSiVaImp/Data/anes_timeseries_cdf_codebook/"
@@ -76,10 +61,3 @@ getvarmissings <- function(x, divrange = 200:1){
 getvarmissings(34)
 names(missinglist) <- lapply(seq_along(missingind$missingbeg), getvarmissings)
 missinglist
-
-head(missinglist, 99)
-
-avar <- "vcf0202"
-
-missinglist[avar]
-sort(unique(anes[,avar]))

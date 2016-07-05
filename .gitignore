@@ -10,3 +10,7 @@ Data/GSS_stata/GSS7214_R4.DTA
 *.pdf
 
 *.sav
+
+*.dta
+
+*.zip
