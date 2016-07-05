@@ -11,8 +11,9 @@ library(memisc)
 
 ## anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"), to.data.frame = T)
 if(!exists("anes")){
-    anes <- as.data.set(spss.system.file(paste0(loc,"anes_timseries_cdf.sav")))
-    ## anes <- as.data.frame(anes)
+    anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"))
+    anes <- as.data.frame(anes)
+    colnames(anes) <- tolower(colnames(anes))
 }
 
 anes$vcf0202[!is.na(anes$vcf0202)]
@@ -36,8 +37,9 @@ varnames <- unique(cb[ divlocations + 1])
 ## get rid of the value that's all spaces
 varnames <- varnames[-grep("\\s+", varnames)]
 
-## Get missing codes beginning locations
-missingbeg <- grep("MISSING_CODES", cb, T)
+## Get missing codes beginning locations. The + 2 at the end should
+## eliminate the first two rows (i.e. the MISSING_CODES and dashes).
+missingbeg <- grep("MISSING_CODES", cb, T) + 2
 
 ## Figure out how to get all lines between missingbeg and the next blank line
 ## Write a function to get the next blank line after missingbeg
@@ -47,7 +49,7 @@ missingbeg <- grep("MISSING_CODES", cb, T)
 ## without seq_along. This should get us the first fully blank line
 ## after the missing codes line.
 getmissingend <- function(x){
-    missingbeg[x] + which(cb[missingbeg[x]+ 1:100] %in% "")[1]
+    missingbeg[x] + which(cb[missingbeg[x]+ 1:100] %in% "")[1] - 1
               }
 missingend <- unlist(lapply(seq_along(missingbeg), getmissingend))
 
@@ -56,16 +58,16 @@ missingind <- data.frame(missingbeg, missingend)
 
 
 getthemissings <- function(x){
-    cb[missingind$missingbeg[x]:missingind$missingend[x]]
+    cb[(missingind$missingbeg[x]):missingind$missingend[x]]
 }
 
 missinglist <- lapply(seq_along(missingind$missingbeg), getthemissings)
 
+head(missinglist)
+
 ## So now we have a real problem... how can we guarantee which missing
 ## values correspond to which variable?
 
-divrange <- 200:1
-missrange <- missingbeg[2] - divrange
 
 ## Find which values before missingbeg have the divider
 
@@ -73,13 +75,37 @@ getvarmissings <- function(x, divrange = 200:1){
     missrange <- missingbeg[x] - divrange
     cb[missrange][ tail(which(cb[missrange] %in% divider), 1) + 1 ]
 }
-getvarmissings(34)
+tst <- getvarmissings(4)
+
 names(missinglist) <- lapply(seq_along(missingind$missingbeg), getvarmissings)
-missinglist
+## missinglist
 
-head(missinglist, 99)
 
-avar <- "vcf0202"
+## remove the first set of missings from anes. The ^ means beginning of
+## the line. Before we were getting a digit followed by a period just
+## anywhere in the line, which was giving us trouble.
+justcodes <- lapply(missinglist,function(x) grep("^\\d+\\.", x, value = T))
 
-missinglist[avar]
-sort(unique(anes[,avar]))
+
+## This is how I find that first period and grab everything before it.
+missingvals <- lapply(justcodes, function(avar){
+    endpt <- unlist(regexec("\\.", avar)) -1
+    substring(avar, 1, endpt)
+})
+
+
+lapply(missingvals, function(x) nchar(as.numeric(x)))
+
+x <- names(missingvals)[8]
+missingvals[[x]]
+substr(anes[,x], 1, 1) %in% missingvals[[x]]
+
+is.factor(anes[,x])
+
+## remove missing data from anes
+lapply(names(missingvals), function(x){
+anes[,x] %in% missingvals[[x]]
+})
+
+anes[  anes[,x] %in% missingvals[[x]] ,x] <- NA
+

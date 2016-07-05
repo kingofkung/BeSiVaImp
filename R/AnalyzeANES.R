@@ -18,13 +18,14 @@ sapply(anes48, function(x) length(unique(x)))
 ## the second iteration (with vcf0110, a measure of education). On the other hand, it's not
 ## exactly obvious what else to do about the separation.
 table(anes48$bindep, anes48$vcf0734)
+table(anes48$vcf0102, anes48$vcf0103)
 
-avoidcols <- c("vcf0702", "bindep", "vcf0706", "vcf0704", "vcf0704a", "vcf0705", "vcf0716", "vcf0015a", "vcf0712", "vcf0737" , "vcf0734")
+avoidcols <- c("vcf0702", "bindep", "vcf0706", "vcf0704", "vcf0704a", "vcf0705", "vcf0716", "vcf0015a", "vcf0712", "vcf0737" , "vcf0734", "vcf0103")
 colstouse <- colnames(anes48)[ !colnames(anes48) %in% avoidcols]
 length(colstouse)
 ## View(anes48)
 
-bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 5, perc = .1)
+bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 5, perc = .1, thresh = .01)
 ## names(bes1)
 bes1$tieforms
 
@@ -37,9 +38,9 @@ anes52$bindep <- ifelse(anes52$vcf0702 %in% "2. Yes, voted", 1, 0)
 ## eliminate any variable with fewer than 1 category, making sure to
 ## remove NAs as a unique option
 fewcats <- names(which(!sapply(anes52, function(x) length(unique(na.omit(x)))) > 1))
-anes52$vcf0009x
+## anes52$vcf0009x
 
-avoidcols2 <- c(avoidcols, "vcf0703", fewcats)
+avoidcols2 <- c(avoidcols, "vcf0703", fewcats, "vcf9023")
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
 bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .1, iters = 4, sampseed = 12345)
 bes2$glms

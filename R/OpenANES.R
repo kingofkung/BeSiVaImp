@@ -5,24 +5,31 @@ loc <- "/Users/bjr/Dropbox/R_Projects/GSSThing/anes_timeseries_cdf_sav/"
 library(foreign)
 library(readstata13)
 library(memisc)
+library(plyr)
 
-anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"))
 if(!exists("anes")){
-    anes <- as.data.set(spss.system.file(paste0(loc,"anes_timseries_cdf.sav")))
-    ## anes <- as.data.frame(anes)
+    anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"))
+    anes <- as.data.frame(anes)
+    colnames(anes) <- tolower(colnames(anes))
 }
+length(anes[[1]])
+lapply(anes, length)
+View(head(anes))
 
 
-str(anes)
-unlist(lapply(anes, length))
+## if(!exists("anes")){
+##     anes <- as.data.set(spss.system.file(paste0(loc,"anes_timseries_cdf.sav")))
+##     ## anes <- as.data.frame(anes)
+## }
 
-anes$VCF0117[!is.na(anes$VCF0117)]
 
-table(as.vector(anes$VCF0202[!is.na(anes$VCF0202)]))
-anesdf <- as.data.frame(anes)
-table(as.vector(anesdf$vcf0202[!is.na(anesdf$vcf0202)]))
 
-anes2$VCF0202[!is.na(anes2$VCF0202)]
+## anes$vcf0120[!is.na(anes$vcf0120)]
+
+table(as.vector(anes$vcf0202[!is.na(anes$vcf0202)]))
+## anesdf <- as.data.frame(anes)
+## table(as.vector(anesdf$vcf0202[!is.na(anesdf$vcf0202)]))
+
 
 
 
@@ -35,7 +42,7 @@ anes2$VCF0202[!is.na(anes2$VCF0202)]
 
 ## Work on dealing with missing data, according to the codebook
 
-source("rmMissings.R")
+## source("rmMissings.R")
 
 str(anes)
 

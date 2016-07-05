@@ -2,6 +2,22 @@
 ## data from the anes.  Right now, there are a series of codings that
 ## anes claims are missing, but are treated as categorical variables.
 
+## Here's the script where we open the american national election survey data
+rm(list = ls()[!ls() %in% "anes"])
+loc <- "/Users/bjr/Dropbox/R_Projects/GSSThing/anes_timeseries_cdf_sav/"
+
+library(foreign)
+library(memisc)
+
+## anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"), to.data.frame = T)
+if(!exists("anes")){
+    anes <- read.spss(paste0(loc,"anes_timseries_cdf.sav"))
+    anes <- as.data.frame(anes)
+    colnames(anes) <- tolower(colnames(anes))
+}
+
+anes$vcf0202[!is.na(anes$vcf0202)]
+
 ## The goal is to get the missing data categories into a spreadsheet, so we can easily recode the missings as such.
 
 codeloc <- "/Users/bjr/GitHub/BeSiVaImp/Data/anes_timeseries_cdf_codebook/"
@@ -21,8 +37,9 @@ varnames <- unique(cb[ divlocations + 1])
 ## get rid of the value that's all spaces
 varnames <- varnames[-grep("\\s+", varnames)]
 
-## Get missing codes beginning locations
-missingbeg <- grep("MISSING_CODES", cb, T)
+## Get missing codes beginning locations. The + 2 at the end should
+## eliminate the first two rows (i.e. the MISSING_CODES and dashes).
+missingbeg <- grep("MISSING_CODES", cb, T) + 2
 
 ## Figure out how to get all lines between missingbeg and the next blank line
 ## Write a function to get the next blank line after missingbeg
@@ -32,7 +49,7 @@ missingbeg <- grep("MISSING_CODES", cb, T)
 ## without seq_along. This should get us the first fully blank line
 ## after the missing codes line.
 getmissingend <- function(x){
-    missingbeg[x] + which(cb[missingbeg[x]+ 1:100] %in% "")[1]
+    missingbeg[x] + which(cb[missingbeg[x]+ 1:100] %in% "")[1] - 1
               }
 missingend <- unlist(lapply(seq_along(missingbeg), getmissingend))
 
@@ -41,16 +58,16 @@ missingind <- data.frame(missingbeg, missingend)
 
 
 getthemissings <- function(x){
-    cb[missingind$missingbeg[x]:missingind$missingend[x]]
+    cb[(missingind$missingbeg[x]):missingind$missingend[x]]
 }
 
 missinglist <- lapply(seq_along(missingind$missingbeg), getthemissings)
 
+head(missinglist)
+
 ## So now we have a real problem... how can we guarantee which missing
 ## values correspond to which variable?
 
-divrange <- 200:1
-missrange <- missingbeg[2] - divrange
 
 ## Find which values before missingbeg have the divider
 
@@ -58,6 +75,17 @@ getvarmissings <- function(x, divrange = 200:1){
     missrange <- missingbeg[x] - divrange
     cb[missrange][ tail(which(cb[missrange] %in% divider), 1) + 1 ]
 }
-getvarmissings(34)
+tst <- getvarmissings(4)
+
 names(missinglist) <- lapply(seq_along(missingind$missingbeg), getvarmissings)
 missinglist
+
+
+## remove the first set of missings from anes
+justcodes <- lapply(missinglist[1:50],function(x) grep("\\d+\\.", x, value = T))
+## now how can I find the first period and grab everything before it?
+
+
+missinglist$vcf0012a
+
+anes$vcf0012[!is.na(anes$vcf0012)]
