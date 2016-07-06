@@ -25,8 +25,9 @@ colstouse <- colnames(anes48)[ !colnames(anes48) %in% avoidcols]
 length(colstouse)
 ## View(anes48)
 
-bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 2, perc = .1, thresh = .001)
-data.frame("pcps" = bes1$pcps, "formulae" = as.character(bes1$forms))
+bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 2, perc = .15, thresh = .001, sampseed = i, showoutput = T)
+
+data.frame("pcps" = bes1$pcps, "formulae" = as.character(bes1$forms))[order(bes1$pcps), ]
 model.frame(bindep ~ vcf0014 + vcf0713, data = anes48[-bes1$tstrows, ])
 
 bm <- glm(bindep ~ vcf0713, data = anes48, binomial)

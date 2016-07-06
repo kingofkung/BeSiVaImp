@@ -131,9 +131,10 @@ foldmaker <- function(foldnum = 3){}
 ##' @param nfolds ## number of folds of the data. For implementing k-fold cross validation
 ##' @param thresh The threshold by an improvement must be made to be considered important. Currently quite small
 ##' @param sampseed The seed for set.seed. Set, but could change as desired
+##' @param showoutput do I want to show the output from the algorithm or not?
 ##' @return  the IVs of the best model based on subset selection, as well as the percent correctly predicted by that model.
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345){
+besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = T){
         set.seed(sampseed)
         ## divy up data
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
@@ -196,11 +197,11 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## the for loop if we get more than 1 with a maximum pcp.
             if(length(maxpcp)>1) {
                 tieforms <- forms[maxpcp]
-                print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
+                if(showoutput == TRUE) print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
                 break} else tieforms <- NA
             ## print(maxpcp)
             vars <- as.character(forms[[maxpcp]]) [3]
-            print(i)
+            if(showoutput == TRUE) print(i)
         }
 
         ## What do we output?
@@ -209,7 +210,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
         ## print(predvals)
         ## This one gives the list of variables
         intvars <- strsplit( vars, split = "\\s[+]\\s")
-        print(intvars)
+        if(showoutput == TRUE) print(intvars)
         ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
         ## strsplit( vars, split = "\\s[+]\\s")
