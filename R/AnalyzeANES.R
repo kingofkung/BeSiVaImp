@@ -25,9 +25,8 @@ colstouse <- colnames(anes48)[ !colnames(anes48) %in% avoidcols]
 length(colstouse)
 ## View(anes48)
 
-bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 5, perc = .1, thresh = .01)
-
-bes1$forms
+bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 2, perc = .1, thresh = .001)
+data.frame("pcps" = bes1$pcps, "formulae" = as.character(bes1$forms))
 model.frame(bindep ~ vcf0014 + vcf0713, data = anes48[-bes1$tstrows, ])
 
 bm <- glm(bindep ~ vcf0713, data = anes48, binomial)
@@ -51,51 +50,13 @@ onecat <- names(which(sapply(anes52, function(x) length(unique(na.omit(x)))) == 
 fewcats <- names(which(!sapply(anes52, function(x) length(unique(na.omit(x)))) > 1))
 ## anes52$vcf0009x
 
-avoidcols2 <- c(avoidcols, "vcf0703", fewcats, "vcf9023")
+avoidcols2 <- c(avoidcols, "vcf0703", fewcats, "vcf9023", "vcf0901", "vcf0701")
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
-bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .1, iters = 4, sampseed = 12345)
-bes2$glms
+bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, thresh =.01, iters = 4, sampseed = 12345)
 bes2$pcps
-sort(bes2$pcps)
-bes2$tieforms
+data.frame(as.character(bes2$forms), bes2$pcps)[   order(bes2$pcps),]
 
-## The problem, illustrated
-## two variables that have the issue: vcf0396d, vcf0498d
-## three variables that do not: vcf0711, vcf0701, vcf0411
-u <- glm(bindep ~ vcf0006 + vcf0013, "binomial", data = anes52[-bes2$tstrows,])
-u <- glm(bindep ~ vcf0498d, "binomial", data = anes52[-bes2$tstrows,])
+ivside <- paste(unlist(bes2$intvars), collapse = " + ")
+bm2 <- glm(as.formula(paste0("bindep ~", ivside )), data = anes52, family = "binomial")
+summary(bm2)
 
-model.frame(u)
-
-## if you run the line predictr() below, it'll return an error instead of
-## predictions due to the new categories in vcf0378d's test set
-## predictr(u, anes52, bes2$tstrows)
-ndat <- catprobfinder(u, anes52, bes2$tstrows)
-str(ndat)
-ndat$muniques
-ndat$tuniques
-
-findnew(1, ndat$tuniques, ndat$muniques)
-
-
-
-model.frame(u)
-na.omit(ndat$tstdatnu)
-predictr(u, ndat$tstdatnu, bes2$tstrows)
-
-##################################################################
-## It is at this point that we go from simply detecting whether levels
-## are new to removing those new levels.
-## Need to provide: The test data and the new levels
-
-## tdatnu <- as.data.frame(sapply(seq_along(newlvls), function(i){
-##     tdat[tdat[,i] %in%   newlvls[[i]], i] <- NA
-##     tdat[,i]}
-##     ))
-## colnames(tdatnu) <- ivsused
-## na.omit(tdatnu)
-## ## table(factor(tdat[,1]), factor(tdatnu[,1]))
-
-## predout <- predictr( u, data = tdatnu, rowstouse= seq_along(rownames(tdat)))
-## print(predout)
-## ## getpcp(predout, anes52$bindep[examrw])
