@@ -14,7 +14,7 @@ if(!exists("anes")){
 }
 length(anes[[1]])
 lapply(anes, length)
-View(head(anes))
+## View(head(anes))
 
 
 ## if(!exists("anes")){
@@ -42,7 +42,7 @@ table(as.vector(anes$vcf0202[!is.na(anes$vcf0202)]))
 
 ## Work on dealing with missing data, according to the codebook
 
-## source("rmMissings.R")
+source("rmMissings.R")
 
 str(anes)
 

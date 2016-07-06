@@ -107,7 +107,7 @@ x <- names(missingvals)[which( names(missingvals) == "vcf0120")]
 
 
 anes2 <- anes
- for(x in names(missingvals))   anes2[ substr(anes2[,x], 1, strlen[[x]]) %in% missingvals[[x]], x] <- NA
+ for(x in names(missingvals))   anes[ substr(anes[,x], 1, strlen[[x]]) %in% missingvals[[x]], x] <- NA
 
 anothervar <- names(missingvals)[sample(seq_along(missingvals), 1)]
 table(anes2[, anothervar], anes[, anothervar], useNA = "always")

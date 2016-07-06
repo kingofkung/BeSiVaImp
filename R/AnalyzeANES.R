@@ -26,10 +26,16 @@ length(colstouse)
 ## View(anes48)
 
 bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 5, perc = .1, thresh = .01)
+
+bes1$forms
+model.frame(bindep ~ vcf0014 + vcf0713, data = anes48[-bes1$tstrows, ])
+
+bm <- glm(bindep ~ vcf0713, data = anes48, binomial)
+summary(bm)
+
 ## names(bes1)
 bes1$tieforms
 
-glm(bindep ~ vcf0127 + vcf9027 + vcf0713, data = anes48)
 
 
 
@@ -37,6 +43,11 @@ anes52$bindep <- ifelse(anes52$vcf0702 %in% "2. Yes, voted", 1, 0)
 
 ## eliminate any variable with fewer than 1 category, making sure to
 ## remove NAs as a unique option
+
+sapply(anes52, function(x) length(unique(na.omit(x))) > 1 )
+
+onecat <- names(which(sapply(anes52, function(x) length(unique(na.omit(x)))) == 1))
+
 fewcats <- names(which(!sapply(anes52, function(x) length(unique(na.omit(x)))) > 1))
 ## anes52$vcf0009x
 
