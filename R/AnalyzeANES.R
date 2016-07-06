@@ -25,10 +25,19 @@ colstouse <- colnames(anes48)[ !colnames(anes48) %in% avoidcols]
 length(colstouse)
 ## View(anes48)
 
-bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 2, perc = .15, thresh = .001, sampseed = i, showoutput = T)
+for(i in 1:100){
+    bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 4, perc = .15, sampseed = i, showoutput = F)
+    ifelse(i == 1, savvar <- unique(bes1$intvars), savvar <- c(savvar,unique(bes1$intvars)))
+}
+
+
+which(lapply(bes1$glms, class) == "try-error")
+
+sort(table(unlist(savvar)))
 
 data.frame("pcps" = bes1$pcps, "formulae" = as.character(bes1$forms))[order(bes1$pcps), ]
-model.frame(bindep ~ vcf0014 + vcf0713, data = anes48[-bes1$tstrows, ])
+pmf <- model.frame(bindep ~ vcf0014 + vcf0713, data = anes48[-bes1$tstrows, ])
+table(pmf[,2], pmf[,3])
 
 bm <- glm(bindep ~ vcf0713, data = anes48, binomial)
 summary(bm)
@@ -51,7 +60,7 @@ onecat <- names(which(sapply(anes52, function(x) length(unique(na.omit(x)))) == 
 fewcats <- names(which(!sapply(anes52, function(x) length(unique(na.omit(x)))) > 1))
 ## anes52$vcf0009x
 
-avoidcols2 <- c(avoidcols, "vcf0703", fewcats, "vcf9023", "vcf0901", "vcf0701")
+avoidcols2 <- c(avoidcols, "vcf0703", fewcats, "vcf9023", "vcf0901", "vcf0701", "vcf0715")
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
 bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, thresh =.01, iters = 4, sampseed = 12345)
 bes2$pcps
