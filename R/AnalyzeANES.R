@@ -29,7 +29,7 @@ for(i in 1:100){
     bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 4, perc = .15, sampseed = i, showoutput = F)
     ifelse(i == 1, savvar <- unique(bes1$intvars), savvar <- c(savvar,unique(bes1$intvars)))
 }
-
+savvar
 
 which(lapply(bes1$glms, class) == "try-error")
 
@@ -70,3 +70,20 @@ ivside <- paste(unlist(bes2$intvars), collapse = " + ")
 bm2 <- glm(as.formula(paste0("bindep ~", ivside )), data = anes52, family = "binomial")
 summary(bm2)
 
+## Meet w/Dr. Joslyn
+## Move onto 2000... is vote intent still king?
+
+## Take some theories: so
+## Michigan: determinants
+## sociological: determinants
+## R + H: determinants
+## Retrospective(FIorina)
+## etc...
+## and use just those variables across all years.
+
+## may have to leave out vote intent
+
+## Try to standardize across years...
+## Family/personal income
+## Education
+## Age, but be consistent!
