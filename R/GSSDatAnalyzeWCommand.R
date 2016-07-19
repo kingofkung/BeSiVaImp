@@ -76,7 +76,7 @@ mods$pcps
 ## find the columns that are giving us grief
 probkids <- colstouse[ which(lapply(mods$predvals, class) == "try-error")]
 print(probkids)
-## write.csv(probkids, paste0("/Users/bjr/Dropbox/R_Projects/GSSThing/","probkids.csv"), row.names = F)
+## write.csv(probkids, paste0("/Users/bjr/Dropbox/R_Projects/GSSThing/","probkids.csv"), row.names = F, append = T)
 
 ## I understand why pres08 and othlang1 might give us trouble. relhhd2, relhh2, and relsp3 aren't so clear
 
