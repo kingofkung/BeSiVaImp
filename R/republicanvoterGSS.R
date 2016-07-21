@@ -62,11 +62,12 @@ length(unique(colstouse))
 
 colstoreallyuse <- colstouse
 
-mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1, thresh = 0.01)
+mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1, thresh = 0.001)
 names(mods)
 
-# W/5, thresh = 0, perc = .1, Runs# "satfrnd" "confed"  "degree"  "satfin"  "partyid"
-
+# W/5 iters, thresh = 0, perc = .1, intvars = "satfrnd" "confed"  "degree"  "satfin"  "partyid"
+# W/10 iters, thresh = 0.01, perc = .1, intvars = "satfin"  "partyid"
+# W/10 iters, thresh = 0.001, perc = .1,
 
 
 
