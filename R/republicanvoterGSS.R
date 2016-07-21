@@ -23,7 +23,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "pres72","wtcomb",  colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "pres72","wtcomb",  colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)], devee )
 
 
 ## How can I figure out if a column is now all na's?
@@ -50,7 +50,6 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[, x]))/nrow(dat2))
 
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
-noVote08 <- "vote08"
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)]) #, noVote08)
 
 
@@ -63,13 +62,20 @@ length(unique(colstouse))
 
 colstoreallyuse <- colstouse
 
-mods <- besiva(devee, colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
-
-## str(mods)
+mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1, thresh = 0.01)
 names(mods)
+
+# W/5, thresh = 0, perc = .1, Runs# "satfrnd" "confed"  "degree"  "satfin"  "partyid"
+
+
+
+
 mods$intvars
 mods$tieforms
 mods$pcps
+
+
+
 ## find the columns that are giving us grief
 probkids <- colstouse[ which(lapply(mods$predvals, class) == "try-error")]
 print(probkids)

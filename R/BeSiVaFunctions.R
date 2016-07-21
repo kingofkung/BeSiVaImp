@@ -165,7 +165,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             glms <- lapply(forms,
                            function(x, thedat = dat[-testrows, ], famille = fam){
                                    eval(bquote(try(junker <- glm(.(x)
-                                                               , data = thedat, family = famille))
+                                                               , data = model.frame(x, thedat), family = famille))
                                                ))
                                    ## try(print(summary(junker)))
                                    ## try(junker)
