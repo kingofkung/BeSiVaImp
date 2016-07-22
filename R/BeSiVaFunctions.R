@@ -147,6 +147,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## Make some formulas
             ## Set vars as blank if i == 1
             if(i == 1) vars <- ""
+            ## make it clear which variables are no longer considered
             outvars <- unlist(strsplit(vars, "\\s[+]\\s"))
 
 
@@ -168,9 +169,6 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
                                    eval(bquote(try(junker <- glm(.(x)
                                                                , data = model.frame(x, thedat), family = binomial()))
                                                ))
-                                   ## ## try(print(summary(junker)))
-                                   ## try(junker)
-
                            }
                            )
             predvals <- lapply(glms,
