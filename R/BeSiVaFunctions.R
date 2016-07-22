@@ -147,9 +147,10 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             ## Make some formulas
             ## Set vars as blank if i == 1
             if(i == 1) vars <- ""
+            outvars <- unlist(strsplit(vars, "\\s[+]\\s"))
 
 
-            forms <- lapply(ivs, function(x, deev = devee, invars = vars){
+            forms <- lapply(ivs[!ivs %in% outvars], function(x, deev = devee, invars = vars){
                 if(vars == ""){ as.formula(paste(deev, "~", x))}
                 else {as.formula(paste(deev, "~", x, "+", vars))}
 
@@ -165,9 +166,9 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             glms <- lapply(forms,
                            function(x, thedat = dat[-testrows, ], famille = fam){
                                    eval(bquote(try(junker <- glm(.(x)
-                                                               , data = model.frame(x, thedat), family = famille))
+                                                               , data = model.frame(x, thedat), family = binomial()))
                                                ))
-                                   ## try(print(summary(junker)))
+                                   ## ## try(print(summary(junker)))
                                    ## try(junker)
 
                            }
@@ -201,6 +202,7 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
                 break} else tieforms <- NA
             ## print(maxpcp)
             vars <- as.character(forms[[maxpcp]]) [3]
+            print(vars)
             if(showoutput == TRUE) print(i)
         }
 

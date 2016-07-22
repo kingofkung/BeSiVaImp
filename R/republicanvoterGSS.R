@@ -31,20 +31,21 @@ avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", 
 ## How can I figure out if a column is now all na's?
 
 
-whichcols <- lapply(colnames(dat2), function(x) all(is.na(dat2[, x]))) == TRUE
-
-allnas <- colnames(dat2)[whichcols]
+## whichcols <- lapply(colnames(dat2), function(x) all(is.na(dat2[, x]))) == TRUE
+## allnas <- colnames(dat2)[whichcols]
 
 ## Now, how can I figure out if a column is majority nas?
 mostlynas <- colnames(dat2)[nearZeroVar(dat2[,])]
 
 
+dat2[, mostlynas]
 
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[, x]))/nrow(dat2))
 
 
+
 ## varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)]) #, noVote08)
+avoidcols <- c(avoidcols, mostlynas, colnames(dat2)[which(napercs>.8)]) #, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -56,7 +57,7 @@ length(unique(colstouse))
 
 colstoreallyuse <- colstouse
 
-mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1, thresh = 0.001)
+mods <- besiva(devee, colstoreallyuse[1:4+60], dat2, iters = 10, perc = .1, thresh = 0.01)
 names(mods)
 
 # W/5 iters, thresh = 0, perc = .1, intvars = "satfrnd" "confed"  "degree"  "satfin"  "partyid"
