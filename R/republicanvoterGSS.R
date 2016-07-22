@@ -60,7 +60,7 @@ colstoreallyuse <- colstouse
 mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1)
 names(mods)
 
-lapply(mods$forms, modmaker, dat2[-mods$tstrows,])
+
 
 
 ## W/5 iters, thresh = 0, perc = .1, intvars = "satfrnd" "confed"  "degree"  "satfin"  "partyid"
@@ -69,10 +69,8 @@ lapply(mods$forms, modmaker, dat2[-mods$tstrows,])
 ## W/10 iters, thresh = 0.001, perc = .1, intvars = "family16" "satfrnd"  "confed"   "degree"   "satfin"   "partyid"
 
 
+data.frame(as.character(mods$forms), mods$pcps)[order(mods$pcps),]
 
-mods$intvars
-mods$tieforms
-mods$pcps
 
 
 
