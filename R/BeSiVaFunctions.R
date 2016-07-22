@@ -112,9 +112,17 @@ dispboth <- function(model, fulldata){
     list(model, fullmod)
 }
 
+
+
+modmaker <- function(x, thedat, famille = binomial()){
+    eval(bquote(
+        try(junker <- glm(.(x), data = model.frame(.(x), thedat), family = famille))
+    ))
+}
+
+
 ##' Proposed function: folder/foldmaker.
 ##' The function will take the DV, IV(s), data, and number of folds you'd like, and return the mean/median pcps for each fold
-
 foldmaker <- function(foldnum = 3){}
 
 
@@ -134,7 +142,7 @@ foldmaker <- function(foldnum = 3){}
 ##' @param showoutput do I want to show the output from the algorithm or not?
 ##' @return  the IVs of the best model based on subset selection, as well as the percent correctly predicted by that model.
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = T){
+besiva <- function(devee, ivs, dat, fam = binomial(), iters = 1, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = T){
         set.seed(sampseed)
         ## divy up data
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
@@ -158,29 +166,18 @@ besiva <- function(devee, ivs, dat, fam = "binomial", iters = 1, perc = .2, nfol
             })
             ##
 
-
-
             ## Here is where the k-fold cross-validation would need to begin
-            ## Problem: We'd need to create rows for each fold.
-            ## At this point, testrows is a single variable. Would we want it as a list? A vector?
-            ## Basically it'd be a getpcp outside of the current getpcp function.
-            glms <- lapply(forms,
-                           function(x, thedat = dat[-testrows, ], famille = fam){
-                                   eval(bquote(try(junker <- glm(.(x)
-                                                               , data = model.frame(x, thedat), family = binomial()))
-                                               ))
-                           }
-                           )
+            ## issue: when attempting to run speedglm, it doesn't recognize the data
+            ## modmaker makes glms according to our specifications
+            glms <- lapply(forms, modmaker, thedat = dat[-testrows,])
+
+
             predvals <- lapply(glms,
                                function(x) try(predictr(x,
                                                     data = dat, rowstouse = testrows)))
             pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))
-            ## While I had the round command here, round_any doesn't
-            ## look that much slower, and it does exactly what I'm
-            ## looking for without needing to resort to any kind of
-            ## trick. I suppose I could use what's inside, which is just
-            ## round(pcps/thresh) * thresh, but we'll see if that's
-            ## really necessary when stress testing.
+
+            ## round to a given threshold, as per user preference.
             if(thresh != 0) pcps <- plyr::round_any(pcps, thresh)
             ## Here is where it would end. Basically we'd need to run
             ## it over the different folds of data.

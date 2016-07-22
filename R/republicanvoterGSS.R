@@ -1,7 +1,7 @@
 ## Begin analyzing GSS Data
 rm(list = ls())
-## source("GSSDatFix.R")
-dat72kp <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/datpres72kp.csv")
+source("GSSDatFix.R")
+## dat72kp <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/datpres72kp.csv")
 source("BeSiVaFunctions.R")
 library(caret)
 
@@ -57,12 +57,16 @@ length(unique(colstouse))
 
 colstoreallyuse <- colstouse
 
-mods <- besiva(devee, colstoreallyuse[1:4+60], dat2, iters = 10, perc = .1, thresh = 0.01)
+mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1)
 names(mods)
 
-# W/5 iters, thresh = 0, perc = .1, intvars = "satfrnd" "confed"  "degree"  "satfin"  "partyid"
-# W/10 iters, thresh = 0.01, perc = .1, intvars = "satfin"  "partyid"
-# W/10 iters, thresh = 0.001, perc = .1, intvars = "family16" "satfrnd"  "confed"   "degree"   "satfin"   "partyid"
+lapply(mods$forms, modmaker, dat2[-mods$tstrows,])
+
+
+## W/5 iters, thresh = 0, perc = .1, intvars = "satfrnd" "confed"  "degree"  "satfin"  "partyid"
+## W/10 iters, thresh = 0, perc = .1, intvars = "xnorcsiz" "satfin"  "partyid"
+## W/10 iters, thresh = 0.01, perc = .1, intvars = "satfin"  "partyid"
+## W/10 iters, thresh = 0.001, perc = .1, intvars = "family16" "satfrnd"  "confed"   "degree"   "satfin"   "partyid"
 
 
 
