@@ -67,7 +67,7 @@ names(mods)
 
 # W/5 iters, thresh = 0, perc = .1, intvars = "satfrnd" "confed"  "degree"  "satfin"  "partyid"
 # W/10 iters, thresh = 0.01, perc = .1, intvars = "satfin"  "partyid"
-# W/10 iters, thresh = 0.001, perc = .1,
+# W/10 iters, thresh = 0.001, perc = .1, intvars = "family16" "satfrnd"  "confed"   "degree"   "satfin"   "partyid"
 
 
 
