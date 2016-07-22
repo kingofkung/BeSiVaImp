@@ -1,7 +1,9 @@
 ## Begin analyzing GSS Data
 rm(list = ls())
-source("GSSDatFix.R")
+## source("GSSDatFix.R")
+dat72kp <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/datpres72kp.csv")
 source("BeSiVaFunctions.R")
+library(caret)
 
 
 devee <- "voterep"
@@ -23,7 +25,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "pres72","wtcomb",  colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)], devee )
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "pres72","wtcomb",  colnames(dat2)[ which(ncats>50)], colnames(dat2)[ which(ncats==1)], devee )
 
 
 ## How can I figure out if a column is now all na's?
@@ -34,29 +36,21 @@ whichcols <- lapply(colnames(dat2), function(x) all(is.na(dat2[, x]))) == TRUE
 allnas <- colnames(dat2)[whichcols]
 
 ## Now, how can I figure out if a column is majority nas?
-library(caret)
 mostlynas <- colnames(dat2)[nearZeroVar(dat2[,])]
-
-## probvars <- read.csv("/Users/bjr/Dropbox/R_Projects/GSSThing/probkids.csv", stringsAsFactors = F)
-
-
-## dat2[, probvars$x] <- apply(probvars, 1, function(x) rmnewCats(dat2[,x], test))
-
-## dat2[-test, 3]
 
 
 
 napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[, x]))/nrow(dat2))
 
 
-varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
+## varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)]) #, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
 colstouse <- colnames(dat2)[!colnames(dat2) %in% avoidcols]
 
-length(colnames(dat2)) -  length(unique(avoidcols))
+length(unique(colnames(dat2))) -  length(unique(avoidcols))
 
 length(unique(colstouse))
 

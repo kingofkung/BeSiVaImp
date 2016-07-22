@@ -61,3 +61,5 @@ dim(dat72kp)
 
 dat72kp[dat72kp$pres72 %in% "", "pres72"] <- NA
 dat72kp$voterep <- ifelse(dat72kp$pres72 == "nixon", 1, 0)
+
+write.csv(dat72kp, paste0(datloc, "datpres72kp.csv"))
