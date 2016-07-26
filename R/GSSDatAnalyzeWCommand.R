@@ -1,6 +1,8 @@
 ## Begin analyzing GSS Data
-rm(list = ls())
-source("GSSDatFix.R")
+rm(list = ls()[!ls() %in% "dat2"])
+## source("GSSDatFix.R")
+datloc <- "/Users/bjr/GitHub/BeSiVaImp/Data/GSS_stata/"
+if(!exists("dat2")) dat2 <- read.csv(paste0(datloc, "vote12bindat.csv"))
 source("BeSiVaFunctions.R")
 
 
@@ -10,7 +12,7 @@ devee <- "vote12bin"
 
 ## Keep some data held out
 ## First, make sure our DV Is included in all cases rows
-dat2 <- dat[complete.cases(dat[,devee]),]
+## dat2 <- dat[complete.cases(dat[,devee]),]
 ## dat2$vote08bin
 
 
@@ -20,30 +22,29 @@ set.seed(12345)
 test <- sample(seq_along(dat2$vote12bin), size = round(nrow(dat2)/10))
 
 ## Figure out which rows have few categories, so we can eliminate them later.
-ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[-test,x])))
+ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[,x])))
 
 
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "vote08bin", "vote12bin", "pres12", "if12who","wtcomb",  colnames(dat)[ which(ncats>50)], colnames(dat)[ which(ncats==1)] )
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "vote08bin", "vote12bin", "pres12", "if12who","wtcomb",  colnames(dat2)[ which(ncats>50)], colnames(dat2)[ which(ncats==1)] )
 
 
 ## How can I figure out if a column is now all na's?
 
 
-whichcols <- lapply(colnames(dat2), function(x) all(is.na(dat2[-test, x]))) == TRUE
+whichcols <- lapply(colnames(dat2), function(x) all(is.na(dat2[, x]))) == TRUE
 
 allnas <- colnames(dat2)[whichcols]
 
 ## Now, how can I figure out if a column is majority nas?
 library(caret)
-mostlynas <- colnames(dat2)[nearZeroVar(dat2[-test,])]
+mostlynas <- colnames(dat2)[nearZeroVar(dat2[,])]
 
 probvars <- read.csv("/Users/bjr/Dropbox/R_Projects/GSSThing/probkids.csv", stringsAsFactors = F)
 
 
-dat2[, probvars$x] <- apply(probvars, 1, function(x) rmnewCats(dat2[,x], test))
 
 ## dat2[-test, 3]
 
@@ -64,9 +65,19 @@ length(colnames(dat2)) -  length(unique(avoidcols))
 
 length(unique(colstouse))
 
-colstoreallyuse <- colstouse
+colstoreallyuse <- sort(colstouse)
 
-mods <- besiva(devee, colstoreallyuse, dat2, iters = 5, perc = .1, thresh = 0)
+mods <- besiva(devee, colstoreallyuse, dat2, iters = 5, perc = .1)
+
+## tstmod <- glm(vote12bin ~ sector, data = dat2[-test,], family = binomial)
+## tstcpf <- catprobfinder(tstmod, dat2, test)
+## unique(model.frame(tstmod)$sector)
+## unique(dat2[test, 'sector'])
+## unique(tstcpf$tstdatnu)
+
+## predictr(tstmod, data = dat2, rowstouse = mods$tstrows)
+
+data.frame(as.character(mods$forms), mods$pcps)[order(mods$pcps),]
 
 ## str(mods)
 names(mods)

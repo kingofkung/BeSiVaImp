@@ -40,7 +40,10 @@ catprobfinder <- function(nx, data, testrows){
     mdat <- model.frame(nx)[, -1, drop = FALSE]
     moduniques <- lapply(mdat, function(x) unique(na.omit(x)))
 
-    newlvls <- lapply(1:length(testuniques), findnew, testuniques, moduniques)
+    ## newlvls <- lapply(1:length(testuniques), findnew, testuniques, moduniques)
+    newlvls <-lapply(1:length(testuniques),
+                     function(x)  testuniques[[x]][!testuniques[[x]] %in% moduniques[[x]]] )
+
 
     nNewcats <- sum(unlist(lapply(newlvls, length)))
 
@@ -74,6 +77,7 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
     ## So right here: Somewhere between where the data in newdata
     ## comes in and the predict function is where we could place our
     ## variables
+    print(formula(x))
 
     tryCatch(cpf <- catprobfinder(nx = x, data, rowstouse ), warning = "nu")
     if(!is.null(cpf$tstdatnu)){
@@ -95,7 +99,9 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows){
 ##' @author Benjamin Rogers
 getpcp <- function(preds, realresults, fullpreds = TRUE) {
     ifelse(fullpreds == TRUE , denom <- length(preds), denom <- length(na.omit(preds)))
-    length(which(preds == realresults))/denom
+    out <- length(which(preds == realresults))/denom
+    out
+
 }
 
 ## Function wishlist
@@ -118,6 +124,9 @@ modmaker <- function(x, thedat, famille = binomial()){
     eval(bquote(
         try(junker <- glm(.(x), data = model.frame(.(x), thedat), family = famille))
     ))
+    eval(bquote(print(.(x))))
+
+    try(junker)
 }
 
 
