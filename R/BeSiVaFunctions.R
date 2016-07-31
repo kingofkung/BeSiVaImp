@@ -151,7 +151,7 @@ foldmaker <- function(foldnum = 3){}
 ##' @param showoutput do I want to show the output from the algorithm or not?
 ##' @return  the IVs of the best model based on subset selection, as well as the percent correctly predicted by that model.
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = binomial(), iters = 1, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = T){
+besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = T){
         set.seed(sampseed)
         ## divy up data
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
