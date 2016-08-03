@@ -1,7 +1,7 @@
 ## Begin analyzing GSS Data
 rm(list = ls())
-source("GSSDatFix.R")
-## dat72kp <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/datpres72kp.csv")
+## source("GSSDatFix.R")
+dat72kp <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/GSS_stata/datpres72kp.csv")
 source("BeSiVaFunctions.R")
 library(caret)
 
@@ -55,9 +55,12 @@ length(unique(colnames(dat2))) -  length(unique(avoidcols))
 
 length(unique(colstouse))
 
-colstoreallyuse <- colstouse
+colstoreallyuse <- sort(colstouse)
 
-mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1)
+for(i in 1:3 ){
+    mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1, sampseed = i)
+    write.table(t(data.frame(mods$intvars) ), "/Users/bjr/GitHub/BeSiVaImp/Output/ivsofint.csv", sep = ",", append = T)
+}
 names(mods)
 
 

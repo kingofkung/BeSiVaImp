@@ -61,5 +61,19 @@ dim(dat72kp)
 
 dat72kp[dat72kp$pres72 %in% "", "pres72"] <- NA
 dat72kp$voterep <- ifelse(dat72kp$pres72 == "nixon", 1, 0)
+dat72kp$voterep[!dat72$pres72 %in% c("mcgovern", "nixon")] <- NA
+table(dat72kp$voterep, dat72kp$pres72)
 
-write.csv(dat72kp, paste0(datloc, "datpres72kp.csv"))
+ write.csv(dat72kp, paste0(datloc, "datpres72kp.csv"))
+
+
+dat76 <- dat[!is.na(dat$pres76) & !dat$pres76 %in% "", ]
+notallnas76 <- unlist(lapply(dat76, function(x) !all(is.na(x))))
+dat76kp <- dat76[ , notallnas76]
+dim(dat76kp)
+
+dat76kp$voterep <- ifelse(dat76kp$pres76 == "ford", 1, 0)
+dat76kp$voterep[ dat76kp$pres76 %in% c("no pres. vote", "other", "refused")] <- NA
+
+table(dat76kp$voterep, dat76kp$pres76)
+write.csv(dat76kp, paste0(datloc, "datpres76kp.csv"))
