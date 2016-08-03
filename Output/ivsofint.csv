@@ -3,3 +3,5 @@
 "res16","srcbelt","partyid"
 "partyid"
 "relig","race","partyid"
+"srcbelt","region","partyid"
+"region","partyid"
