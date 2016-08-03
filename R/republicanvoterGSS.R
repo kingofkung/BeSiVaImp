@@ -57,12 +57,23 @@ length(unique(colstouse))
 
 colstoreallyuse <- sort(colstouse)
 
-for(i in 1:3 ){
-    mods <- besiva(devee, colstoreallyuse, dat2, iters = 10, perc = .1, sampseed = i)
-    write.table(t(data.frame(mods$intvars) ), "/Users/bjr/GitHub/BeSiVaImp/Output/ivsofint.csv", sep = ",", append = T)
+for(i in 1:50 ){
+    ifelse(i == 1, setappend <- FALSE, setappend <- TRUE)
+    mods <- besiva(devee, colstoreallyuse, dat2,
+                   iters = 10, perc = .2, sampseed = i, thresh = .01)
+    write.table(t(data.frame(i = mods$intvars) ),
+                "/Users/bjr/GitHub/BeSiVaImp/Output/ivsofint.csv",
+                sep = ",", append = setappend, col.names = F, row.names = F)
 }
 names(mods)
 
+data.frame("forms" = as.character(mods$forms), mods$pcps)
+
+if(exists("amod") rm(amod)
+amod <- glm(voterep ~ amicable + childs + region + abhave3 + relig + partyid + race
+,
+            dat2[-mods$tstrows,], family = binomial())
+getpcp(predictr(amod, dat2, mods$tstrows), dat2[mods$tstrows, "voterep"])
 
 
 
