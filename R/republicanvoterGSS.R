@@ -1,7 +1,7 @@
 ## Begin analyzing GSS Data
 rm(list = ls())
 ## source("GSSDatFix.R")
-dat72kp <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/GSS_stata/datpres72kp.csv")
+dat76kp <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/GSS_stata/datpres76kp.csv")
 source("BeSiVaFunctions.R")
 library(caret)
 

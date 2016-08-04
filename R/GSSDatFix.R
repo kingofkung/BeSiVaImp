@@ -64,7 +64,7 @@ dat72kp$voterep <- ifelse(dat72kp$pres72 == "nixon", 1, 0)
 dat72kp$voterep[!dat72$pres72 %in% c("mcgovern", "nixon")] <- NA
 table(dat72kp$voterep, dat72kp$pres72)
 
- write.csv(dat72kp, paste0(datloc, "datpres72kp.csv"))
+ ## write.csv(dat72kp, paste0(datloc, "datpres72kp.csv"))
 
 
 dat76 <- dat[!is.na(dat$pres76) & !dat$pres76 %in% "", ]
