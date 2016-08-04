@@ -208,6 +208,9 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
             vars <- as.character(forms[[maxpcp]]) [3]
             print(vars)
             if(showoutput == TRUE) print(i)
+            ## by saving the pcps here, if the loop breaks first, then
+            ## the old pcps are saved, without having them be rewritten
+            oldpcps <- pcps
         }
 
         ## What do we output?
@@ -220,5 +223,5 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
         ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
         ## strsplit( vars, split = "\\s[+]\\s")
-        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows)
+        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows, "intpcps" = oldpcps)
 }
