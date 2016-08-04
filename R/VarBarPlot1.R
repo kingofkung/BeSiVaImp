@@ -11,5 +11,14 @@ barvals$vals <- factor(barvals$vals, levels = names(bartab))
 
 library(ggplot2)
 
-ggplot(data = data.frame(barvals)) + geom_bar(aes(vals), fill = "darkgreen") + theme_classic() + xlab("Variable Names") + ylab("Count") + ggtitle("Number of times BeSiVa Selected a Variable Out of 50 Runs")
-
+dev.new()
+pdf(paste0(datloc,"firstBar.pdf"))
+##
+##
+ggplot(data = data.frame(barvals)) +
+    geom_bar(aes(vals), fill = "darkgreen") +
+    theme_classic() +
+    xlab("Variable Names") + ylab("Count") +
+    ggtitle("Number of times BeSiVa Selected a Variable Out of 50 Runs")
+##
+graphics.off()

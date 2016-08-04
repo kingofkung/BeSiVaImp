@@ -12,7 +12,7 @@ devee <- "voterep"
 
 ## Keep some data held out
 ## First, make sure our DV Is included in all cases rows
-dat2 <- dat72kp[complete.cases(dat72kp[,devee]),]
+dat2 <- dat76kp[complete.cases(dat76kp[,devee]),]
 ## dat2$vote08bin
 
 
@@ -44,7 +44,6 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[, x]))/nrow(dat2))
 
 
 
-## varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 avoidcols <- c(avoidcols, mostlynas, colnames(dat2)[which(napercs>.8)]) #, noVote08)
 
 
