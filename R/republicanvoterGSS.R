@@ -25,7 +25,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "pres72","wtcomb",  colnames(dat2)[ which(ncats>50)], colnames(dat2)[ which(ncats==1)], devee )
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "pres76","wtcomb",  colnames(dat2)[ which(ncats>50)], colnames(dat2)[ which(ncats==1)], devee )
 
 
 ## How can I figure out if a column is now all na's?
@@ -56,17 +56,17 @@ length(unique(colstouse))
 
 colstoreallyuse <- sort(colstouse)
 
-for(i in 1:50 ){
+for(i in 1:100 ){
     ifelse(i == 1, setappend <- FALSE, setappend <- TRUE)
     mods <- besiva(devee, colstoreallyuse, dat2,
                    iters = 10, perc = .2, sampseed = i, thresh = .01)
     write.table(t(data.frame(i = mods$intvars) ),
-                "/Users/bjr/GitHub/BeSiVaImp/Output/ivsofint.csv",
+                "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/ivsofint76.csv",
                 sep = ",", append = setappend, col.names = F, row.names = F)
 }
 names(mods)
 
-data.frame("forms" = as.character(mods$forms), mods$pcps)
+ data.frame("forms" = as.character(mods$forms), mods$pcps)
 
 if(exists("amod") rm(amod)
 amod <- glm(voterep ~ amicable + childs + region + abhave3 + relig + partyid + race
