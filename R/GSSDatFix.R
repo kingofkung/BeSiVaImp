@@ -29,6 +29,19 @@ dat$vote12bin <- as.numeric(dat$vote12bin)
 
 table(dat$vote12, dat$vote12bin)
 
+## Reconsider how we make our data
+## Get complete.cases, as before
+dvote12 <- dat[complete.cases(dat$vote12bin), ]
+## but also, find which columns are NOT all na's...
+somedatahere <- unlist(lapply(dvote12, function(x) !all(is.na(x))))
+## ...and remove them from consideration.
+dvote12 <- dvote12[, somedatahere]
+
+## That still leaves us with a lot of data, and allows us to write a
+## file that's smaller than before.
+dim(dvote12)
+write.csv(dvote12, paste0(datloc, "rmMissingsVotebin12.csv"), row.names = F)
+
 
 unique(dat$occ10)
 
@@ -76,4 +89,4 @@ dat76kp$voterep <- ifelse(dat76kp$pres76 == "ford", 1, 0)
 dat76kp$voterep[ dat76kp$pres76 %in% c("no pres. vote", "other", "refused")] <- NA
 
 table(dat76kp$voterep, dat76kp$pres76)
-write.csv(dat76kp, paste0(datloc, "datpres76kp.csv"))
+## write.csv(dat76kp, paste0(datloc, "datpres76kp.csv"))
