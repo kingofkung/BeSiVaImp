@@ -30,6 +30,16 @@ dattouse <- dat[, c(varsofint, "vote12bin")]
 percMissing <- lapply(dattouse, function(x) sum(is.na(x))/nrow(dat))
 
 
+library(mice)
+
+## for(i in 1:2){
+dattouse <- mice(dattouse, MaxNWts = 2000)
+complete(dattouse, 1)
+## }
+
+
+
+
 
 ## So let's say I wanted to make a dv from these variables
 library(dummies)
