@@ -30,13 +30,32 @@ dattouse <- dat[, c(varsofint, "vote12bin")]
 percMissing <- lapply(dattouse, function(x) sum(is.na(x))/nrow(dat))
 
 
+
 ## So let's say I wanted to make a dv from these variables
+library(dummies)
 set.seed(1234)
-constDVlat <- 1 + .1 * dattouse$age + dummies::dummy(dattouse$sex)[, 1]
+constDVlat <- -100 + 1 * dattouse$age + 2.5 * dattouse$educ
 pr <- 1/(1 + exp(-constDVlat))
-hist(round(pr, 2))
+plot(sort(pr))
+table(round(pr, 1))
 dattouse$constDV <- rbinom(nrow(dattouse), 1, pr)
-summary(glm(constDV ~ age + sex, family = binomial, dattouse))
+table(dattouse$constDV)
+summary(glm(constDV ~ age + educ, family = binomial, dattouse))
 
 
 
+source("BeSiVaFunctions.R")
+
+for(i in 1:100){
+    g <- besiva("constDV", varsofint, dattouse, sampseed = i, showoutput = F, thresh = .025)
+    ifelse(i == 1, savr <- g$intvars, savr <- c(savr, g$intvars))
+}
+table(unlist(savr))
+
+
+
+
+savrpaste <- lapply(savr, function(x) paste(sort(x), collapse = ""))
+sum(savrpaste %in% "ageeduc")
+
+table(unlist(truevars), unlist(savrpaste))

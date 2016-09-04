@@ -223,5 +223,6 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
         ## glms
         ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
         ## strsplit( vars, split = "\\s[+]\\s")
-        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows, "intpcps" = oldpcps)
+        if(!exists("oldpcps")) oldpcps <- NULL
+        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows , "intpcps" = oldpcps)
 }
