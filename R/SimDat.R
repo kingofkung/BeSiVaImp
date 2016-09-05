@@ -59,8 +59,11 @@ for(i in 1:10){
 
 
 }
-
 write.csv(dtu1rm, "../Data/GSS_stata/simdat.csv")
+
+
+
+colnames(dturm)[sample(1:ncol(dturm), 5)]
 
 ## So let's say I wanted to make a dv from these variables
 lapply(dtu1rm, unique)
