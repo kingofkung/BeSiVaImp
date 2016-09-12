@@ -70,14 +70,15 @@ catprobfinder <- function(nx, data, testrows){
 ##' @param x a glm model to make predictions
 ##' @param data # the entire dataset
 ##' @param rowstouse row information for the holdout set. Set to
+##' @param loud If loud is true, then print the formulae. Should be based on showoutput
 ##' @return the predictions: Usually vector of 0's and 1's, but this might change in future
 ##' @author Benjamin Rogers
-predictr <- function(x, data = mat, rowstouse = holdoutrows){
+predictr <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
 
     ## So right here: Somewhere between where the data in newdata
     ## comes in and the predict function is where we could place our
     ## variables
-    print(formula(x))
+    if(loud == T) print(formula(x))
 
     tryCatch(cpf <- catprobfinder(nx = x, data, rowstouse ), warning = "nu")
     if(!is.null(cpf$tstdatnu)){
@@ -119,12 +120,21 @@ dispboth <- function(model, fulldata){
 }
 
 
-
-modmaker <- function(x, thedat, famille = binomial()){
+##' .. content for \description{} (no empty lines) ..
+##'
+##' .. content for \details{} ..
+##' @title
+##' @param x
+##' @param thedat
+##' @param famille
+##' @param loud
+##' @return
+##' @author Benjamin Rogers
+modmaker <- function(x, thedat, famille = binomial(), loud = TRUE){
     eval(bquote(
         try(junker <- glm(.(x), data = model.frame(.(x), thedat), family = famille))
     ))
-    eval(bquote(print(.(x))))
+    if(loud == TRUE) eval(bquote(print(.(x))))
 
     try(junker)
 }
@@ -149,9 +159,10 @@ foldmaker <- function(foldnum = 3){}
 ##' @param thresh The threshold by an improvement must be made to be considered important. Currently quite small
 ##' @param sampseed The seed for set.seed. Set, but could change as desired
 ##' @param showoutput do I want to show the output from the algorithm or not?
+##' @param showforms Do I want to see the formulae on screen, or not? Best to see them if I've got a lot of variables, but not if there's only a few.
 ##' @return  the IVs of the best model based on subset selection, as well as the percent correctly predicted by that model.
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = T){
+besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = TRUE, showforms = TRUE){
         set.seed(sampseed)
         ## divy up data
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
@@ -178,12 +189,12 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
             ## Here is where the k-fold cross-validation would need to begin
             ## issue: when attempting to run speedglm, it doesn't recognize the data
             ## modmaker makes glms according to our specifications
-            glms <- lapply(forms, modmaker, thedat = dat[-testrows,])
+            glms <- lapply(forms, modmaker, thedat = dat[-testrows,], loud = showforms)
 
 
             predvals <- lapply(glms,
                                function(x) try(predictr(x,
-                                                    data = dat, rowstouse = testrows)))
+                                                    data = dat, rowstouse = testrows, loud = showforms)))
             pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))
 
             ## round to a given threshold, as per user preference.
@@ -206,8 +217,10 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
                 break} else tieforms <- NA
             ## print(maxpcp)
             vars <- as.character(forms[[maxpcp]]) [3]
-            print(vars)
-            if(showoutput == TRUE) print(i)
+            if(showoutput == TRUE) {
+                print(vars)
+                print(i)
+            }
             ## by saving the pcps here, if the loop breaks first, then
             ## the old pcps are saved, without having them be rewritten
             oldpcps <- pcps

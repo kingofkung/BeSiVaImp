@@ -87,3 +87,33 @@ summary(bm2)
 ## Family/personal income
 ## Education
 ## Age, but be consistent!
+
+head(anes2000)
+
+anes2000$bindep <- ifelse(anes2000$vcf0702 %in% "2. Yes, voted", 1, 0)
+
+anes2000$vcf9030a
+## Efficacy? Personal efficacy == VCF0609
+
+
+varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff"=  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" )
+
+for(i in 1:100) {
+    print(paste0("i = ", i))
+    bes2000 <- besiva("bindep", varstouse, anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F)
+    ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
+    ifelse(i == 1, savpcp <- max(bes2000$intpcps), savpcp <- c(savpcp, max(bes2000$intpcps)))
+}
+savvars <- unlist(savvars)
+savvartab <- sort(table(savvars), decreasing = T)
+
+## swap useless names for useful ones
+names(varstouse)[ match(names(savvartab) , varstouse)]
+
+sort(savvartab, T)
+
+table(savpcp)
+
+## str(bes2000)
+
+varstouse[varstouse %in% unlist(bes2000$intvars)]

@@ -1,9 +1,9 @@
 ## Here's the script where we open the american national election survey data
 rm(list = ls()[!ls() %in% "anes"])
-loc <- "/Users/bjr/Dropbox/R_Projects/GSSThing/anes_timeseries_cdf_sav/"
+loc <- "/Users/bjr/GitHub/BeSiVaImp/Data/"
 
 library(foreign)
-library(readstata13)
+## library(readstata13)
 library(memisc)
 library(plyr)
 
@@ -45,12 +45,16 @@ table(as.vector(anes$vcf0202[!is.na(anes$vcf0202)]))
 source("rmMissings.R")
 
 str(anes)
-
+data.frame(table(anes$vcf0004))
 
 anes48 <- anes[ anes$vcf0004 == 1948,]
 anes48$vcf0006a
 
 anes52 <- anes[anes$vcf0004 == 1952,]
+
+anes2000 <- anes[anes$vcf0004 == 2000, ]
+
+
 
 dim(anes48)
 
@@ -63,3 +67,7 @@ colnames(anes48)
 
 notmissing52 <- colSums(!is.na(anes52)) > 0
 anes52 <- anes52[,notmissing52]
+
+
+notmissing2000 <- colSums(!is.na(anes2000)) > 0
+anes2000 <- anes2000[, notmissing2000]
