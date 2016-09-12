@@ -212,6 +212,7 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
             ## would return an error. To remedy this, I break out of
             ## the for loop if we get more than 1 with a maximum pcp.
             if(length(maxpcp)>1) {
+                if(i == 1) oldpcps <- pcps
                 tieforms <- forms[maxpcp]
                 if(showoutput == TRUE) print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
                 break} else tieforms <- NA

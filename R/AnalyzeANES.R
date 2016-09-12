@@ -96,16 +96,20 @@ anes2000$vcf9030a
 ## Efficacy? Personal efficacy == VCF0609
 
 
-varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff"=  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" )
+varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130")
+vtunn <- varstouse
+names(vtunn) <- NULL
 
-for(i in 1:100) {
+for(i in 1:20) {
     print(paste0("i = ", i))
-    bes2000 <- besiva("bindep", varstouse, anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F)
+    bes2000 <- besiva("bindep", vtunn, anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .00001)
     ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
-    ifelse(i == 1, savpcp <- max(bes2000$intpcps), savpcp <- c(savpcp, max(bes2000$intpcps)))
+    ifelse(i == 1, savpcp <- max(bes2000$intpcps, na.rm = T), savpcp <- c(savpcp, max(bes2000$intpcps, na.rm = T)))
 }
-savvars <- unlist(savvars)
-savvartab <- sort(table(savvars), decreasing = T)
+savvarsU <- unlist(savvars)
+savvartab <- sort(table(savvarsU), decreasing = T)
+
+table(unlist(lapply(savvars, length)))
 
 ## swap useless names for useful ones
 names(varstouse)[ match(names(savvartab) , varstouse)]
@@ -113,7 +117,6 @@ names(varstouse)[ match(names(savvartab) , varstouse)]
 sort(savvartab, T)
 
 table(savpcp)
+hist(savpcp)
 
 ## str(bes2000)
-
-varstouse[varstouse %in% unlist(bes2000$intvars)]
