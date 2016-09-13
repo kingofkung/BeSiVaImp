@@ -206,7 +206,9 @@ maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 for(u in seq_along(besforms)){
     ##
-    print(paste("iteration",u))
+    print(paste("iteration", u))
+    ## A loop designed to replicate the monte Carlo simulations of
+    ## BeSiVa, but with a single model instead of many.
     thepcps <- unlist(lapply(1:maxIT, function(i, maxiter = maxIT){
         ## print progress
         ## print(paste0("progress = ", round(i/maxiter * 100), "%" ))
@@ -224,7 +226,16 @@ for(u in seq_along(besforms)){
     }
 
 colnames(finalout) <- paste0("iteration", seq_along(besforms))
+colnames(finalout)[ncol(finalout)] <- "texeira1987ish"
 write.csv(finalout, paste0(writeloc, "pcps.csv"))
+
+finaloutmeans <- apply(finalout, 2, mean)
+
+which(finaloutmeans == max(finaloutmeans))
+
+plot(seq_along(finaloutmeans[-length(finaloutmeans)]), finaloutmeans[-length(finaloutmeans)], type = "p", ylim = c(0.45, 0.75))
+lines(x = seq_along(finaloutmeans), y= rep(finaloutmeans[length(finaloutmeans)], length(finaloutmeans)), col = "red")
+
 
 hist(thepcps)
 summarize(thepcps)
