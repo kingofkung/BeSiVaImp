@@ -3,6 +3,8 @@ getwd()
 source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 
+writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/"
+
 ## make dependent binary variable
 head(anes48)
 anes48$bindep <- ifelse(anes48$vcf0702 %in% "2. Yes, voted", 1, 0)
@@ -26,7 +28,7 @@ length(colstouse)
 ## View(anes48)
 
 for(i in 1:100){
-    bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 4, perc = .15, sampseed = i, showoutput = F)
+    bes1 <- besiva("bindep", colstouse, dat = anes48, iters = 4, perc = .15, sampseed = i, showoutput = F, showforms = F)
     ifelse(i == 1, savvar <- unique(bes1$intvars), savvar <- c(savvar,unique(bes1$intvars)))
 }
 savvar
@@ -62,7 +64,7 @@ fewcats <- names(which(!sapply(anes52, function(x) length(unique(na.omit(x)))) >
 
 avoidcols2 <- c(avoidcols, "vcf0703", fewcats, "vcf9023", "vcf0901", "vcf0701", "vcf0715")
 colstouse2 <- colnames(anes52)[!colnames(anes52) %in%  avoidcols2]
-bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, thresh =.01, iters = 4, sampseed = 12345)
+bes2 <- besiva("bindep", colstouse2, dat = anes52, perc = .25, thresh =.01, iters = 4, sampseed = 12345, , showforms = F)
 bes2$pcps
 data.frame(as.character(bes2$forms), bes2$pcps)[   order(bes2$pcps),]
 
@@ -95,14 +97,36 @@ anes2000$bindep <- ifelse(anes2000$vcf0702 %in% "2. Yes, voted", 1, 0)
 anes2000$vcf9030a
 ## Efficacy? Personal efficacy == VCF0609
 
+## make a measure of the overall strength of party ID
+pidstr <- as.character(anes2000$vcf0301)
+sort(unique(pidstr))
+pidstr[grep("Strong", pidstr, ignore.case = T)] <- "3"
+pidstr[grep("Weak", pidstr, ignore.case = T)] <- "2"
+pidstr[grep("Independent - Independent", pidstr, ignore.case = T)] <- "0"
+pidstr[grep("Independent - Democrat|Republican", pidstr, ignore.case = T)] <- "1"
+table(anes2000$vcf0301, pidstr)
+anes2000$pidstr <- as.numeric(pidstr)
+anes2000$pidstr
 
-varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130")
+## Note that regional mobility may not be testable, but we do have where respondent grew up
+anes2000$vcf0132
+anes2000$vcf9002
+
+
+varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "timeinHouse" = "vcf9002", "age" = "vcf0101" )#, "pidstr" = "pidstr")
+
+nucolnames <- colnames(anes2000)
+nucolnames[match(varstouse, nucolnames)] <- names(varstouse)
+## table(nucolnames, colnames(anes2000))[names(varstouse), varstouse]
+colnames(anes2000) <- nucolnames
+
+
 vtunn <- varstouse
 names(vtunn) <- NULL
 
-for(i in 1:1000) {
+for(i in 1:100) {
     print(paste0("i = ", i))
-    bes2000 <- besiva("bindep", vtunn, anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
+    bes2000 <- besiva("bindep", names(varstouse), anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
     ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
     ifelse(i == 1, savpcp <- max(bes2000$intpcps, na.rm = T), savpcp <- c(savpcp, max(bes2000$intpcps, na.rm = T)))
 }
@@ -112,24 +136,87 @@ savvartab <- sort(table(savvarsU), decreasing = T)
 table(unlist(lapply(savvars, length)))
 
 ## swap useless names for useful ones
-usefulnames <- names(varstouse)[ match(names(savvartab) , varstouse)]
+## usefulnames <- names(varstouse)[ match(names(savvartab) , varstouse)]
 
-names(savvartab) <- usefulnames
+## names(savvartab) <- usefulnames
 
 svtabdf <- data.frame("Var" = unlist(lapply(seq_along(savvartab), function(x) rep(names(savvartab)[x], savvartab[x]))))
-svtabdf$Var <- factor(svtabdf$Var, levels = usefulnames)
+uniqueVar <- unique(svtabdf$Var)
+svtabdf$Var <- factor(svtabdf$Var, levels = uniqueVar[length(uniqueVar):1])
 
 library(ggplot2)
 
+dev.new()
+pdf(paste0(writeloc,"ANES2000",i,"runs.pdf"))
 ggplot(data = svtabdf) +
     geom_bar(aes(x = Var, stat = "identity"), fill = "darkgreen") +
     theme_classic(10) +
     xlab("Variable Names") + ylab("Count") +
-    ggtitle(paste("Number of times BeSiVa Selected a Variable Out of", i, "Runs"))
+    ggtitle(paste("Number of times BeSiVa Selected a Variable Out of", i, "Runs\n 2000 Election ANES Data")) +
+    coord_flip()
+graphics.off()
+
+str(savpcp)
+table(savpcp)
+
+hist(rnorm(100), freq = F)
+hist(savpcp, freq = F)
+
+anesh <- hist(savpcp, prob = T)
+## anesh$counts <- anesh$counts/sum(anesh$counts)
+dev.new()
+pdf(paste0(writeloc,"ANES2000",i,"runs pcpHist.pdf"))
+plot(anesh, main = "Histogram of 2000 ANES PCPS")
+##
+##
+## plot normal distribution
+savseq <- seq(min(savpcp), max(savpcp), length.out = length(savpcp))
+normedsavseq <- dnorm(x = savseq, mean = mean(savpcp), sd = sd(savpcp))
+lines(x = savseq, y = normedsavseq, lty = 1)
+##
+##
+## Plot kernel density
+lines(density(savpcp, na.rm = T), lty = 2)
+##
+##
+## Add a legend
+legend("topright", legend = c("Normal Distribution", "Kernel Density"), lty = c(1, 2) )
+graphics.off()
 
 
 
- table(savpcp)
-hist(savpcp)
+
+
+library(rockchalk)
+
+f1 <- formula(bindep ~ ed)
+f2 <- formula(bindep ~ ed + pid7)
+f3 <- formula(bindep ~ ed + pid7 + race7)
+f4 <-  formula(bindep ~ ed + pid7 + race7 + sex)
+f5 <- formula(bindep ~ ed + pid7 + race7 + sex + age)
+
+lapply(uniqueVar, function(x)
+
+
+ftex <- formula(bindep ~ daysreadpaper + pid7 + polEff + ed + incGroup + age + timeinHouse + marital + race7 + region + sex)
+
+
+maxiter <- 100
+for(i in 1:maxiter){
+    ## print progress
+    print(paste0("progress = ", round(i/maxiter * 100), "%" ))
+    ## sample the rows
+    subsamp <- sample(1:nrow(anes2000), size = round(nrow(anes2000)/10))
+    ## create the model, making sure to pull out some of the data
+    mod <- glm(ftex, family = binomial, data = anes2000[-subsamp,])
+    ## get the predictions and the pcps
+    predsb <- predictr(mod, anes2000, subsamp, loud = F)
+    junker <- getpcp(predsb, anes2000$bindep[subsamp])
+    ## save the pcps
+    ifelse(i == 1, thepcps <- junker, thepcps <- c(thepcps, junker))
+}
+
+summarize(thepcps)
+
 
 ## str(bes2000)
