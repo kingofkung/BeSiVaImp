@@ -189,33 +189,44 @@ graphics.off()
 
 library(rockchalk)
 
-f1 <- formula(bindep ~ ed)
-f2 <- formula(bindep ~ ed + pid7)
-f3 <- formula(bindep ~ ed + pid7 + race7)
-f4 <-  formula(bindep ~ ed + pid7 + race7 + sex)
-f5 <- formula(bindep ~ ed + pid7 + race7 + sex + age)
 
-lapply(uniqueVar, function(x)
+besforms <- lapply(seq_along(uniqueVar), function(x){
+    ivtxt <- paste(uniqueVar[1:x], collapse = " + ")
+    wdv <- paste0("bindep ~ ", ivtxt)
+    as.formula(wdv)
+})
 
 
 ftex <- formula(bindep ~ daysreadpaper + pid7 + polEff + ed + incGroup + age + timeinHouse + marital + race7 + region + sex)
 
+besforms <- c(besforms, ftex)
+## Maximum iterations
 
-maxiter <- 100
-for(i in 1:maxiter){
-    ## print progress
-    print(paste0("progress = ", round(i/maxiter * 100), "%" ))
-    ## sample the rows
-    subsamp <- sample(1:nrow(anes2000), size = round(nrow(anes2000)/10))
-    ## create the model, making sure to pull out some of the data
-    mod <- glm(ftex, family = binomial, data = anes2000[-subsamp,])
-    ## get the predictions and the pcps
-    predsb <- predictr(mod, anes2000, subsamp, loud = F)
-    junker <- getpcp(predsb, anes2000$bindep[subsamp])
-    ## save the pcps
-    ifelse(i == 1, thepcps <- junker, thepcps <- c(thepcps, junker))
-}
+maxIT <- 100
+sampsize <- round(nrow(anes2000) * .2)
+for(u in seq_along(besforms)){
+    ##
+    print(paste("iteration",u))
+    thepcps <- unlist(lapply(1:maxIT, function(i, maxiter = maxIT){
+        ## print progress
+        ## print(paste0("progress = ", round(i/maxiter * 100), "%" ))
+        ## sample the rows
+        subsamp <- sample(1:nrow(anes2000), size = sampsize )
+        ## create the model, making sure to pull out some of the data
+        mod <- glm(besforms[[u]], family = binomial, data = anes2000[-subsamp,])
+        ## get the predictions and the pcps
+        predsb <- predictr(mod, anes2000, subsamp, loud = F)
+        junker <- getpcp(predsb, anes2000$bindep[subsamp])
+        ## save the pcps
+        junker
+    }))
+    ifelse(u == 1, finalout <- data.frame(thepcps), finalout <- cbind(finalout, thepcps))
+    }
 
+colnames(finalout) <- paste0("iteration", seq_along(besforms))
+write.csv(finalout, paste0(writeloc, "pcps.csv"))
+
+hist(thepcps)
 summarize(thepcps)
 
 
