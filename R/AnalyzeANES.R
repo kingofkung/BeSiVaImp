@@ -100,9 +100,9 @@ varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf
 vtunn <- varstouse
 names(vtunn) <- NULL
 
-for(i in 1:20) {
+for(i in 1:1000) {
     print(paste0("i = ", i))
-    bes2000 <- besiva("bindep", vtunn, anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .00001)
+    bes2000 <- besiva("bindep", vtunn, anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
     ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
     ifelse(i == 1, savpcp <- max(bes2000$intpcps, na.rm = T), savpcp <- c(savpcp, max(bes2000$intpcps, na.rm = T)))
 }
@@ -112,11 +112,24 @@ savvartab <- sort(table(savvarsU), decreasing = T)
 table(unlist(lapply(savvars, length)))
 
 ## swap useless names for useful ones
-names(varstouse)[ match(names(savvartab) , varstouse)]
+usefulnames <- names(varstouse)[ match(names(savvartab) , varstouse)]
 
-sort(savvartab, T)
+names(savvartab) <- usefulnames
 
-table(savpcp)
+svtabdf <- data.frame("Var" = unlist(lapply(seq_along(savvartab), function(x) rep(names(savvartab)[x], savvartab[x]))))
+svtabdf$Var <- factor(svtabdf$Var, levels = usefulnames)
+
+library(ggplot2)
+
+ggplot(data = svtabdf) +
+    geom_bar(aes(x = Var, stat = "identity"), fill = "darkgreen") +
+    theme_classic(10) +
+    xlab("Variable Names") + ylab("Count") +
+    ggtitle(paste("Number of times BeSiVa Selected a Variable Out of", i, "Runs"))
+
+
+
+ table(savpcp)
 hist(savpcp)
 
 ## str(bes2000)
