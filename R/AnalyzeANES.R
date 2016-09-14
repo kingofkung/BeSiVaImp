@@ -204,6 +204,7 @@ besforms <- c(besforms, ftex)
 
 maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
+set.seed(10101)
 for(u in seq_along(besforms)){
     ##
     print(paste("iteration", u))
@@ -226,16 +227,31 @@ for(u in seq_along(besforms)){
     }
 
 colnames(finalout) <- paste0("iteration", seq_along(besforms))
-colnames(finalout)[ncol(finalout)] <- "texeira1987ish"
+## Make sure we have teixeira's model somewhere.
+teixeiraloc <- lapply(besforms, function(x) as.character(x)[[3]]) %in% as.character(ftex)[[3]]
+colnames(finalout)[teixeiraloc] <- "teixeira1987ish"
 write.csv(finalout, paste0(writeloc, "pcps.csv"))
 
 finaloutmeans <- apply(finalout, 2, mean)
 
 which(finaloutmeans == max(finaloutmeans))
 
-plot(seq_along(finaloutmeans[-length(finaloutmeans)]), finaloutmeans[-length(finaloutmeans)], type = "p", ylim = c(0.45, 0.75))
-lines(x = seq_along(finaloutmeans), y= rep(finaloutmeans[length(finaloutmeans)], length(finaloutmeans)), col = "red")
-
+dev.new()
+pdf(file = paste(writeloc,"numPts.pdf"))
+plot(
+    seq_along(finaloutmeans[-length(finaloutmeans)]),
+    finaloutmeans[-length(finaloutmeans)],
+    ylab = "PCPs",
+    xlab = "Number of Selected Independent Variables\n Included in the Model",
+    type = "p", ylim = c(0.45, 0.75))
+lines(x = c(0, seq_along(finaloutmeans)),
+      y = rep(finaloutmeans[length(finaloutmeans)], 1 + length(finaloutmeans)),
+      col = "red")
+legend("bottomright",
+       c("BeSiVa", "Teixeira 1987"),
+       lty = c(-1, 1), pch = c(1, -1),
+       col = c("black", "red"))
+graphics.off()
 
 hist(thepcps)
 summarize(thepcps)
