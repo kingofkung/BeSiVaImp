@@ -236,6 +236,7 @@ finaloutmeans <- apply(finalout, 2, mean)
 
 which(finaloutmeans == max(finaloutmeans))
 
+## Possible to add error bars to each point/ confidence bands on lines?
 dev.new()
 pdf(file = paste(writeloc,"numPts.pdf"))
 plot(
