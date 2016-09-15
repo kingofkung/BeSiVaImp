@@ -159,11 +159,12 @@ finaloutmeans <- apply(finalout, 2, mean)
 which(finaloutmeans == max(finaloutmeans))
 
 ## Possible to add error bars to each point/ confidence bands on lines?
+algIters <- grep("iteration", names(finaloutmeans))
 dev.new()
 pdf(file = paste(writeloc,"numPts.pdf"))
 plot(
-    seq_along(finaloutmeans[-length(finaloutmeans)]),
-    finaloutmeans[-length(finaloutmeans)],
+    seq_along(finaloutmeans[algIters]),
+    finaloutmeans[algIters],
     ylab = "PCPs",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
     type = "p", ylim = c(0.45, 0.75))
@@ -185,7 +186,7 @@ summarize(thepcps)
 ## Start working on a latex table featuring the best models
 mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
 
-write.table(outreg(mods[1:6], "latex"), file = paste0(writeloc, "convMods.txt"), row.names = F, col.names = F)
+write.table(outreg(mods[1:6], "latex"), file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods.txt"), row.names = F, col.names = F, quote = FALSE)
 
 
 ## str(bes2000)
