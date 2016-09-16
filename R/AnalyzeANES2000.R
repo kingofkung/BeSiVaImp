@@ -1,10 +1,10 @@
 ## This is where we'll store our analyses of the ANES data
-getwd()
+## getwd()
 source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 
 writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/"
-
+note <- ""
 
 head(anes2000)
 
@@ -13,40 +13,91 @@ anes2000$bindep <- ifelse(anes2000$vcf0702 %in% "2. Yes, voted", 1, 0)
 anes2000$vcf9030a
 ## Efficacy? Personal efficacy == VCF0609
 
+varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "timeinHouse" = "vcf9002", "age" = "vcf0101" , "pidstr" = "pidstr")
+nucolnames <- colnames(anes2000)
+nucolnames[na.omit(match(varstouse, nucolnames))] <- names(varstouse)[!names(varstouse) %in% "pidstr"]
+## table(nucolnames, colnames(anes2000))[names(varstouse), varstouse]
+colnames(anes2000) <- nucolnames
+
+
+
 ## make a measure of the overall strength of party ID
-pidstr <- as.character(anes2000$vcf0301)
+pidstr <- as.character(anes2000$pid7)
 sort(unique(pidstr))
 pidstr[grep("Strong", pidstr, ignore.case = T)] <- "3"
 pidstr[grep("Weak", pidstr, ignore.case = T)] <- "2"
 pidstr[grep("Independent - Independent", pidstr, ignore.case = T)] <- "0"
 pidstr[grep("Independent - Democrat|Republican", pidstr, ignore.case = T)] <- "1"
-table(anes2000$vcf0301, pidstr)
+table(anes2000$pid7, pidstr)
 anes2000$pidstr <- as.numeric(pidstr)
-anes2000$pidstr
-
-## Note that regional mobility may not be testable, but we do have where respondent grew up
-anes2000$vcf0132
-anes2000$vcf9002
+## anes2000$pidstr
 
 
-varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "timeinHouse" = "vcf9002", "age" = "vcf0101" )#, "pidstr" = "pidstr")
-
-nucolnames <- colnames(anes2000)
-nucolnames[match(varstouse, nucolnames)] <- names(varstouse)
-## table(nucolnames, colnames(anes2000))[names(varstouse), varstouse]
-colnames(anes2000) <- nucolnames
 
 
-vtunn <- varstouse
-names(vtunn) <- NULL
+## Create numeric education variable.
+anes2000$ednum <- as.character(anes2000$ed)
+anes2000$ednum <- substr(anes2000$ednum, 1, 1)
+anes2000$ednum <- as.numeric(anes2000$ednum)
+## table(anes2000$ed, anes2000$ednum)
+
+## Craft age squared variable
+anes2000$agesq <- anes2000$age**2
+## plot(anes2000$age, anes2000$agesq)
+
+## Get racial data together
+table(anes2000$race7)
+anes2000$minority <- as.character(anes2000$race7)
+anes2000$minority[anes2000$race7 %in% "1. White non-Hispanic (1948-2012)" ] <- "0"
+anes2000$minority[!anes2000$race7 %in% "1. White non-Hispanic (1948-2012)" & !is.na(anes2000$race7) ] <- "1"
+anes2000$minority <- as.numeric(anes2000$minority)
+table(anes2000$race7, anes2000$minority, useNA = "always")
+
+## numeric income
+anes2000$incNum <- substr(as.character(anes2000$incGroup), 1, 1)
+anes2000$incNum <- as.numeric(anes2000$incNum)
+
+## house time
+
+anes2000$houseTimeNum <- substr(anes2000$timeinHouse, 1, 1)
+anes2000$houseTimeNum <- as.numeric(anes2000$houseTimeNum)
+table(anes2000$houseTimeNum, anes2000$timeinHouse)
+
+## region dichotomize
+anes2000$south <- as.character(anes2000$region)
+anes2000$south[grepl("South", anes2000$region)] <- 1
+anes2000$south[!grepl("South", anes2000$region)] <- 0
+table(anes2000$south, anes2000$region)
+
+## divorced dichotomous
+anes2000$divorced <- as.character(anes2000$marital)
+anes2000$divorced[grepl("Divorced", anes2000$marital)] <- 1
+anes2000$divorced[!grepl("Divorced", anes2000$marital) & !is.na(anes2000$marital)] <- 0
+table(anes2000$divorced, anes2000$marital)
+
+## Goto church dichotomous
+sort(unique(anes2000$church))
+anes2000$churchBin <- as.character(anes2000$church)
+anes2000$churchBin[grepl("Never", anes2000$church)] <- 0
+anes2000$churchBin[!grepl("Never", anes2000$church) & !is.na(anes2000$church)] <- 1
+table(anes2000$church, anes2000$churchBin, useNA = "always")
+
+## dichotomize Party and other Contact (all)
+contactVars <- grep("Contact", names(varstouse), value = T)
+lapply(contactVars, function(x) sort(unique(anes2000[,x])))
+
+varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
+
+    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = 5, showoutput = F, showforms = F, thresh = .001)
+
 
 for(i in 1:100) {
     print(paste0("i = ", i))
-    bes2000 <- besiva("bindep", names(varstouse), anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
+    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
     ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
     ifelse(i == 1, savpcp <- max(bes2000$intpcps, na.rm = T), savpcp <- c(savpcp, max(bes2000$intpcps, na.rm = T)))
 }
-savvarsU <- unlist(savvars)
+ savvarsU <- unlist(savvars)
 savvartab <- sort(table(savvarsU), decreasing = T)
 
 table(unlist(lapply(savvars, length)))
@@ -63,7 +114,7 @@ svtabdf$Var <- factor(svtabdf$Var, levels = uniqueVar[length(uniqueVar):1])
 library(ggplot2)
 
 dev.new()
-pdf(paste0(writeloc,"ANES2000",i,"runs.pdf"))
+pdf(paste0(writeloc,"ANES2000",i,"runs",note, ".pdf"))
 ggplot(data = svtabdf) +
     geom_bar(aes(x = Var, stat = "identity"), fill = "darkgreen") +
     theme_classic(10) +
@@ -81,7 +132,7 @@ hist(savpcp, freq = F)
 anesh <- hist(savpcp, prob = T)
 ## anesh$counts <- anesh$counts/sum(anesh$counts)
 dev.new()
-pdf(paste0(writeloc,"ANES2000",i,"runs pcpHist.pdf"))
+pdf(paste0(writeloc,"ANES2000",i,"runs pcpHist",note, ".pdf"))
 plot(anesh, main = "Histogram of 2000 ANES PCPS")
 ##
 ##
@@ -103,7 +154,7 @@ graphics.off()
 
 
 
-library(rockchalk)
+ library(rockchalk)
 
 
 besforms <- lapply(seq_along(uniqueVar), function(x){
@@ -113,11 +164,13 @@ besforms <- lapply(seq_along(uniqueVar), function(x){
 })
 
 
-ftex <- formula(bindep ~ daysreadpaper + pid7 + polEff + ed + incGroup + age + timeinHouse + marital + race7 + region + sex)
+ftex <- formula(bindep ~ daysreadpaper + pidstr + polEff + ednum + incNum + age + houseTimeNum + divorced + minority + south + sex)
 michigan <- formula(bindep ~ pid7)
+RnH <- formula(bindep ~ polEff + ed + incGroup + partyContact + otherContact + churchBin)
 ##Rosenstone and Hansen 1993
+model.frame(glm(RnH, data = anes2000, family = binomial()))
 
-besforms <- c(besforms, ftex, michigan)
+besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 
 maxIT <- 100
@@ -149,20 +202,24 @@ colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
 teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
 michiganloc <- ivlist %in% as.character(michigan)[[3]]
+RnHloc <- ivlist %in% as.character(RnH)[[3]]
 
 colnames(finalout)[teixeiraloc] <- "teixeira1987ish"
 colnames(finalout)[michiganloc] <- "CCMS1960ish"
+colnames(finalout)[RnHloc] <- "RnH1993ish"
 
-write.csv(finalout, paste0(writeloc, "pcps.csv"))
+finaloutdf <- as.data.frame(sapply(finalout, summarizeNumerics))
+rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
+
+write.csv(finaloutdf, paste0(writeloc, "pcpsum", note, ".csv"))
 
 finaloutmeans <- apply(finalout, 2, mean)
 
-which(finaloutmeans == max(finaloutmeans))
 
 ## Possible to add error bars to each point/ confidence bands on lines?
 algIters <- grep("iteration", names(finaloutmeans))
 dev.new()
-pdf(file = paste(writeloc,"numPts.pdf"))
+pdf(file = paste0(writeloc,"numPts",note, ".pdf"))
 plot(
     seq_along(finaloutmeans[algIters]),
     finaloutmeans[algIters],
@@ -171,11 +228,13 @@ plot(
     type = "p", ylim = c(0.45, 0.75))
 abline(h = finaloutmeans["teixeira1987ish"],col = "red")
 abline(h = finaloutmeans["CCMS1960ish"],col = "green")
+abline(h = finaloutmeans["RnH1993ish"], col = "purple")
 abline(h = prop.table(table(anes2000$bindep)), col = "blue")
+abline(v = which(finaloutmeans == max(finaloutmeans)))
 legend("bottomright",
-       c("BeSiVa", "Teixeira 1987", "Party ID", "Mode for all"),
-       lty = c(-1, 1, 1, 1), pch = c(1, -1, -1, -1),
-       col = c("black", "red", "green", "blue"))
+       c("BeSiVa", "Teixeira 1987", "Party ID", "RnH",  "Mode for all"),
+       lty = c(-1, 1, 1, 1, 1), pch = c(1, -1, -1, -1, -1),
+       col = c("black", "red", "green", "purple", "blue"))
 graphics.off()
 
 hist(thepcps)
@@ -183,7 +242,7 @@ summarize(thepcps)
 
 ## Start working on a latex table featuring the best models
 mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
-lyxout <- outreg(mods[1:9], "latex", showAIC = T)
+lyxout <- outreg(mods[1:14], "latex", showAIC = T)
 ## But look, there's a line with way too many *'s, and -2LLR twice, right here.
 badlineloc <- grep("[*]{5}", lyxout, T)
 badline <- lyxout[badlineloc]
@@ -206,7 +265,7 @@ gsub("chi", "\\chi", fixline)
 lyxout[badlineloc] <- fixline
 ##
 ##
-write.table(lyxout, file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods.txt"), row.names = F, col.names = F, quote = FALSE)
+write.table(lyxout, file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods", note,".txt"), row.names = F, col.names = F, quote = FALSE)
 
 
 ## str(bes2000)

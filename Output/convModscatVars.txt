@@ -1,0 +1,153 @@
+\begin{tabular}{*{10}{l}}
+\hline
+
+                 & M1 & M2 & M3 & M4 & M5 & M6 & M7 & M8 & M9   \tabularnewline
+
+                  &Estimate   &Estimate   &Estimate   &Estimate   &Estimate   &Estimate   &Estimate   &Estimate   &Estimate \tabularnewline
+
+                &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.) \tabularnewline
+
+\hline
+
+\hline
+
+  (Intercept)     &-0.379 &-2.662*** &-2.640*** &-2.582*** &-2.898*** &-2.665*** &-2.650*** &-2.721*** &-2.577*** \tabularnewline
+
+                &(0.255)   &(0.357)   &(0.386)   &(0.389)   &(0.402)   &(0.410)   &(0.410)   &(0.413)   &(0.434)  \tabularnewline
+
+  ed2. 9-12 grades ('high school'), no diploma/equivalency    &-0.004 &0.535 &0.520 &0.523 &0.432 &0.348 &0.297 &0.252 &0.242 \tabularnewline
+
+                &(0.317)   &(0.334)   &(0.336)   &(0.336)   &(0.345)   &(0.349)   &(0.349)   &(0.350)   &(0.353)  \tabularnewline
+
+  ed3. 12 grades, diploma or equivalency    &0.584* &1.308*** &1.279*** &1.293*** &1.268*** &1.148*** &1.063*** &1.014*** &0.966** \tabularnewline
+
+                &(0.269)   &(0.290)   &(0.292)   &(0.292)   &(0.299)   &(0.303)   &(0.304)   &(0.305)   &(0.306)  \tabularnewline
+
+  ed5. Some college, no degree; junior/community college    &1.086*** &1.927*** &1.910*** &1.922*** &1.857*** &1.765*** &1.656*** &1.597*** &1.547*** \tabularnewline
+
+                &(0.270)   &(0.295)   &(0.297)   &(0.297)   &(0.304)   &(0.309)   &(0.310)   &(0.311)   &(0.313)  \tabularnewline
+
+  ed6. BA level degrees    &1.759*** &2.651*** &2.645*** &2.647*** &2.532*** &2.411*** &2.289*** &2.266*** &2.198*** \tabularnewline
+
+                &(0.285)   &(0.311)   &(0.313)   &(0.313)   &(0.319)   &(0.324)   &(0.326)   &(0.328)   &(0.330)  \tabularnewline
+
+  ed7. Advanced degrees incl. LLB    &2.223*** &2.936*** &2.926*** &2.923*** &2.832*** &2.711*** &2.561*** &2.501*** &2.406*** \tabularnewline
+
+                &(0.333)   &(0.351)   &(0.354)   &(0.354)   &(0.360)   &(0.364)   &(0.367)   &(0.369)   &(0.372)  \tabularnewline
+
+  age               & .      &0.033*** &0.033*** &0.033*** &0.029*** &0.027*** &0.024*** &0.023*** &0.024*** \tabularnewline
+
+                &         &(0.003)   &(0.004)   &(0.004)   &(0.004)   &(0.004)   &(0.004)   &(0.004)   &(0.005)  \tabularnewline
+
+  region2. North Central (IL, IN, IA, KS, MI, MN, MO, NE, ND,      & .        & .      &0.312 &0.308 &0.295 &0.263 &0.254 &0.229 &0.197 \tabularnewline
+
+                &         &         &(0.171)   &(0.171)   &(0.174)   &(0.176)   &(0.176)   &(0.177)   &(0.179)  \tabularnewline
+
+  region3. South (AL, AR, DE, D.C., FL, GA, KY, LA, MD, MS, NC      & .        & .      &-0.050 &-0.051 &-0.101 &-0.075 &-0.056 &-0.046 &-0.058 \tabularnewline
+
+                &         &         &(0.157)   &(0.157)   &(0.160)   &(0.163)   &(0.164)   &(0.165)   &(0.166)  \tabularnewline
+
+  region4. West (AK, AZ, CA, CO, HI, ID, MT, NV, NM, OR, UT, WA,      & .        & .      &-0.135 &-0.144 &-0.176 &-0.127 &-0.114 &-0.087 &-0.085 \tabularnewline
+
+                &         &         &(0.174)   &(0.174)   &(0.177)   &(0.181)   &(0.181)   &(0.183)   &(0.184)  \tabularnewline
+
+  sex2. Female      & .        & .        & .      &-0.127 &-0.150 &-0.133 &-0.094 &-0.071 &-0.045 \tabularnewline
+
+                &         &         &         &(0.109)   &(0.111)   &(0.112)   &(0.114)   &(0.114)   &(0.116)  \tabularnewline
+
+  pidstr            & .        & .        & .        & .      &0.342*** &0.352*** &0.354*** &0.342*** &0.337*** \tabularnewline
+
+                &         &         &         &         &(0.054)   &(0.055)   &(0.055)   &(0.056)   &(0.056)  \tabularnewline
+
+  race72. Black non-Hispanic (1948-2012)      & .        & .        & .        & .        & .      &-0.172 &-0.149 &-0.130 &-0.087 \tabularnewline
+
+                &         &         &         &         &         &(0.178)   &(0.178)   &(0.180)   &(0.182)  \tabularnewline
+
+  race73. Asian or Pacific Islander, non-Hispanic (1966-2012)      & .        & .        & .        & .        & .      &-0.429 &-0.428 &-0.504 &-0.527 \tabularnewline
+
+                &         &         &         &         &         &(0.402)   &(0.404)   &(0.409)   &(0.412)  \tabularnewline
+
+  race74. American Indian or Alaska Native non-Hispanic (1966-2012)      & .        & .        & .        & .        & .      &-1.236 &-1.272 &-1.260 &-1.250 \tabularnewline
+
+                &         &         &         &         &         &(0.793)   &(0.794)   &(0.801)   &(0.810)  \tabularnewline
+
+  race75. Hispanic (1966-2012)      & .        & .        & .        & .        & .      &-0.646** &-0.617** &-0.659** &-0.656** \tabularnewline
+
+                &         &         &         &         &         &(0.203)   &(0.203)   &(0.206)   &(0.206)  \tabularnewline
+
+  race76. Other or multiple races, non-Hispanic (1968-2012)      & .        & .        & .        & .        & .      &-0.201 &-0.164 &-0.221 &-0.214 \tabularnewline
+
+                &         &         &         &         &         &(0.295)   &(0.295)   &(0.299)   &(0.303)  \tabularnewline
+
+  daysreadpaper      & .        & .        & .        & .        & .        & .      &0.057** &0.055** &0.054** \tabularnewline
+
+                &         &         &         &         &         &         &(0.020)   &(0.021)   &(0.021)  \tabularnewline
+
+  timeinHouse2. 5-9 years      & .        & .        & .        & .        & .        & .        & .      &0.543*** &0.498** \tabularnewline
+
+                &         &         &         &         &         &         &         &(0.155)   &(0.157)  \tabularnewline
+
+  timeinHouse3. 10-19 years      & .        & .        & .        & .        & .        & .        & .      &0.486** &0.428** \tabularnewline
+
+                &         &         &         &         &         &         &         &(0.163)   &(0.165)  \tabularnewline
+
+  timeinHouse4. 20-29 years      & .        & .        & .        & .        & .        & .        & .      &0.399 &0.351 \tabularnewline
+
+                &         &         &         &         &         &         &         &(0.204)   &(0.207)  \tabularnewline
+
+  timeinHouse6. 'All of life' (regardless of number of years)      & .        & .        & .        & .        & .        & .        & .      &0.386 &0.403 \tabularnewline
+
+                &         &         &         &         &         &         &         &(0.464)   &(0.469)  \tabularnewline
+
+  marital2. Never married      & .        & .        & .        & .        & .        & .        & .        & .      &-0.174 \tabularnewline
+
+                &         &         &         &         &         &         &         &         &(0.159)  \tabularnewline
+
+  marital3. Divorced      & .        & .        & .        & .        & .        & .        & .        & .      &-0.312 \tabularnewline
+
+                &         &         &         &         &         &         &         &         &(0.172)  \tabularnewline
+
+  marital4. Separated      & .        & .        & .        & .        & .        & .        & .        & .      &-0.707* \tabularnewline
+
+                &         &         &         &         &         &         &         &         &(0.316)  \tabularnewline
+
+  marital5. Widowed      & .        & .        & .        & .        & .        & .        & .        & .      &-0.350 \tabularnewline
+
+                &         &         &         &         &         &         &         &         &(0.227)  \tabularnewline
+
+  marital7. Partners; not married (VOLUNTEERED [exc.1986,2012])      & .        & .        & .        & .        & .        & .        & .        & .      &-0.011 \tabularnewline
+
+                &         &         &         &         &         &         &         &         &(0.333)  \tabularnewline
+
+\hline
+
+N                 &1800       &1792       &1792       &1792       &1777       &1766       &1766       &1766       &1761       \tabularnewline
+
+
+
+
+Deviance         &2168.958   &2055.866   &2046.473   &2045.121   &1988.390   &1957.446   &1949.536   &1930.690   &1918.165   \tabularnewline
+
+$-2LLR (Model chi^2)$        & 149.224         & 250.408       & 259.801       & 261.153       & 297.486       & 311.382       & 319.292       & 338.138       & 342.547 \tabularnewline
+
+AIC
+     & 2180.958
+     & 2069.866
+     & 2066.473
+     & 2067.121
+     & 2012.390
+     & 1991.446
+     & 1985.536
+     & 1974.690
+     & 1972.165
+\tabularnewline
+
+\hline
+\hline
+
+
+
+\multicolumn{10}{c}{${*  p}\le 0.05$${*\!\!*  p}\le 0.01$${*\!\!*\!\!*  p}\le 0.001$}\tabularnewline
+
+\end{tabular}
+

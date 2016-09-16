@@ -54,7 +54,7 @@
 \shortcut idx
 \color #008000
 \end_index
-\paperwidth 15in
+\paperwidth 20in
 \paperheight 17.5in
 \secnumdepth 3
 \tocdepth 3
@@ -1189,6 +1189,893 @@ hline
 
 \backslash
 multicolumn{10}{c}{${*  p}
+\backslash
+le 0.05$${*
+\backslash
+!
+\backslash
+!*  p}
+\backslash
+le 0.01$${*
+\backslash
+!
+\backslash
+!*
+\backslash
+!
+\backslash
+!*  p}
+\backslash
+le 0.001$}
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tabular}{*{15}{l}}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                 & M1 & M2 & M3 & M4 & M5 & M6 & M7 & M8 & M9 & M10 & M11
+ & M12 & M13 & M14   
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                  &Estimate   &Estimate   &Estimate   &Estimate   &Estimate
+   &Estimate   &Estimate   &Estimate   &Estimate   &Estimate   &Estimate
+   &Estimate   &Estimate   &Estimate 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)  
+ &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.)   &(S.E.) 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  (Intercept)     &-0.977*** &-1.681*** &-2.131*** &-3.364*** &-4.036*** &-3.949***
+ &-3.738*** &-3.700*** &-3.719*** &-3.774*** &-3.872*** &-3.087*** &-2.821*** &-3.840***
+ 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.147)   &(0.177)   &(0.202)   &(0.269)   &(0.437)   &(0.444)
+   &(0.451)   &(0.454)   &(0.454)   &(0.456)   &(0.460)   &(0.600)   &(0.655) 
+  &(0.418)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  ednum           &0.372*** &0.367*** &0.372*** &0.434*** &0.423*** &0.422***
+ &0.409*** &0.408*** &0.391*** &0.386*** &0.378*** &0.444*** &0.442*** &0.402***
+ 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.032)   &(0.033)   &(0.034)   &(0.036)   &(0.036)   &(0.036)
+   &(0.037)   &(0.037)   &(0.037)   &(0.037)   &(0.038)   &(0.048)   &(0.048) 
+  &(0.052)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  pidstr            & .
+      &0.418*** &0.415*** &0.340*** &0.337*** &0.338*** &0.356*** &0.357*** &0.358***
+ &0.356*** &0.343*** &0.475*** &0.476*** &0.526*** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &(0.052)   &(0.052)   &(0.054)   &(0.054)   &(0.054)
+   &(0.055)   &(0.055)   &(0.055)   &(0.055)   &(0.056)   &(0.070)   &(0.071) 
+  &(0.074)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  houseTimeNum      & .
+        & .
+      &0.237*** &0.168*** &0.160** &0.158** &0.164** &0.164** &0.158** &0.148**
+ &0.156** &0.210** &0.209** &0.225** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &(0.049)   &(0.050)   &(0.050)   &(0.050)
+   &(0.050)   &(0.051)   &(0.051)   &(0.051)   &(0.051)   &(0.068)   &(0.068) 
+  &(0.072)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  age               & .
+        & .
+        & .
+      &0.026*** &0.060*** &0.059*** &0.057** &0.057** &0.054** &0.060*** &0.059**
+ &0.065** &0.065** &0.022*** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &(0.003)   &(0.017)   &(0.017)
+   &(0.018)   &(0.018)   &(0.017)   &(0.018)   &(0.018)   &(0.022)   &(0.022) 
+  &(0.005)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  agesq             & .
+        & .
+        & .
+        & .
+      &0.000* &0.000 &0.000 &0.000 &0.000 &0.000* &0.000* &-0.001* &-0.001*   & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &(0.000)   &(0.000)
+   &(0.000)   &(0.000)   &(0.000)   &(0.000)   &(0.000)   &(0.000)   &(0.000) 
+  &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  sex2.
+ Female      & .
+        & .
+        & .
+        & .
+        & .
+      &-0.120 &-0.094 &-0.092 &-0.056 &-0.054 &-0.068 &-0.183 &-0.183 &-0.053 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &(0.111)
+   &(0.112)   &(0.112)   &(0.113)   &(0.113)   &(0.114)   &(0.144)   &(0.144) 
+  &(0.150)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  minority          & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &-0.435*** &-0.423*** &-0.396** &-0.396** &-0.433*** &-0.093 &-0.096 &0.009
+ 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &(0.126)   &(0.127)   &(0.127)   &(0.128)   &(0.129)   &(0.166)   &(0.166)
+   &(0.177)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  south1            & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &-0.085 &-0.064 &-0.063 &-0.079 &-0.054 &-0.050 &-0.095 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &(0.115)   &(0.115)   &(0.116)   &(0.117)   &(0.146)   &(0.146)
+   &(0.153)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  daysreadpaper      & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &0.058** &0.059** &0.058** &0.073** &0.072** &0.062* 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &(0.020)   &(0.020)   &(0.020)   &(0.026)   &(0.026)
+   &(0.027)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  divorced1         & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &-0.279 &-0.238 &-0.187 &-0.177 &-0.130 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &         &(0.162)   &(0.164)   &(0.203)   &(0.203)
+   &(0.206)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  churchBin1        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &0.308* &0.453** &0.450**   & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &         &         &(0.121)   &(0.148)   &(0.148)
+   &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  partyContact2.
+ No contact by major party      & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &-1.258*** &-1.230***   & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &         &         &         &(0.183)   &(0.185)
+   &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  otherContact5.
+ No      & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &-0.275   & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &         &         &         &         &(0.277)
+   &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  polEff2.
+ Disagree      & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &0.456** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &         &         &         &         &     
+    &(0.175)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  polEff3.
+ Neither agree nor disagree (1988 and later only)      & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &0.092 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &         &         &         &         &     
+    &(0.237)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  polEff9.
+ DK; not sure; it depends; can't say; refused to say      & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &-1.559 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &         &         &         &         &     
+    &(1.027)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  incNum            & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+        & .
+      &0.265*** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &         &         &         &    
+     &         &         &         &         &         &         &     
+    &(0.077)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+N                 &1800       &1785       &1784       &1776       &1776
+       &1776       &1766       &1766       &1766       &1761       &1752
+       &1515       &1514       &1295       
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Deviance         &2176.614   &2092.904   &2064.382   &1993.065   &1989.163  
+ &1987.999   &1961.302   &1960.754   &1952.485   &1945.157   &1925.618   &1279.774
+   &1278.591   &1159.998   
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+$-2LLR (Model chi^2)$        & 141.568         & 204.886       & 231.273  
+     & 290.672       & 294.574       & 295.738       & 307.526       & 308.074
+       & 316.343       & 315.555       & 323.634       & 388.614       & 389.248
+       & 288.152 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+AIC
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2180.614
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2098.904
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2072.382
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2003.065
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2001.163
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2001.999
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1977.302
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1978.754
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1972.485
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1967.157
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1949.618
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1305.774
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1306.591
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1187.998
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+multicolumn{15}{c}{${*  p}
 \backslash
 le 0.05$${*
 \backslash
