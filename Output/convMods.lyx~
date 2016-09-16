@@ -27,8 +27,9 @@
 \bibtex_command default
 \index_command default
 \paperfontsize default
+\spacing single
 \use_hyperref false
-\papersize default
+\papersize custom
 \use_geometry false
 \use_package amsmath 1
 \use_package amssymb 1
@@ -53,6 +54,8 @@
 \shortcut idx
 \color #008000
 \end_index
+\paperwidth 11in
+\paperheight 13.5in
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
@@ -795,9 +798,8 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-$-2LLR (Model chi^2)$ ******       & 149.224******$-2LLR (Model chi^2)$ ******
-       & 224.921*****       & 254.530****       & 254.780***       & 314.869**
-       & 336.056* 
+$-2LLR (Model chi^2)$        & 149.224        & 224.921       & 254.530   
+    & 254.780      & 314.869       & 336.056 
 \backslash
 tabularnewline
 \end_layout

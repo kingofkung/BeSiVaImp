@@ -114,8 +114,9 @@ besforms <- lapply(seq_along(uniqueVar), function(x){
 
 
 ftex <- formula(bindep ~ daysreadpaper + pid7 + polEff + ed + incGroup + age + timeinHouse + marital + race7 + region + sex)
+michigan <- formula(bindep ~ pid7)
 
-besforms <- c(besforms, ftex)
+besforms <- c(besforms, ftex, michigan)
 ## Maximum iterations
 
 maxIT <- 100
@@ -144,8 +145,13 @@ for(u in seq_along(besforms)){
 
 colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ## Make sure we have teixeira's model somewhere.
-teixeiraloc <- lapply(besforms, function(x) as.character(x)[[3]]) %in% as.character(ftex)[[3]]
+ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
+teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
+michiganloc <- ivlist %in% as.character(michigan)[[3]]
+
 colnames(finalout)[teixeiraloc] <- "teixeira1987ish"
+colnames(finalout)[michiganloc] <- "CCMS1960ish"
+
 write.csv(finalout, paste0(writeloc, "pcps.csv"))
 
 finaloutmeans <- apply(finalout, 2, mean)
@@ -153,25 +159,34 @@ finaloutmeans <- apply(finalout, 2, mean)
 which(finaloutmeans == max(finaloutmeans))
 
 ## Possible to add error bars to each point/ confidence bands on lines?
+algIters <- grep("iteration", names(finaloutmeans))
 dev.new()
 pdf(file = paste(writeloc,"numPts.pdf"))
 plot(
-    seq_along(finaloutmeans[-length(finaloutmeans)]),
-    finaloutmeans[-length(finaloutmeans)],
+    seq_along(finaloutmeans[algIters]),
+    finaloutmeans[algIters],
     ylab = "PCPs",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
     type = "p", ylim = c(0.45, 0.75))
 lines(x = c(0, seq_along(finaloutmeans)),
-      y = rep(finaloutmeans[length(finaloutmeans)], 1 + length(finaloutmeans)),
+      y = rep(finaloutmeans["teixeira1987ish"], 1 + length(finaloutmeans)),
       col = "red")
+lines(x = c(0, seq_along(finaloutmeans)),
+      y = rep(finaloutmeans["CCMS1960ish"], 1 + length(finaloutmeans)),
+      col = "green")
 legend("bottomright",
-       c("BeSiVa", "Teixeira 1987"),
-       lty = c(-1, 1), pch = c(1, -1),
-       col = c("black", "red"))
+       c("BeSiVa", "Teixeira 1987", "CCMS 1960"),
+       lty = c(-1, 1, 1), pch = c(1, -1, -1),
+       col = c("black", "red", "green"))
 graphics.off()
 
 hist(thepcps)
 summarize(thepcps)
+
+## Start working on a latex table featuring the best models
+mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
+
+write.table(outreg(mods[1:6], "latex"), file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods.txt"), row.names = F, col.names = F, quote = FALSE)
 
 
 ## str(bes2000)

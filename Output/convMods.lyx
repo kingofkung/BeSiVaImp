@@ -798,8 +798,54 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-$-2LLR (Model chi^2)$        & 149.224        & 224.921       & 254.530   
-    & 254.780      & 314.869       & 336.056 
+$-2LLR (Model chi^2)$        & 149.224         & 224.921       & 254.530  
+     & 254.780       & 314.869       & 336.056 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+AIC
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2180.958
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2096.869
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2058.084
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2059.833
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1991.959
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1978.772
+\end_layout
+
+\begin_layout Plain Layout
+
+
 \backslash
 tabularnewline
 \end_layout
