@@ -115,6 +115,7 @@ besforms <- lapply(seq_along(uniqueVar), function(x){
 
 ftex <- formula(bindep ~ daysreadpaper + pid7 + polEff + ed + incGroup + age + timeinHouse + marital + race7 + region + sex)
 michigan <- formula(bindep ~ pid7)
+##Rosenstone and Hansen 1993
 
 besforms <- c(besforms, ftex, michigan)
 ## Maximum iterations
@@ -168,16 +169,13 @@ plot(
     ylab = "PCPs",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
     type = "p", ylim = c(0.45, 0.75))
-lines(x = c(0, seq_along(finaloutmeans)),
-      y = rep(finaloutmeans["teixeira1987ish"], 1 + length(finaloutmeans)),
-      col = "red")
-lines(x = c(0, seq_along(finaloutmeans)),
-      y = rep(finaloutmeans["CCMS1960ish"], 1 + length(finaloutmeans)),
-      col = "green")
+abline(h = finaloutmeans["teixeira1987ish"],col = "red")
+abline(h = finaloutmeans["CCMS1960ish"],col = "green")
+abline(h = prop.table(table(anes2000$bindep)), col = "blue")
 legend("bottomright",
-       c("BeSiVa", "Teixeira 1987", "CCMS 1960"),
-       lty = c(-1, 1, 1), pch = c(1, -1, -1),
-       col = c("black", "red", "green"))
+       c("BeSiVa", "Teixeira 1987", "CCMS 1960", "Mode for all"),
+       lty = c(-1, 1, 1, 1), pch = c(1, -1, -1, -1),
+       col = c("black", "red", "green", "blue"))
 graphics.off()
 
 hist(thepcps)

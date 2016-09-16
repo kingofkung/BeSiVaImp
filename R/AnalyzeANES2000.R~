@@ -185,7 +185,7 @@ summarize(thepcps)
 
 ## Start working on a latex table featuring the best models
 mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
-lyxout <- outreg(mods[1:6], "latex", showAIC = T)
+lyxout <- outreg(mods[1:9], "latex", showAIC = T)
 ## But look, there's a line with way too many *'s, and -2LLR twice, right here.
 badlineloc <- grep("[*]{5}", lyxout, T)
 badline <- lyxout[badlineloc]
@@ -204,10 +204,10 @@ fixline <- paste(substr(badline, 1, start2LLR2-1), substr(badline, start2LLR2 + 
 ## what we do have?
 ## Think I'll talk with PJ.
 gsub("chi", "\\chi", fixline)
-
+##
 lyxout[badlineloc] <- fixline
-
-
+##
+##
 write.table(lyxout, file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods.txt"), row.names = F, col.names = F, quote = FALSE)
 
 
