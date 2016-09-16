@@ -173,7 +173,7 @@ abline(h = finaloutmeans["teixeira1987ish"],col = "red")
 abline(h = finaloutmeans["CCMS1960ish"],col = "green")
 abline(h = prop.table(table(anes2000$bindep)), col = "blue")
 legend("bottomright",
-       c("BeSiVa", "Teixeira 1987", "CCMS 1960", "Mode for all"),
+       c("BeSiVa", "Teixeira 1987", "Party ID", "Mode for all"),
        lty = c(-1, 1, 1, 1), pch = c(1, -1, -1, -1),
        col = c("black", "red", "green", "blue"))
 graphics.off()
