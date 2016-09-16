@@ -185,8 +185,30 @@ summarize(thepcps)
 
 ## Start working on a latex table featuring the best models
 mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
+lyxout <- outreg(mods[1:6], "latex", showAIC = T)
+## But look, there's a line with way too many *'s, and -2LLR twice, right here.
+badlineloc <- grep("[*]{5}", lyxout, T)
+badline <- lyxout[badlineloc]
+## Get rid of excessive asterisks.
+badline <- gsub("[*]+", "", badline)
+## deal with that pesky second -2LLR
+neg2LLR <- "[$]-2LLR\\s[(]Model\\schi[:^:]\\d[:):][:$:]"
+start2LLR2 <- gregexpr(neg2LLR, badline)[[1]][2]
+## Turns out we can't just use the length of the above thing, as it's
+## got a bunch of extra characters we don't need. So we'll use the
+## length of the thing that's bugging us.
+n2llrlen <- nchar("$-2LLR (Model chi^2)$")
+## And then we cut it out like so
+fixline <- paste(substr(badline, 1, start2LLR2-1), substr(badline, start2LLR2 + n2llrlen , nchar(badline))   )
+## Possible to get it so we actually have the symbol chi^2, instead of
+## what we do have?
+## Think I'll talk with PJ.
+gsub("chi", "\\chi", fixline)
 
-write.table(outreg(mods[1:6], "latex"), file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods.txt"), row.names = F, col.names = F, quote = FALSE)
+lyxout[badlineloc] <- fixline
+
+
+write.table(lyxout, file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods.txt"), row.names = F, col.names = F, quote = FALSE)
 
 
 ## str(bes2000)
