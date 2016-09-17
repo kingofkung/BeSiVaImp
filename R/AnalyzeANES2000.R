@@ -15,11 +15,13 @@ anes2000$bindep <- ifelse(anes2000$vcf0702 %in% "2. Yes, voted", 1, 0)
 
 anes2000$vcf9030a
 ## Efficacy? Personal efficacy == VCF0609
-grep("vcf0101", colnames(anes2000))
-varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "union" = "vCF0127", "timeinHouse" = "vcf9002", "age" = "vcf0101", "pidstr" = "pidstr")
+lastknownages <- anes2000[,grep("vcf0101", colnames(anes2000))]
+
+varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "union" = "vcf0127", "timeinHouse" = "vcf9002", "age" = "vcf0101", "pidstr" = "pidstr")
 nucolnames <- colnames(anes2000)
 nucolnames[na.omit(match(varstouse, nucolnames))] <- names(varstouse)[!names(varstouse) %in% "pidstr"]
 ## table(nucolnames, colnames(anes2000))[names(varstouse), varstouse]
+
 colnames(anes2000) <- nucolnames
 
 
@@ -185,7 +187,7 @@ model.frame(glm(RnH, data = anes2000, family = binomial()))
 besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 
-maxIT <- 100
+maxIT <- 1000
 sampsize <- round(nrow(anes2000) * .2)
 set.seed(10101)
 for(u in seq_along(besforms)){
@@ -208,36 +210,38 @@ for(u in seq_along(besforms)){
     }))
     ifelse(u == 1, finalout <- data.frame(thepcps), finalout <- cbind(finalout, thepcps))
     }
-
+##
 colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ## Make sure we have teixeira's model somewhere.
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
 teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
 michiganloc <- ivlist %in% as.character(michigan)[[3]]
 RnHloc <- ivlist %in% as.character(RnH)[[3]]
-
+##
 colnames(finalout)[teixeiraloc] <- "teixeira1987ish"
 colnames(finalout)[michiganloc] <- "CCMS1960ish"
 colnames(finalout)[RnHloc] <- "RnH1993ish"
-
+##
 finaloutdf <- as.data.frame(sapply(finalout, summarizeNumerics))
+bootstrapCI <- sapply(finalout, quantile, probs = c(.025, .975), na.rm = T)
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
-
-write.csv(finaloutdf, paste0(writeloc, "pcpsum", note, ".csv"))
-
+##
+write.csv(finaloutdf, paste0(writeloc, "pcpsum", "maxIter", maxIT, note, ".csv"))
+##
 finaloutmeans <- apply(finalout, 2, mean)
-
-
+##
+##
 ## Possible to add error bars to each point/ confidence bands on lines?
 algIters <- grep("iteration", names(finaloutmeans))
 dev.new()
-pdf(file = paste0(writeloc,"numPts",note, ".pdf"))
+pdf(file = paste0(writeloc,"maxIter", maxIT,"numPts",note, ".pdf"))
 plot(
     seq_along(finaloutmeans[algIters]),
     finaloutmeans[algIters],
     ylab = "PCPs",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
     type = "p", ylim = c(0.45, 0.75))
+lapply(seq_along(algIters), function(x) segments(x, bootstrapCI[2,x], x, bootstrapCI[1,x]))
 abline(h = finaloutmeans["teixeira1987ish"],col = "red")
 abline(h = finaloutmeans["CCMS1960ish"],col = "green")
 abline(h = finaloutmeans["RnH1993ish"], col = "purple")
