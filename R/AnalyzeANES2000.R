@@ -3,6 +3,9 @@
 source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 
+library(ggplot2)
+library(rockchalk)
+
 writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/"
 note <- ""
 
@@ -12,14 +15,16 @@ anes2000$bindep <- ifelse(anes2000$vcf0702 %in% "2. Yes, voted", 1, 0)
 
 anes2000$vcf9030a
 ## Efficacy? Personal efficacy == VCF0609
-
-varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "timeinHouse" = "vcf9002", "age" = "vcf0101" , "pidstr" = "pidstr")
+grep("vcf0101", colnames(anes2000))
+varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "union" = "vCF0127", "timeinHouse" = "vcf9002", "age" = "vcf0101", "pidstr" = "pidstr")
 nucolnames <- colnames(anes2000)
 nucolnames[na.omit(match(varstouse, nucolnames))] <- names(varstouse)[!names(varstouse) %in% "pidstr"]
 ## table(nucolnames, colnames(anes2000))[names(varstouse), varstouse]
 colnames(anes2000) <- nucolnames
 
 
+
+grep("partyContact", colnames(anes2000))
 
 ## make a measure of the overall strength of party ID
 pidstr <- as.character(anes2000$pid7)
@@ -73,7 +78,16 @@ table(anes2000$south, anes2000$region)
 anes2000$divorced <- as.character(anes2000$marital)
 anes2000$divorced[grepl("Divorced", anes2000$marital)] <- 1
 anes2000$divorced[!grepl("Divorced", anes2000$marital) & !is.na(anes2000$marital)] <- 0
+anes2000$divorced <- as.numeric(anes2000$divorced)
 table(anes2000$divorced, anes2000$marital)
+
+## married dichotomous
+anes2000$married <- as.character(anes2000$marital)
+anes2000$married[grepl("Married", anes2000$marital)] <- "1"
+anes2000$married[!grepl("Married", anes2000$marital) & !is.na(anes2000$marital)] <- "0"
+anes2000$married <- as.numeric(anes2000$married)
+table(anes2000$married, anes2000$marital)
+
 
 ## Goto church dichotomous
 sort(unique(anes2000$church))
@@ -111,7 +125,6 @@ svtabdf <- data.frame("Var" = unlist(lapply(seq_along(savvartab), function(x) re
 uniqueVar <- unique(svtabdf$Var)
 svtabdf$Var <- factor(svtabdf$Var, levels = uniqueVar[length(uniqueVar):1])
 
-library(ggplot2)
 
 dev.new()
 pdf(paste0(writeloc,"ANES2000",i,"runs",note, ".pdf"))
@@ -154,7 +167,6 @@ graphics.off()
 
 
 
- library(rockchalk)
 
 
 besforms <- lapply(seq_along(uniqueVar), function(x){
