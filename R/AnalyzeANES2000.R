@@ -187,7 +187,7 @@ model.frame(glm(RnH, data = anes2000, family = binomial()))
 besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 
-maxIT <- 1000
+maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 set.seed(10101)
 for(u in seq_along(besforms)){
@@ -223,13 +223,14 @@ colnames(finalout)[michiganloc] <- "CCMS1960ish"
 colnames(finalout)[RnHloc] <- "RnH1993ish"
 ##
 finaloutdf <- as.data.frame(sapply(finalout, summarizeNumerics))
-bootstrapCI <- sapply(finalout, quantile, probs = c(.025, .975), na.rm = T)
+## get bootstrapped confidence intervals
+btstpCI <- sapply(finalout, quantile, probs = c(.025, .975), na.rm = T)
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
 ##
 write.csv(finaloutdf, paste0(writeloc, "pcpsum", "maxIter", maxIT, note, ".csv"))
 ##
 finaloutmeans <- apply(finalout, 2, mean)
-##
+
 ##
 ## Possible to add error bars to each point/ confidence bands on lines?
 algIters <- grep("iteration", names(finaloutmeans))
@@ -241,20 +242,21 @@ plot(
     ylab = "PCPs",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
     type = "p", ylim = c(0.45, 0.75))
-lapply(seq_along(algIters), function(x) segments(x, bootstrapCI[2,x], x, bootstrapCI[1,x]))
+lapply(seq_along(algIters), function(x) segments(x, btstpCI[2,x], x, btstpCI[1,x]))
+lapply(seq_along(algIters), function(g) segments(x0 = g - hbar, y0 = btstpCI[1,g], x1 = g + hbar , y1 = btstpCI[1,g]))
+lapply(seq_along(algIters), function(g) segments(x0 = g - hbar, y0 = btstpCI[2,g], x1 = g + hbar , y1 = btstpCI[2,g]))
 abline(h = finaloutmeans["teixeira1987ish"],col = "red")
 abline(h = finaloutmeans["CCMS1960ish"],col = "green")
 abline(h = finaloutmeans["RnH1993ish"], col = "purple")
 abline(h = prop.table(table(anes2000$bindep)), col = "blue")
-abline(v = which(finaloutmeans == max(finaloutmeans)))
+## Which one is largest?
+points(x = which(finaloutmeans == max(finaloutmeans)), max(finaloutmeans), pch = 4, lwd = 3, col = "red")
 legend("bottomright",
        c("BeSiVa", "Teixeira 1987", "Party ID", "RnH",  "Mode for all"),
        lty = c(-1, 1, 1, 1, 1), pch = c(1, -1, -1, -1, -1),
        col = c("black", "red", "green", "purple", "blue"))
 graphics.off()
 
-hist(thepcps)
-summarize(thepcps)
 
 ## Start working on a latex table featuring the best models
 mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
