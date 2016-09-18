@@ -187,7 +187,7 @@ model.frame(glm(RnH, data = anes2000, family = binomial()))
 besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 
-maxIT <- 100
+maxIT <- 1000
 sampsize <- round(nrow(anes2000) * .2)
 set.seed(10101)
 for(u in seq_along(besforms)){
@@ -230,7 +230,7 @@ rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
 write.csv(finaloutdf, paste0(writeloc, "pcpsum", "maxIter", maxIT, note, ".csv"))
 ##
 finaloutmeans <- apply(finalout, 2, mean)
-
+##
 ##
 ## Possible to add error bars to each point/ confidence bands on lines?
 algIters <- grep("iteration", names(finaloutmeans))
