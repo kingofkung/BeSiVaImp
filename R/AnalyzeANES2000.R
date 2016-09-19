@@ -106,22 +106,29 @@ varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", 
 
     bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = 5, showoutput = F, showforms = F, thresh = .001)
 
-
-for(i in 1:100) {
-    print(paste0("i = ", i))
-    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
+MCIter <- 200
+for(i in 1:MCIter) {
+    print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
+    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 10, sampseed = i, showoutput = F, showforms = F, thresh = .001)
     ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
     ifelse(i == 1, savpcp <- max(bes2000$intpcps, na.rm = T), savpcp <- c(savpcp, max(bes2000$intpcps, na.rm = T)))
 }
- savvarsU <- unlist(savvars)
+savvarsU <- unlist(savvars)
 savvartab <- sort(table(savvarsU), decreasing = T)
 
-table(unlist(lapply(savvars, length)))
-
-## swap useless names for useful ones
-## usefulnames <- names(varstouse)[ match(names(savvartab) , varstouse)]
-
-## names(savvartab) <- usefulnames
+## Make plot to explain number of variables selected
+VarSelect <- table(unlist(lapply(savvars, length)))
+## make table and convert it to a dataframe
+proptab <- prop.table(VarSelect)*100
+proptabdf <- data.frame(t(proptab))[, 2:3]
+## plot table using ggplot2. It needs a dataframe.
+dev.new()
+pdf(paste0(writeloc,"AlgVarNumSelect", MCIter, "runs.pdf"))
+ggplot(data = proptabdf, aes(x = Var2, y =  Freq)) +
+    geom_bar( stat = "identity") +
+    xlab("Number of Variables") + ylab("Percentage of Runs") +
+    ggtitle(paste0("Number of Variables Selected by BeSiVa Over ", MCIter, " Runs"))
+graphics.off()
 
 svtabdf <- data.frame("Var" = unlist(lapply(seq_along(savvartab), function(x) rep(names(savvartab)[x], savvartab[x]))))
 uniqueVar <- unique(svtabdf$Var)
@@ -187,7 +194,7 @@ model.frame(glm(RnH, data = anes2000, family = binomial()))
 besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 
-maxIT <- 1000
+maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 set.seed(10101)
 for(u in seq_along(besforms)){
