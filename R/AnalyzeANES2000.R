@@ -106,12 +106,23 @@ cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 ## bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = 5, showoutput = F, showforms = F, thresh = .001)
 
 MCIter <- 100
-for(i in 1:MCIter) {
+## for(i in 1:MCIter) {
+##     print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
+##     bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
+##     ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
+##     ifelse(i == 1, savpcp <- max(bes2000$intpcps, na.rm = T), savpcp <- c(savpcp, max(bes2000$intpcps, na.rm = T)))
+## }
+besresults <- lapply(1:MCIter, function(i){
     print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
-    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
-    ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
-    ifelse(i == 1, savpcp <- max(bes2000$intpcps, na.rm = T), savpcp <- c(savpcp, max(bes2000$intpcps, na.rm = T)))
-}
+    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000,
+                      iters = 5, sampseed = i,
+                      showoutput = F, showforms = F, thresh = .001)
+    bes2000}
+    )
+
+savvars <- lapply(besresults, function(x) unlist(x$intvars))
+savpcp <- unlist(lapply(besresults, function(x) unlist(max(x$intpcps, na.rm = T))))
+
 savvarsU <- unlist(savvars)
 savvartab <- sort(table(savvarsU), decreasing = T)
 
@@ -152,7 +163,7 @@ ggplot(data = svtabdf) +
 graphics.off()
 
 str(savpcp)
-table(savpcp)
+table(unlist(savpcp))
 
 
 anesh <- hist(savpcp, prob = T)
