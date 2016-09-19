@@ -13,9 +13,6 @@ head(anes2000)
 
 anes2000$bindep <- ifelse(anes2000$vcf0702 %in% "2. Yes, voted", 1, 0)
 
-anes2000$vcf9030a
-## Efficacy? Personal efficacy == VCF0609
-lastknownages <- anes2000[,grep("vcf0101", colnames(anes2000))]
 
 varstouse <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "union" = "vcf0127", "timeinHouse" = "vcf9002", "age" = "vcf0101", "pidstr" = "pidstr")
 nucolnames <- colnames(anes2000)
@@ -37,9 +34,6 @@ pidstr[grep("Independent - Independent", pidstr, ignore.case = T)] <- "0"
 pidstr[grep("Independent - Democrat|Republican", pidstr, ignore.case = T)] <- "1"
 table(anes2000$pid7, pidstr)
 anes2000$pidstr <- as.numeric(pidstr)
-## anes2000$pidstr
-
-
 
 
 ## Create numeric education variable.
@@ -104,17 +98,27 @@ lapply(contactVars, function(x) sort(unique(anes2000[,x])))
 
 varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
 
-    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = 5, showoutput = F, showforms = F, thresh = .001)
+cor.test(anes2000$age, anes2000$houseTimeNum, use = "pairwise.complete.obs")
+cor.test(anes2000$houseTimeNum, anes2000$incNum, use = "pairwise.complete.obs")
+cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
-MCIter <- 200
+
+## bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = 5, showoutput = F, showforms = F, thresh = .001)
+
+MCIter <- 100
 for(i in 1:MCIter) {
     print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
-    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 10, sampseed = i, showoutput = F, showforms = F, thresh = .001)
+    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = i, showoutput = F, showforms = F, thresh = .001)
     ifelse(i == 1, savvars <-  bes2000$intvars, savvars <- c(savvars, bes2000$intvars))
     ifelse(i == 1, savpcp <- max(bes2000$intpcps, na.rm = T), savpcp <- c(savpcp, max(bes2000$intpcps, na.rm = T)))
 }
 savvarsU <- unlist(savvars)
 savvartab <- sort(table(savvarsU), decreasing = T)
+
+length(which(unlist(lapply(savvars, function(x) "age" %in% x))))
+length(which(unlist(lapply(savvars, function(x) "age" %in% x | "agesq" %in% x))))
+length(which(unlist(lapply(savvars, function(x) "age" %in% x & "agesq" %in% x))))
+
 
 ## Make plot to explain number of variables selected
 VarSelect <- table(unlist(lapply(savvars, length)))
@@ -127,8 +131,10 @@ pdf(paste0(writeloc,"AlgVarNumSelect", MCIter, "runs.pdf"))
 ggplot(data = proptabdf, aes(x = Var2, y =  Freq)) +
     geom_bar( stat = "identity") +
     xlab("Number of Variables") + ylab("Percentage of Runs") +
-    ggtitle(paste0("Number of Variables Selected by BeSiVa Over ", MCIter, " Runs"))
-graphics.off()
+    ggtitle(paste0("Number of Variables Selected by BeSiVa Over ", MCIter, " Runs")) +
+    scale_y_continuous(expand = c(0,0)) +
+    theme(axis.ticks.x = element_blank())
+    graphics.off()
 
 svtabdf <- data.frame("Var" = unlist(lapply(seq_along(savvartab), function(x) rep(names(savvartab)[x], savvartab[x]))))
 uniqueVar <- unique(svtabdf$Var)
@@ -148,8 +154,6 @@ graphics.off()
 str(savpcp)
 table(savpcp)
 
-hist(rnorm(100), freq = F)
-hist(savpcp, freq = F)
 
 anesh <- hist(savpcp, prob = T)
 ## anesh$counts <- anesh$counts/sum(anesh$counts)
@@ -157,25 +161,17 @@ dev.new()
 pdf(paste0(writeloc,"ANES2000",i,"runs pcpHist",note, ".pdf"))
 plot(anesh, main = "Histogram of 2000 ANES PCPS")
 ##
-##
 ## plot normal distribution
 savseq <- seq(min(savpcp), max(savpcp), length.out = length(savpcp))
 normedsavseq <- dnorm(x = savseq, mean = mean(savpcp), sd = sd(savpcp))
 lines(x = savseq, y = normedsavseq, lty = 1)
 ##
-##
 ## Plot kernel density
 lines(density(savpcp, na.rm = T), lty = 2)
-##
 ##
 ## Add a legend
 legend("topright", legend = c("Normal Distribution", "Kernel Density"), lty = c(1, 2) )
 graphics.off()
-
-
-
-
-
 
 
 besforms <- lapply(seq_along(uniqueVar), function(x){
@@ -183,17 +179,13 @@ besforms <- lapply(seq_along(uniqueVar), function(x){
     wdv <- paste0("bindep ~ ", ivtxt)
     as.formula(wdv)
 })
-
-
+##
 ftex <- formula(bindep ~ daysreadpaper + pidstr + polEff + ednum + incNum + age + houseTimeNum + divorced + minority + south + sex)
 michigan <- formula(bindep ~ pid7)
-RnH <- formula(bindep ~ polEff + ed + incGroup + partyContact + otherContact + churchBin)
-##Rosenstone and Hansen 1993
-model.frame(glm(RnH, data = anes2000, family = binomial()))
-
 besforms <- c(besforms, ftex, michigan, RnH)
-## Maximum iterations
 
+
+## Maximum iterations
 maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 set.seed(10101)
@@ -238,9 +230,9 @@ write.csv(finaloutdf, paste0(writeloc, "pcpsum", "maxIter", maxIT, note, ".csv")
 ##
 finaloutmeans <- apply(finalout, 2, mean)
 ##
-##
 ## Possible to add error bars to each point/ confidence bands on lines?
 algIters <- grep("iteration", names(finaloutmeans))
+hbar <- 0.05
 dev.new()
 pdf(file = paste0(writeloc,"maxIter", maxIT,"numPts",note, ".pdf"))
 plot(
@@ -291,6 +283,3 @@ lyxout[badlineloc] <- fixline
 ##
 ##
 write.table(lyxout, file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods", note,".txt"), row.names = F, col.names = F, quote = FALSE)
-
-
-## str(bes2000)
