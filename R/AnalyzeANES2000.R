@@ -1,11 +1,14 @@
 ## This is where we'll store our analyses of the ANES data
 ## getwd()
-source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES.R")
+source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES2000.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
-source("/Users/bjr/GitHub/BeSiVaImp/R/RecodeANES2000.R")
+source("/Users/bjr/GitHub/BeSiVaImp/R/RecodeANES.R")
 
 library(ggplot2)
 library(rockchalk)
+library(parallel)
+no_cores <- detectCores() - 4
+
 
 writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/"
 note <- ""
@@ -22,15 +25,18 @@ cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 
 ## bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = 5, showoutput = F, showforms = F, thresh = .001)
-library(parallel)
+cl <- makeCluster(no_cores)
+clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
+clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
 MCIter <- 100
-besresults <- lapply(1:MCIter, function(i){
-    print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
+besresults <- parLapply(cl, 1:MCIter, function(i){
+    ## print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
     bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000,
                       iters = 5, sampseed = i,
                       showoutput = F, showforms = F, thresh = .001)
     bes2000}
     )
+stopCluster(cl)
 savvars <- lapply(besresults, function(x) unlist(x$intvars))
 savpcp <- unlist(lapply(besresults, function(x) unlist(max(x$intpcps, na.rm = T))))
 savvarsU <- unlist(savvars)
