@@ -2,7 +2,7 @@
 ## getwd()
 source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES2000.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
-source("/Users/bjr/GitHub/BeSiVaImp/R/RecodeANES.R")
+source("/Users/bjr/GitHub/BeSiVaImp/R/RecodeANES2000.R")
 
 library(ggplot2)
 library(rockchalk)
@@ -13,7 +13,7 @@ no_cores <- detectCores() - 4
 writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/"
 note <- ""
 
-head(anes2000)
+## head(anes2000)
 
 
 
@@ -24,23 +24,28 @@ cor.test(anes2000$houseTimeNum, anes2000$incNum, use = "pairwise.complete.obs")
 cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 
-## bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000, iters = 5, sampseed = 5, showoutput = F, showforms = F, thresh = .001)
+## First effort at parallel programming:
 cl <- makeCluster(no_cores)
+MCIter <- 100
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
-MCIter <- 100
+pti <- proc.time()
 besresults <- parLapply(cl, 1:MCIter, function(i){
     ## print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
     bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000,
                       iters = 5, sampseed = i,
                       showoutput = F, showforms = F, thresh = .001)
     bes2000}
-    )
+                        )
+ptf <- proc.time() - pti
 stopCluster(cl)
+##
 savvars <- lapply(besresults, function(x) unlist(x$intvars))
 savpcp <- unlist(lapply(besresults, function(x) unlist(max(x$intpcps, na.rm = T))))
 savvarsU <- unlist(savvars)
 savvartab <- sort(table(savvarsU), decreasing = T)
+
+
 
 length(which(unlist(lapply(savvars, function(x) "age" %in% x))))
 length(which(unlist(lapply(savvars, function(x) "age" %in% x | "agesq" %in% x))))
@@ -114,7 +119,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 set.seed(10101)
-for(u in seq_along(besforms)){
+finalout <- lapply(seq_along(besforms), function(u){
     ##
     print(paste("iteration", u))
     ## A loop designed to replicate the monte Carlo simulations of
@@ -132,9 +137,11 @@ for(u in seq_along(besforms)){
         ## save the pcps
         junker
     }))
-    ifelse(u == 1, finalout <- data.frame(thepcps), finalout <- cbind(finalout, thepcps))
-    }
+    })
 ##
+finalout <- do.call(cbind, finalout)
+
+
 colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ## Make sure we have teixeira's model somewhere.
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
@@ -148,7 +155,7 @@ colnames(finalout)[RnHloc] <- "RnH1993ish"
 ##
 finaloutdf <- as.data.frame(sapply(finalout, summarizeNumerics))
 ## get bootstrapped confidence intervals
-btstpCI <- sapply(finalout, quantile, probs = c(.025, .975), na.rm = T)
+btstpCI <- apply(finalout, 2, quantile, probs = c(.025, .975), na.rm = T)
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
 ##
 write.csv(finaloutdf, paste0(writeloc, "pcpsum", "maxIter", maxIT, note, ".csv"))

@@ -81,5 +81,6 @@ anes2000$churchBin[!grepl("Never", anes2000$church) & !is.na(anes2000$church)] <
 table(anes2000$church, anes2000$churchBin, useNA = "always")
 
 ## dichotomize Party and other Contact (all)
-contactVars <- grep("Contact", names(varstouse), value = T)
+contactVars <- grep("Contact", names(varstochange), value = T)
 lapply(contactVars, function(x) sort(unique(anes2000[,x])))
+## Looks like we're already there. NVM.
