@@ -116,7 +116,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 
 library(speedglm)
 ## Maximum iterations
-maxIT <- 50
+maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 set.seed(10101)
 pti2 <- proc.time()
@@ -143,10 +143,10 @@ finalout <- lapply(seq_along(besforms), function(u){
     })
 ptf2 <- proc.time() - pti2
 ##
-## finalout <- do.call(cbind, finalout)
+finalout <- do.call(cbind, finalout)
 
 
-finacolnames(finalout) <- paste0("iteration", seq_along(besforms))
+colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ## Make sure we have teixeira's model somewhere.
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
 teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
@@ -172,7 +172,7 @@ hbar <- 0.05
 dev.new()
 pdf(file = paste0(writeloc,"maxIter", maxIT,"numPts",note, ".pdf"))
 plot(
-    seq_along(finaloutmeans[algIters]),
+    x = seq_along(finaloutmeans[algIters]),
     finaloutmeans[algIters],
     ylab = "PCPs",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
