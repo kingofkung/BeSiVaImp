@@ -114,11 +114,12 @@ michigan <- formula(bindep ~ pid7)
 RnH <- formula(bindep ~ polEff + ed + incGroup + partyContact + otherContact + churchBin)
 besforms <- c(besforms, ftex, michigan, RnH)
 
-
+library(speedglm)
 ## Maximum iterations
-maxIT <- 100
+maxIT <- 50
 sampsize <- round(nrow(anes2000) * .2)
 set.seed(10101)
+pti2 <- proc.time()
 finalout <- lapply(seq_along(besforms), function(u){
     ##
     print(paste("iteration", u))
@@ -128,21 +129,24 @@ finalout <- lapply(seq_along(besforms), function(u){
         ## print progress
         ## print(paste0("progress = ", round(i/maxiter * 100), "%" ))
         ## sample the rows
-        subsamp <- sample(1:nrow(anes2000), size = sampsize )
+        subsamp <- sample(1:nrow(anes2000), size = sampsize)
         ## create the model, making sure to pull out some of the data
-        mod <- glm(besforms[[u]], family = binomial, data = anes2000[-subsamp,])
+        ## mod <- speedglm(besforms[[u]], family = binomial(logit), data = droplevels(anes2000[-subsamp,]), fitted = T)
+        mod <- glm(besforms[[u]], family = binomial(logit), data = anes2000[-subsamp,])
         ## get the predictions and the pcps
-        predsb <- predictr(mod, anes2000, subsamp, loud = F)
+        ## predsb <- ifelse(predict(mod, newdata = droplevels(anes2000[subsamp,]), type = "response") > .5, 1, 0)
+        predsb <- predictr(mod, data = anes2000, subsamp, loud = F)
         junker <- getpcp(predsb, anes2000$bindep[subsamp])
         ## save the pcps
         junker
     }))
     })
+ptf2 <- proc.time() - pti2
 ##
-finalout <- do.call(cbind, finalout)
+## finalout <- do.call(cbind, finalout)
 
 
-colnames(finalout) <- paste0("iteration", seq_along(besforms))
+finacolnames(finalout) <- paste0("iteration", seq_along(besforms))
 ## Make sure we have teixeira's model somewhere.
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
 teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
