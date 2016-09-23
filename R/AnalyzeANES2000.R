@@ -27,7 +27,7 @@ cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores)
-MCIter <- 100
+MCIter <- 2000
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
 pti <- proc.time()
