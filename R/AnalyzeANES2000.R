@@ -1,6 +1,7 @@
 ## This is where we'll store our analyses of the ANES data
 ## getwd()
-source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES2000.R")
+## source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES2000.R")
+anes2000 <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/anes2000.csv")
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/RecodeANES2000.R")
 

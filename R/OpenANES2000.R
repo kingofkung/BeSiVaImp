@@ -26,3 +26,7 @@ anes2000 <- anes[anes$vcf0004 == 2000, ]
 
 notmissing2000 <- colSums(!is.na(anes2000)) > 0
 anes2000 <- anes2000[, notmissing2000]
+
+## turns out rmMissings.R changes the location of loc. I changed it back.
+loc <- "/Users/bjr/GitHub/BeSiVaImp/Data/"
+write.csv(anes2000, file = paste0(loc,"anes2000.csv"), row.names = F)
