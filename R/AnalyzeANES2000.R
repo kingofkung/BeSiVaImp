@@ -27,7 +27,7 @@ cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores)
-MCIter <- 2000
+MCIter <- 10000
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
 pti <- proc.time()
@@ -117,36 +117,43 @@ besforms <- c(besforms, ftex, michigan, RnH)
 
 library(speedglm)
 ## Maximum iterations
-maxIT <- 100
+cl <- makeCluster(no_cores)
+clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
+maxIT <- 10000
 sampsize <- round(nrow(anes2000) * .2)
-set.seed(10101)
+clusterExport(cl, c("besforms", "maxIT"))
+clusterExport(cl, c("anes2000"))
+clusterExport(cl, "sampsize")
 pti2 <- proc.time()
 finalout <- lapply(seq_along(besforms), function(u){
     ##
     print(paste("iteration", u))
     ## A loop designed to replicate the monte Carlo simulations of
     ## BeSiVa, but with a single model instead of many.
-    thepcps <- unlist(lapply(1:maxIT, function(i, maxiter = maxIT){
+    thepcps <- unlist(parLapply(cl, 1:maxIT, function(i, you = u, maxiter = maxIT, sampsz = sampsize, dat = anes2000){
+        set.seed(i)
         ## print progress
         ## print(paste0("progress = ", round(i/maxiter * 100), "%" ))
         ## sample the rows
-        subsamp <- sample(1:nrow(anes2000), size = sampsize)
+        subsamp <- sample(1:nrow(dat), size = sampsz)
         ## create the model, making sure to pull out some of the data
         ## mod <- speedglm(besforms[[u]], family = binomial(logit), data = droplevels(anes2000[-subsamp,]), fitted = T)
-        mod <- glm(besforms[[u]], family = binomial(logit), data = anes2000[-subsamp,])
+        mod <- glm(besforms[[you]], family = binomial(logit), data = dat[-subsamp,])
         ## get the predictions and the pcps
         ## predsb <- ifelse(predict(mod, newdata = droplevels(anes2000[subsamp,]), type = "response") > .5, 1, 0)
-        predsb <- predictr(mod, data = anes2000, subsamp, loud = F)
-        junker <- getpcp(predsb, anes2000$bindep[subsamp])
+        predsb <- predictr(mod, data = dat, subsamp, loud = F)
+        junker <- getpcp(predsb, dat$bindep[subsamp])
         ## save the pcps
         junker
     }))
-    })
-ptf2 <- proc.time() - pti2
+})
+stopCluster(cl)
+ptf3 <- proc.time() - pti2
 ##
 finalout <- do.call(cbind, finalout)
-
-
+head(finalout)
+##
+##
 colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ## Make sure we have teixeira's model somewhere.
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
@@ -158,7 +165,8 @@ colnames(finalout)[teixeiraloc] <- "teixeira1987ish"
 colnames(finalout)[michiganloc] <- "CCMS1960ish"
 colnames(finalout)[RnHloc] <- "RnH1993ish"
 ##
-finaloutdf <- as.data.frame(sapply(finalout, summarizeNumerics))
+finaloutdf <- as.data.frame(apply(finalout, 2, summarizeNumerics))
+rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[[1]]))
 ## get bootstrapped confidence intervals
 btstpCI <- apply(finalout, 2, quantile, probs = c(.025, .975), na.rm = T)
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
@@ -195,7 +203,7 @@ graphics.off()
 
 
 ## Start working on a latex table featuring the best models
-mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
+ mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
 lyxout <- outreg(mods[1:14], "latex", showAIC = T)
 ## But look, there's a line with way too many *'s, and -2LLR twice, right here.
 badlineloc <- grep("[*]{5}", lyxout, T)
