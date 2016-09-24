@@ -28,7 +28,7 @@ cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores, type = "FORK")
-MCIter <- 10000
+MCIter <- 100
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
 pti <- proc.time()
@@ -89,7 +89,7 @@ graphics.off()
 anesh <- hist(savpcp, prob = T)
 ## anesh$counts <- anesh$counts/sum(anesh$counts)
 dev.new()
-pdf(paste0(writeloc,"ANES2000",i,"runs pcpHist",note, ".pdf"))
+pdf(paste0(writeloc,"ANES2000", MCIter,"runs pcpHist",note, ".pdf"))
 plot(anesh, main = "Histogram of 2000 ANES PCPS")
 ##
 ## plot normal distribution
@@ -120,7 +120,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 cl <- makeCluster(no_cores, type = "FORK")
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
-maxIT <- 100
+maxIT <- 1000
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes2000"))

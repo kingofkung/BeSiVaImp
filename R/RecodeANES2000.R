@@ -1,5 +1,7 @@
 ## Move the recodes to another file, to make everything slightly more managable
 
+if(!exists("anes2000")) anes2000 <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/anes2000.csv")
+
 anes2000$bindep <- ifelse(anes2000$vcf0702 %in% "2. Yes, voted", 1, 0)
 
 
@@ -84,3 +86,12 @@ table(anes2000$church, anes2000$churchBin, useNA = "always")
 contactVars <- grep("Contact", names(varstochange), value = T)
 lapply(contactVars, function(x) sort(unique(anes2000[,x])))
 ## Looks like we're already there. NVM.
+
+##looks like poleff wasn't properly recoded. Let's fix that.
+effrec <- as.character(anes2000[, grep("Eff", colnames(anes2000))])
+## View(sort(unique(effrec)))
+effrec[grep("Agree", effrec)] <- 2
+effrec[grep("Disagree", effrec)] <- 0
+effrec[grep("Neither", effrec)] <- 1
+anes2000$polEff <- as.character(anes2000$polEff)
+anes2000$polEff <- effrec
