@@ -1,6 +1,7 @@
 ## This is where we'll store our analyses of the ANES data
 ## getwd()
 ## source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES2000.R")
+rm(list = ls())
 anes2000 <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/anes2000.csv")
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/RecodeANES2000.R")
@@ -26,7 +27,7 @@ cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 
 ## First effort at parallel programming:
-cl <- makeCluster(no_cores)
+cl <- makeCluster(no_cores, type = "FORK")
 MCIter <- 10000
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
@@ -115,11 +116,11 @@ michigan <- formula(bindep ~ pid7)
 RnH <- formula(bindep ~ polEff + ed + incGroup + partyContact + otherContact + churchBin)
 besforms <- c(besforms, ftex, michigan, RnH)
 
-library(speedglm)
+## library(speedglm)
 ## Maximum iterations
-cl <- makeCluster(no_cores)
+cl <- makeCluster(no_cores, type = "FORK")
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
-maxIT <- 10000
+maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes2000"))
