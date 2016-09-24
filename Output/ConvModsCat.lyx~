@@ -177,7 +177,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  Education           &0.372*** &0.367*** &0.372*** &0.434*** &0.423*** &0.422***
+  ednum           &0.372*** &0.367*** &0.372*** &0.434*** &0.423*** &0.422***
  &0.409*** 
 \backslash
 tabularnewline
@@ -201,7 +201,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  Party ID Strength            & .
+  pidstr            & .
       &0.418*** &0.415*** &0.340*** &0.337*** &0.338*** &0.356*** 
 \backslash
 tabularnewline
@@ -225,7 +225,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  Time in House      & .
+  houseTimeNum      & .
         & .
       &0.237*** &0.168*** &0.160** &0.158** &0.164** 
 \backslash
@@ -250,7 +250,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  Age               & .
+  age               & .
         & .
         & .
       &0.026*** &0.060*** &0.059*** &0.057** 
@@ -276,7 +276,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  Age$^2$             & .
+  agesq             & .
         & .
         & .
         & .
@@ -303,7 +303,8 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  Female      & .
+  sex2.
+ Female      & .
         & .
         & .
         & .
@@ -331,7 +332,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  Minority          & .
+  minority          & .
         & .
         & .
         & .
