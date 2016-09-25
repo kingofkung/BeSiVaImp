@@ -25,6 +25,9 @@ cor.test(anes2000$age, anes2000$houseTimeNum, use = "pairwise.complete.obs")
 cor.test(anes2000$houseTimeNum, anes2000$incNum, use = "pairwise.complete.obs")
 cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
+bstst <- besiva("bindep", names(varstoreallyuse), anes2000, showoutput = F, showforms = F)
+
+modmaker(bstst$forms[[1]], anes2000[bstst$tstrows,])
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores, type = "FORK")
