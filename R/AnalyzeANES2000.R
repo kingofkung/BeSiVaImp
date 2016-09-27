@@ -21,13 +21,8 @@ note <- ""
 
 varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
 
-cor.test(anes2000$age, anes2000$houseTimeNum, use = "pairwise.complete.obs")
-cor.test(anes2000$houseTimeNum, anes2000$incNum, use = "pairwise.complete.obs")
-cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
-bstst <- besiva("bindep", names(varstoreallyuse), anes2000, showoutput = F, showforms = F)
 
-modmaker(bstst$forms[[1]], anes2000[bstst$tstrows,])
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores, type = "FORK")
@@ -100,11 +95,14 @@ ptf3 <- proc.time() - pti2
 finalout <- do.call(cbind, finalout)
 
 
-
+## A few correlations/ one thing that seemed important to have
 
 length(which(unlist(lapply(savvars, function(x) "age" %in% x))))
 length(which(unlist(lapply(savvars, function(x) "age" %in% x | "agesq" %in% x))))
 length(which(unlist(lapply(savvars, function(x) "age" %in% x & "agesq" %in% x))))
+cor.test(anes2000$age, anes2000$houseTimeNum, use = "pairwise.complete.obs")
+cor.test(anes2000$houseTimeNum, anes2000$incNum, use = "pairwise.complete.obs")
+cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 
 ## Make plot to explain number of variables selected
