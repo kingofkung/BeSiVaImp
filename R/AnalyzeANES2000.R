@@ -52,6 +52,57 @@ savvartab <- sort(table(savvarsU), decreasing = T)
 
 
 
+besforms <- lapply(seq_along(savvartab), function(x){
+    ivtxt <- paste(names(savvartab)[1:x], collapse = " + ")
+    wdv <- paste0("bindep ~ ", ivtxt)
+    as.formula(wdv)
+})
+##
+ftex <- formula(bindep ~ daysreadpaper + pidstr + polEff + ednum + incNum + age + houseTimeNum + divorced + minority + south + sex)
+michigan <- formula(bindep ~ pid7)
+RnH <- formula(bindep ~ polEff + ed + incGroup + partyContact + otherContact + churchBin)
+besforms <- c(besforms, ftex, michigan, RnH)
+
+## Maximum iterations
+cl <- makeCluster(no_cores)
+clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
+maxIT <- 100
+sampsize <- round(nrow(anes2000) * .2)
+clusterExport(cl, c("besforms", "maxIT"))
+clusterExport(cl, c("anes2000"))
+clusterExport(cl, "sampsize")
+pti2 <- proc.time()
+finalout <- lapply(seq_along(besforms), function(u){
+    ##
+    print(paste("iteration", u))
+    ## A loop designed to replicate the monte Carlo simulations of
+    ## BeSiVa, but with a single model instead of many.
+    thepcps <- unlist(parLapply(cl, 1:maxIT, function(i, you = u, maxiter = maxIT, sampsz = sampsize, dat = anes2000){
+        set.seed(i)
+        ## print progress
+        ## print(paste0("progress = ", round(i/maxiter * 100), "%" ))
+        ## sample the rows
+        subsamp <- sample(1:nrow(dat), size = sampsz)
+        ## create the model, making sure to pull out some of the data
+        ## mod <- speedglm(besforms[[u]], family = binomial(logit), data = droplevels(anes2000[-subsamp,]), fitted = T)
+        mod <- glm(besforms[[you]], family = binomial(logit), data = dat[-subsamp,])
+        ## get the predictions and the pcps
+        ## predsb <- ifelse(predict(mod, newdata = droplevels(anes2000[subsamp,]), type = "response") > .5, 1, 0)
+        predsb <- predictr(mod, data = dat, subsamp, loud = F)
+        junker <- getpcp(predsb, dat$bindep[subsamp])
+        ## save the pcps
+        junker
+    }))
+})
+stopCluster(cl)
+ptf3 <- proc.time() - pti2
+##
+finalout <- do.call(cbind, finalout)
+head(finalout)
+
+
+
+
 length(which(unlist(lapply(savvars, function(x) "age" %in% x))))
 length(which(unlist(lapply(savvars, function(x) "age" %in% x | "agesq" %in% x))))
 length(which(unlist(lapply(savvars, function(x) "age" %in% x & "agesq" %in% x))))
@@ -115,54 +166,8 @@ legend("topright", legend = c("Normal Distribution", "Kernel Density"), lty = c(
 graphics.off()
 
 
-besforms <- lapply(seq_along(uniqueVar), function(x){
-    ivtxt <- paste(uniqueVar[1:x], collapse = " + ")
-    wdv <- paste0("bindep ~ ", ivtxt)
-    as.formula(wdv)
-})
-##
-ftex <- formula(bindep ~ daysreadpaper + pidstr + polEff + ednum + incNum + age + houseTimeNum + divorced + minority + south + sex)
-michigan <- formula(bindep ~ pid7)
-RnH <- formula(bindep ~ polEff + ed + incGroup + partyContact + otherContact + churchBin)
-besforms <- c(besforms, ftex, michigan, RnH)
 
-## library(speedglm)
-## Maximum iterations
-cl <- makeCluster(no_cores)
-clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
-maxIT <- 100
-sampsize <- round(nrow(anes2000) * .2)
-clusterExport(cl, c("besforms", "maxIT"))
-clusterExport(cl, c("anes2000"))
-clusterExport(cl, "sampsize")
-pti2 <- proc.time()
-finalout <- lapply(seq_along(besforms), function(u){
-    ##
-    print(paste("iteration", u))
-    ## A loop designed to replicate the monte Carlo simulations of
-    ## BeSiVa, but with a single model instead of many.
-    thepcps <- unlist(parLapply(cl, 1:maxIT, function(i, you = u, maxiter = maxIT, sampsz = sampsize, dat = anes2000){
-        set.seed(i)
-        ## print progress
-        ## print(paste0("progress = ", round(i/maxiter * 100), "%" ))
-        ## sample the rows
-        subsamp <- sample(1:nrow(dat), size = sampsz)
-        ## create the model, making sure to pull out some of the data
-        ## mod <- speedglm(besforms[[u]], family = binomial(logit), data = droplevels(anes2000[-subsamp,]), fitted = T)
-        mod <- glm(besforms[[you]], family = binomial(logit), data = dat[-subsamp,])
-        ## get the predictions and the pcps
-        ## predsb <- ifelse(predict(mod, newdata = droplevels(anes2000[subsamp,]), type = "response") > .5, 1, 0)
-        predsb <- predictr(mod, data = dat, subsamp, loud = F)
-        junker <- getpcp(predsb, dat$bindep[subsamp])
-        ## save the pcps
-        junker
-    }))
-})
-stopCluster(cl)
-ptf3 <- proc.time() - pti2
-##
-finalout <- do.call(cbind, finalout)
-head(finalout)
+
 ##
 ##
 colnames(finalout) <- paste0("iteration", seq_along(besforms))
