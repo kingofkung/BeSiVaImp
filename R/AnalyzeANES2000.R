@@ -98,7 +98,6 @@ stopCluster(cl)
 ptf3 <- proc.time() - pti2
 ##
 finalout <- do.call(cbind, finalout)
-head(finalout)
 
 
 
@@ -184,12 +183,13 @@ colnames(finalout)[RnHloc] <- "RnH1993ish"
 finaloutdf <- as.data.frame(apply(finalout, 2, summarizeNumerics))
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[[1]]))
 ## get bootstrapped confidence intervals
-btstpCI <- apply(finalout, 2, quantile, probs = c(.025, .975), na.rm = T)
+btstpCI <- apply(finalout, 2, quantile, probs = c(.025, .975), na.rm = T) *100
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
+modalcat <- prop.table(table(anes2000$bindep)) * 100
 ##
 write.csv(finaloutdf, paste0(writeloc, "pcpsum", "maxIter", maxIT, note, ".csv"))
 ##
-finaloutmeans <- apply(finalout, 2, mean)
+finaloutmeans <- apply(finalout, 2, mean) * 100
 ##
 ## Possible to add error bars to each point/ confidence bands on lines?
 algIters <- grep("iteration", names(finaloutmeans))
@@ -198,17 +198,17 @@ dev.new()
 pdf(file = paste0(writeloc,"maxIter", maxIT,"numPts",note, ".pdf"))
 plot(
     x = seq_along(finaloutmeans[algIters]),
-    finaloutmeans[algIters],
-    ylab = "PCPs",
+    y = finaloutmeans[algIters],
+    ylab = "Percent Correctly Predicted",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
-    type = "p", ylim = c(0.45, 0.75))
+    type = "p", ylim = c(0.45, 0.75)*100)
 lapply(seq_along(algIters), function(x) segments(x, btstpCI[2,x], x, btstpCI[1,x]))
 lapply(seq_along(algIters), function(g) segments(x0 = g - hbar, y0 = btstpCI[1,g], x1 = g + hbar , y1 = btstpCI[1,g]))
 lapply(seq_along(algIters), function(g) segments(x0 = g - hbar, y0 = btstpCI[2,g], x1 = g + hbar , y1 = btstpCI[2,g]))
 abline(h = finaloutmeans["teixeira1987ish"],col = "red")
 abline(h = finaloutmeans["CCMS1960ish"],col = "green")
 abline(h = finaloutmeans["RnH1993ish"], col = "purple")
-abline(h = prop.table(table(anes2000$bindep)), col = "blue")
+abline(h = modalcat, col = "blue")
 ## Which one is largest?
 points(x = which(finaloutmeans == max(finaloutmeans)), max(finaloutmeans), pch = 4, lwd = 3, col = "red")
 legend("bottomright",
