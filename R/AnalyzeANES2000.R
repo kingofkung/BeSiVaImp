@@ -74,6 +74,13 @@ ggplot(data = proptabdf, aes(x = Var2, y =  Freq)) +
     graphics.off()
 
 svtabdf <- data.frame("Var" = unlist(lapply(seq_along(savvartab), function(x) rep(names(savvartab)[x], savvartab[x]))))
+svtabdf$Var <- as.character(svtabdf$Var)
+datrec <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/uniquevarSels.csv")
+svtabdf$Var <- unlist(lapply(seq_along(datrec[,1]), function(x){
+    svtabdf$Var[svtabdf$Var %in% datrec$Var[x]] <- as.character(datrec$Recode[x])
+    svtabdf$Var[svtabdf$Var %in% datrec$Recode[x]]
+}))
+
 uniqueVar <- unique(svtabdf$Var)
 svtabdf$Var <- factor(svtabdf$Var, levels = uniqueVar[length(uniqueVar):1])
 
@@ -121,9 +128,9 @@ besforms <- c(besforms, ftex, michigan, RnH)
 
 ## library(speedglm)
 ## Maximum iterations
-cl <- makeCluster(no_cores, type = "FORK")
+cl <- makeCluster(no_cores)
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
-maxIT <- 1000
+maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes2000"))
