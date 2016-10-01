@@ -1,6 +1,38 @@
 ## Start working on improvements to catprobfinder
-## make some data
 rm(list = ls())
+
+##' This function gets rid of everything that can slow down a glm
+##' model, without breaking predict.
+##' Based on the notes at
+##' http://www.win-vector.com/blog/2014/05/trimming-the-fat-from-glm-models-in-r/
+##'
+##' @title Removes Unnecessary elements of glm Models
+##' @param mod a glm model
+##' @return just enough of the glm model to make predictions
+##' @author Nina Zumel
+ultimatenullifier <- function(mod){
+    mod$data <- NULL
+    mod$y <- NULL
+    mod$linear.predictors <- NULL
+    mod$weights <- NULL
+    mod$fitted.values <- NULL
+    mod$model <- NULL
+    mod$prior.weights <- NULL
+    mod$residuals <- NULL
+    mod$effects <- NULL
+    mod$qr$qr <- NULL
+##
+    mod$family$variance <- NULL
+    mod$family$def.resids <- NULL
+    mod$family$aic <- NULL
+    mod$family$validmu <- NULL
+    mod$family$simulate <- NULL
+##
+##
+    mod
+}
+
+## make some data
 set.seed(1234)
 x1 <- rnorm(100, 0, 1)
 x2 <- rbinom(100, 2, .5)
@@ -32,17 +64,7 @@ traindat <- data.frame(ytrain, x1, x2,  x3, x4)
 m1 <- glm(ytrain ~ x1 + x2 + x3 + x4, binomial, data = traindat, model = F, y = F)
 format(object.size(m1), "Kb")
 
-m1$data <- NULL
-m1$y <- NULL
-m1$linear.predictors <- NULL
-m1$weights <- NULL
-m1$fitted.values <- NULL
-m1$model <- NULL
-m1$prior.weights <- NULL
-m1$residuals <- NULL
-m1$effects <- NULL
-m1$qr$qr <- NULL
-
+m1 <- ultimatenullifier(m1)
 format(object.size(m1), "Kb")
 
 
