@@ -216,8 +216,25 @@ legend("bottomright",
 graphics.off()
 
 
+##
+
+dev.new()
+pdf(file = paste0(writeloc,"maxIter", maxIT," Just theoreticalModsPCPS",note, ".pdf"))
+par(mar = c(5 - 1.75, 4, 4, 2) + 1.25)
+boxplot(finalout[, c("CCMS1960ish", "teixeira1987ish", "RnH1993ish")]*100,
+        las = 1,
+        xaxt = "n",
+        ylab = "Percent Correctly Predicted",
+        main = "Percent Correctly Predicted among Theoretically Specified Models"
+        )
+axis(1, 1:3,  labels = c("Campbell \net. al 1960", "Teixeira\n 1987",  "Rosenstone\n  and Hansen 2003"), tick = FALSE)
+abline(h = modalcat[2], col = "blue")
+graphics.off()
+
+
+
 ## Start working on a latex table featuring the best models
- mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
+  mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
 lyxout <- outreg(mods[1:14], "latex", showAIC = T)
 ## But look, there's a line with way too many *'s, and -2LLR twice, right here.
 badlineloc <- grep("[*]{5}", lyxout, T)
