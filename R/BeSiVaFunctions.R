@@ -196,6 +196,7 @@ foldmaker <- function(foldnum = 3){}
 besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = TRUE, showforms = TRUE){
         set.seed(sampseed)
         ## divy up data
+        dat <- dat[,c(devee, ivs)]
         testrows <- sample(nrow(dat), round(nrow(dat)* perc))
 
         ## calculate appropriate number of digits to round to
