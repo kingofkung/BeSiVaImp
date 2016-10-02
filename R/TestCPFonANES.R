@@ -24,8 +24,8 @@ glm(bindep~vcf1023b + vcf1023b, data = anes2000, family = binomial)
 
 
 
-bettercpf <- function(data, holdoutRows){
-    goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = data[-holdoutRows , ], tesdat = data[holdoutRows , ]){
+bettercpf <- function(dat, holdoutRows, facvarnames){
+    goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = dat[-holdoutRows , ], tesdat = dat[holdoutRows , ]){
         ## Get the levels for the factor of choice
         fac <- facnames[x]
         trlvls <- levels(trdat[,fac])
@@ -41,8 +41,8 @@ bettercpf <- function(data, holdoutRows){
     ## make sure the names match the data
     names(goodfac) <- facvarnames
     goodfac <- as.data.frame(goodfac)
-    data[holdoutRows, colnames(goodfac)] <- goodfac
-    data
+    dat[holdoutRows, colnames(goodfac)] <- goodfac
+    dat
 }
 
-ames2000 <- bettercpf(anes2000, rowsToHold)
+anes2000 <- bettercpf(anes2000, rowsToHold, facvarnames)
