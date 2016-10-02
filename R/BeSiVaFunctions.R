@@ -196,7 +196,7 @@ dispboth <- function(model, fulldata){
 ##' @author Benjamin Rogers
 modmaker <- function(x, thedat, famille = binomial(), loud = TRUE){
     eval(bquote(
-        try(junker <- glm(.(x), data = model.frame(.(x), thedat), family = famille))
+        try(junker <- glm(.(x), data = model.frame(.(x), thedat), family = famille, model = FALSE, y = FALSE))
     ))
     if(loud == TRUE) eval(bquote(print(.(x))))
 
