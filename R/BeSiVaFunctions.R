@@ -1,6 +1,14 @@
 ## Any functions that were created will be kept separate here
 
-
+##' A Faster way of Eliminating problem Categorical variables
+##'
+##' .. content for \details{} ..
+##' @title
+##' @param dat The data with potential problem variables
+##' @param holdoutRows how the variables are divided
+##' @param facvarnames names of factors variables to check
+##' @return
+##' @author Benjamin Rogers
 bettercpf <- function(dat, holdoutRows, facvarnames){
     goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = dat[-holdoutRows , ], tesdat = dat[holdoutRows , ]){
         ## Get the levels for the factor of choice
