@@ -21,7 +21,7 @@ note <- ""
 
 varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
 
-testbes <- besiva("bindep", varstoreallyuse, anes2000)
+
 
 
 ## First effort at parallel programming:
@@ -61,7 +61,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 cl <- makeCluster(no_cores)
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
-maxIT <- 100
+maxIT <- 1000
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes2000"))
@@ -143,20 +143,20 @@ ggplot(data = svtabdf) +
     coord_flip()
 graphics.off()
 
-
-anesh <- hist(savpcp, prob = T)
+anpcp <- savpcp*100
+anesh <- hist(anpcp, freq = F)
 ## anesh$counts <- anesh$counts/sum(anesh$counts)
 dev.new()
 pdf(paste0(writeloc,"ANES2000", MCIter,"runs pcpHist",note, ".pdf"))
-plot(anesh, main = "Histogram of 2000 ANES PCPS")
+plot(anesh, main = "Histogram of 2000 ANES PCPS", xlab = "Saved PCPs", freq = F)
 ##
 ## plot normal distribution
-savseq <- seq(min(savpcp), max(savpcp), length.out = length(savpcp))
-normedsavseq <- dnorm(x = savseq, mean = mean(savpcp), sd = sd(savpcp))
+savseq <- seq(min(anpcp)-20, max(anpcp)+20, length.out = length(anpcp)*100)
+normedsavseq <- dnorm(x = savseq, mean = mean(anpcp), sd = sd(anpcp))
 lines(x = savseq, y = normedsavseq, lty = 1)
 ##
 ## Plot kernel density
-lines(density(savpcp, na.rm = T), lty = 2)
+lines(density(anpcp, na.rm = T), lty = 2)
 ##
 ## Add a legend
 legend("topright", legend = c("Normal Distribution", "Kernel Density"), lty = c(1, 2) )
@@ -167,7 +167,7 @@ graphics.off()
 
 ##
 ##
-colnames(finalout) <- paste0("iteration", seq_along(besforms))
+  colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ## Make sure we have teixeira's model somewhere.
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
 teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
@@ -193,10 +193,11 @@ finaloutmeans <- apply(finalout, 2, mean) * 100
 algIters <- grep("iteration", names(finaloutmeans))
 hbar <- 0.05
 dev.new()
-pdf(file = paste0(writeloc,"maxIter", maxIT,"numPts",note, ".pdf"))
+jpeg(file = paste0(writeloc,"maxIter", maxIT,"numPts",note, ".jpeg"), width = 504, height = 504, quality = 100)
 plot(
     x = seq_along(finaloutmeans[algIters]),
     y = finaloutmeans[algIters],
+    main = paste("Bootstrapped PCPs For Predictors \n BeSiVa Selected Over", maxIT, "iterations"),
     ylab = "Percent Correctly Predicted",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
     type = "p", ylim = c(0.45, 0.75)*100)
@@ -210,7 +211,7 @@ abline(h = modalcat, col = "blue")
 ## Which one is largest?
 points(x = which(finaloutmeans == max(finaloutmeans)), max(finaloutmeans), pch = 4, lwd = 3, col = "red")
 legend("bottomright",
-       c("BeSiVa", "Teixeira 1987", "Party ID", "RnH",  "Mode for all"),
+       c("BeSiVa", "Teixeira 1987", "Campbell et al. 1960", "Rosenstone And Hansen 2003",  "Mode for all"),
        lty = c(-1, 1, 1, 1, 1), pch = c(1, -1, -1, -1, -1),
        col = c("black", "red", "green", "purple", "blue"))
 graphics.off()
