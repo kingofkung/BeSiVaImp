@@ -90,6 +90,9 @@ facvarnames <- names(facvars[facvars])
 
 
 goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = traindat, tesdat = pdat){
+    ## get which variables are factors
+    facvars <- unlist(lapply(pdat, is.factor))
+    facvarnames <- names(facvars[facvars])
     ## Get the levels for the factor of choice
     fac <- facnames[x]
     trlvls <- levels(trdat[,fac])

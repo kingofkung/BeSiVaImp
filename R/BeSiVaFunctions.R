@@ -1,5 +1,28 @@
 ## Any functions that were created will be kept separate here
 
+
+bettercpf <- function(dat, holdoutRows, facvarnames){
+    goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = dat[-holdoutRows , ], tesdat = dat[holdoutRows , ]){
+        ## Get the levels for the factor of choice
+        fac <- facnames[x]
+        trlvls <- levels(trdat[,fac])
+        teslvls <- levels(tesdat[,fac])
+        ## Figure out which levels are/aren't in the training data.
+        ## These are bad levels, as they screw with our ability to predict
+        badlvlbool <- !teslvls %in% trlvls
+        badlvls <- teslvls[badlvlbool]
+        ## Remove the bad levels, and return the column without the bad levels
+        tesdat[tesdat[, fac] %in% badlvls, fac] <- NA
+        tesdat[ , fac]
+    })
+    ## make sure the names match the data
+    names(goodfac) <- facvarnames
+    goodfac <- as.data.frame(goodfac)
+    dat[holdoutRows, colnames(goodfac)] <- goodfac
+    dat
+}
+
+
 ##' findnew takes two lists, testlist and modlist, and sees
 ##' whether there is a difference in the categories in the two lists.
 ##' @title findnew
@@ -80,11 +103,11 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
     ## variables
     if(loud == T) print(formula(x))
 
-    tryCatch(cpf <- catprobfinder(nx = x, data, rowstouse ), warning = "nu")
-    if(!is.null(cpf$tstdatnu)){
-        thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
-    } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-
+    ## tryCatch(cpf <- catprobfinder(nx = x, data, rowstouse ), warning = "nu")
+    ## if(!is.null(cpf$tstdatnu)){
+    ##     thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
+    ## } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
+    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
     ifelse(thepreds >=.5, 1, 0)
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }
@@ -169,7 +192,10 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
 
         ## calculate appropriate number of digits to round to
         ## if(thresh != 0) digs = -1 * log(thresh, base = 10)
-
+        ## get rid of any variable categories that might be a problem
+        facvars <- unlist(lapply(dat, is.factor))
+        factorVars <- names(facvars[facvars])
+        dat <- bettercpf(dat, testrows, facvarnames = factorVars)
 
         for(i in 1:iters){
             ## Make some formulas
