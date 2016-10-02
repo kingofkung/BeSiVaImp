@@ -32,7 +32,7 @@ clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", 
 pti <- proc.time()
 besresults <- parLapply(cl, 1:MCIter, function(i){
     ## print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
-    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000[, varstoreallyuse],
+    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000[],
                       iters = 5, sampseed = i,
                       showoutput = F, showforms = F, thresh = .001)
     bes2000}
@@ -60,7 +60,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 
 ## Maximum iterations
 cl <- makeCluster(no_cores)
-clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
+clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr", "glmnullifier"))
 maxIT <- 1000
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
@@ -80,7 +80,7 @@ finalout <- lapply(seq_along(besforms), function(u){
         subsamp <- sample(1:nrow(dat), size = sampsz)
         ## create the model, making sure to pull out some of the data
         ## mod <- speedglm(besforms[[u]], family = binomial(logit), data = droplevels(anes2000[-subsamp,]), fitted = T)
-        mod <- glm(besforms[[you]], family = binomial(logit), data = dat[-subsamp,])
+        mod <- glmnullifier(glm(besforms[[you]], family = binomial(logit), data = dat[-subsamp,], model = F, y = F))
         ## get the predictions and the pcps
         ## predsb <- ifelse(predict(mod, newdata = droplevels(anes2000[subsamp,]), type = "response") > .5, 1, 0)
         predsb <- predictr(mod, data = dat, subsamp, loud = F)
@@ -145,14 +145,17 @@ graphics.off()
 
 anpcp <- savpcp*100
 anesh <- hist(anpcp, freq = F)
-## anesh$counts <- anesh$counts/sum(anesh$counts)
+## make stats for normal distribution. This was moved up to allow control over ylim in the plot
+savseq <- seq(min(anpcp)- 10, max(anpcp)+ 10, length.out = length(anpcp)*100)
+normedsavseq <- dnorm(x = savseq, mean = mean(anpcp), sd = sd(anpcp))
+normsavylim <-  c(0, max(normedsavseq) + .00625)
+##
+##
 dev.new()
 pdf(paste0(writeloc,"ANES2000", MCIter,"runs pcpHist",note, ".pdf"))
-plot(anesh, main = "Histogram of 2000 ANES PCPS", xlab = "Saved PCPs", freq = F)
 ##
-## plot normal distribution
-savseq <- seq(min(anpcp)-20, max(anpcp)+20, length.out = length(anpcp)*100)
-normedsavseq <- dnorm(x = savseq, mean = mean(anpcp), sd = sd(anpcp))
+##
+plot(anesh, main = "Histogram of 2000 ANES PCPS", xlab = "Saved PCPs", freq = F, ylim = normsavylim)
 lines(x = savseq, y = normedsavseq, lty = 1)
 ##
 ## Plot kernel density
@@ -162,12 +165,12 @@ lines(density(anpcp, na.rm = T), lty = 2)
 legend("topright", legend = c("Normal Distribution", "Kernel Density"), lty = c(1, 2) )
 graphics.off()
 
-
+summarize(anpcp)
 
 
 ##
 ##
-  colnames(finalout) <- paste0("iteration", seq_along(besforms))
+colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ## Make sure we have teixeira's model somewhere.
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
 teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
@@ -220,7 +223,7 @@ graphics.off()
 ##
 
 dev.new()
-pdf(file = paste0(writeloc,"maxIter", maxIT," Just theoreticalModsPCPS",note, ".pdf"))
+jpeg(file = paste0(writeloc,"maxIter", maxIT," Just theoreticalModsPCPS",note, ".jpg"), width = 504, height = 504, quality = 1000)
 par(mar = c(5 - 1.75, 4, 4, 2) + 1.25)
 boxplot(finalout[, c("CCMS1960ish", "teixeira1987ish", "RnH1993ish")]*100,
         las = 1,
@@ -235,7 +238,7 @@ graphics.off()
 
 
 ## Start working on a latex table featuring the best models
-  mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
+mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
 lyxout <- outreg(mods[1:14], "latex", showAIC = T)
 ## But look, there's a line with way too many *'s, and -2LLR twice, right here.
 badlineloc <- grep("[*]{5}", lyxout, T)
@@ -254,7 +257,7 @@ fixline <- paste(substr(badline, 1, start2LLR2-1), substr(badline, start2LLR2 + 
 ## Possible to get it so we actually have the symbol chi^2, instead of
 ## what we do have?
 ## Think I'll talk with PJ.
-gsub("chi", "\\chi", fixline)
+## gsub("chi", "\\chi", fixline)
 ##
 lyxout[badlineloc] <- fixline
 ##

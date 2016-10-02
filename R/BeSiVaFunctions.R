@@ -1,5 +1,38 @@
 ## Any functions that were created will be kept separate here
 
+
+##' This function gets rid of everything that can slow down a glm
+##' model, without breaking predict.
+##' Based on the notes at
+##' http://www.win-vector.com/blog/2014/05/trimming-the-fat-from-glm-models-in-r/
+##'
+##' @title Removes Unnecessary elements of glm Models
+##' @param mod a glm model
+##' @return just enough of the glm model to make predictions
+##' @author Nina Zumel
+glmnullifier <- function(mod){
+    mod$data <- NULL
+    mod$y <- NULL
+    mod$linear.predictors <- NULL
+    mod$weights <- NULL
+    mod$fitted.values <- NULL
+    mod$model <- NULL
+    mod$prior.weights <- NULL
+    mod$residuals <- NULL
+    mod$effects <- NULL
+    mod$qr$qr <- NULL
+##
+    mod$family$variance <- NULL
+    mod$family$def.resids <- NULL
+    mod$family$aic <- NULL
+    mod$family$validmu <- NULL
+    mod$family$simulate <- NULL
+##
+##
+    mod
+}
+
+
 ##' A Faster way of Eliminating problem Categorical variables
 ##'
 ##' .. content for \details{} ..
