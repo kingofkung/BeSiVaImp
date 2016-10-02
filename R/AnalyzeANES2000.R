@@ -32,7 +32,7 @@ clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", 
 pti <- proc.time()
 besresults <- parLapply(cl, 1:MCIter, function(i){
     ## print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
-    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000,
+    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000[, varstoreallyuse],
                       iters = 5, sampseed = i,
                       showoutput = F, showforms = F, thresh = .001)
     bes2000}
