@@ -13,13 +13,14 @@ no_cores <- detectCores() - 4
 
 
 writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/"
-note <- ""
+note <- "noeduc"
 
 ## head(anes2000)
 
 
 
-varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
+## varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
+ varstoreallyuse <- c( "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
 
 
 testbes <- besiva("bindep", names(varstoreallyuse), anes2000[],
@@ -64,7 +65,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 cl <- makeCluster(no_cores)
 clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr", "glmnullifier"))
-maxIT <- 100
+maxIT <- 1000
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes2000"))
