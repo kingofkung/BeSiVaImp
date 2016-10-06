@@ -228,13 +228,13 @@ graphics.off()
 dev.new()
 jpeg(file = paste0(writeloc,"maxIter", maxIT," Just theoreticalModsPCPS",note, ".jpg"), width = 504, height = 504, quality = 1000)
 par(mar = c(5 - 1.75, 4, 4, 2) + 1.25)
-boxplot(finalout[, c("CCMS1960ish", "teixeira1987ish", "RnH1993ish")]*100,
+boxplot(finalout[, c("CCMS1960ish", "teixeira1987ish", "RnH1993ish", "iteration4")]*100,
         las = 1,
         xaxt = "n",
         ylab = "Percent Correctly Predicted",
-        main = "Percent Correctly Predicted among Theoretically Specified Models"
+        main = "Percent Correctly Predicted among Models"
         )
-axis(1, 1:3,  labels = c("Campbell \net. al 1960", "Teixeira\n 1987",  "Rosenstone\n  and Hansen 2003"), tick = FALSE)
+axis(1, 1:4,  labels = c("Campbell \net. al 1960", "Teixeira\n 1987",  "Rosenstone\n  and Hansen 2003", "BeSiVa"), tick = FALSE)
 abline(h = modalcat[2], col = "blue")
 graphics.off()
 
