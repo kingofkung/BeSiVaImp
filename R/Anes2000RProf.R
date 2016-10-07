@@ -28,3 +28,11 @@ tree1 <- prof.tree(file1)
 str(tree1)
 print(tree1, limit = NULL)
 plot(tree1)
+
+
+library(microbenchmark)
+micbench <- microbenchmark(
+    testbes2 <- besiva("bindep", names(varstoreallyuse), anes2000[],
+                      iters = 5, sampseed = 100000,
+                       showoutput = F, showforms = F)
+)
