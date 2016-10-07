@@ -302,9 +302,9 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
         ## This one gives the list of variables
         intvars <- strsplit( vars, split = "\\s[+]\\s")
         if(showoutput == TRUE) print(intvars)
-        ## glms
-        ## glm(as.formula(paste0(devee, "~", vars)), data = dat)
-        ## strsplit( vars, split = "\\s[+]\\s")
-        if(!exists("oldpcps")) oldpcps <- NULL
-        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows , "intpcps" = oldpcps)
+        ## So when we end the loop, there should only be one set of
+        ## PCPs that are output at any time. This makes sure that the
+        ## one set is the last one before the tie, if there is one.
+        if(length(maxpcp)>1) pcps <- oldpcps
+        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows)
 }
