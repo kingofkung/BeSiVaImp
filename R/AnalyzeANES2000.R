@@ -39,9 +39,6 @@ savpcp <- unlist(lapply(besresults, function(x) unlist(max(x$pcps, na.rm = T))))
 savvarsU <- unlist(savvars)
 savvartab <- sort(table(savvarsU), decreasing = T)
 
-## equalpcps <- lapply(besresults, function(x) x$pcps)
-## equalIntpcps <- lapply(besresults, function(x) x$intpcps)
-## lapply(seq_along(equalpcps), function(x) !all.equal(equalpcps[[x]], equalIntpcps[[x]] ) )
 
 
 besforms <- lapply(seq_along(savvartab), function(x){
