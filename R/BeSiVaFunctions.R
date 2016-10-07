@@ -64,67 +64,6 @@ bettercpf <- function(dat, holdoutRows, facvarnames){
 }
 
 
-##' findnew takes two lists, testlist and modlist, and sees
-##' whether there is a difference in the categories in the two lists.
-##' @title findnew
-##' @param r the list element to be considered. An integer
-##' @param testlist a list of unique elements in categorical variables in the test set
-##' @param modlist a list of unique elements in categorical variables in the model data
-##' @return a list of new elements in each list element
-##' @author Benjamin Rogers
-findnew <- function(r, testlist = testuniques , modlist = moduniques){
-    if(is.factor(testlist[[r]])){
-        jn <- testlist[[r]][ !testlist[[r]] %in% modlist[[r]] ]
-        jn <- jn[!is.na(jn)]
-    } else jn <- 0
-
-    jn
-}
-
-
-
-##' .. content for \description{} (no empty lines) ..
-##'
-##' .. content for \details{} ..
-##' @title catprobfinder
-##' @param nx the glm model we'll be using
-##' @param data The dataset from the models
-##' @param testrows The rows designating the test set
-##' @return the test data set with the new categories set as NA's,
-##'     ready to be plugged into the predict function in predictr
-##' @author Benjamin Rogers
-catprobfinder <- function(nx, data, testrows){
-
-    ivsused <- all.vars(formula(nx))[-1]
-    ## print(ivsused)
-
-    tdat <- data[testrows, ivsused, drop = FALSE]
-    testuniques <- lapply(tdat, function(x) unique(na.omit(x)))
-
-    mdat <- model.frame(nx)[, -1, drop = FALSE]
-    moduniques <- lapply(mdat, function(x) unique(na.omit(x)))
-
-    ## newlvls <- lapply(1:length(testuniques), findnew, testuniques, moduniques)
-    newlvls <-lapply(1:length(testuniques),
-                     function(x)  testuniques[[x]][!testuniques[[x]] %in% moduniques[[x]]] )
-
-
-    nNewcats <- sum(unlist(lapply(newlvls, length)))
-
-    if(nNewcats > 0){
-        tdatnu <- data.frame(lapply(seq_along(newlvls), function(i){
-            tdat[tdat[,i] %in% newlvls[[i]], i] <- NA
-            tdat[,i]}
-            ))
-        colnames(tdatnu) <- ivsused
-
-    } else tdatnu <- NULL
-
-    list("newlevels" = newlvls, "numnewcats" = nNewcats,
-         "muniques" = moduniques, "tuniques" = testuniques,
-         "tstdatnu" = tdatnu)
-
-}
 
 
 ##' predictr
