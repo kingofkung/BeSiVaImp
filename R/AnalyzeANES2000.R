@@ -15,6 +15,8 @@ no_cores <- detectCores() - 4
 writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/"
 note <- ""
 
+varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
+
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores, type = "FORK")
@@ -33,10 +35,13 @@ ptf <- proc.time() - pti
 stopCluster(cl)
 ##
 savvars <- lapply(besresults, function(x) unlist(x$intvars))
-savpcp <- unlist(lapply(besresults, function(x) unlist(max(x$intpcps, na.rm = T))))
+savpcp <- unlist(lapply(besresults, function(x) unlist(max(x$pcps, na.rm = T))))
 savvarsU <- unlist(savvars)
 savvartab <- sort(table(savvarsU), decreasing = T)
 
+## equalpcps <- lapply(besresults, function(x) x$pcps)
+## equalIntpcps <- lapply(besresults, function(x) x$intpcps)
+## lapply(seq_along(equalpcps), function(x) !all.equal(equalpcps[[x]], equalIntpcps[[x]] ) )
 
 
 besforms <- lapply(seq_along(savvartab), function(x){

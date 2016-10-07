@@ -279,7 +279,7 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
             ## So it turned out that if there was a tie, the code
             ## would return an error. To remedy this, I break out of
             ## the for loop if we get more than 1 with a maximum pcp.
-            if(length(maxpcp)>1) {
+            if(length(maxpcp) > 1) {
                 if(i == 1) oldpcps <- pcps
                 tieforms <- forms[maxpcp]
                 if(showoutput == TRUE) print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
@@ -305,6 +305,6 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
         ## So when we end the loop, there should only be one set of
         ## PCPs that are output at any time. This makes sure that the
         ## one set is the last one before the tie, if there is one.
-        if(length(maxpcp)>1) pcps <- oldpcps
-        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows)
+        if(length(maxpcp) > 1) pcps <- oldpcps
+        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows, "intpcps" <- oldpcps)
 }
