@@ -21,11 +21,18 @@ note <- ""
 
 varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
 
-
+Rprof(file1 <- paste0(writeloc, "testRprof.txt"))
 testbes <- besiva("bindep", names(varstoreallyuse), anes2000[],
                       iters = 5, sampseed = 100000,
                       showoutput = F, showforms = F)
-testbes$intvars
+Rprof()
+summaryRprof(file1)
+
+library(prof.tree)
+tree1 <- prof.tree(file1)
+str(tree1)
+print(tree1, limit = NULL)
+plot(tree1)
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores, type = "FORK")
@@ -35,7 +42,7 @@ clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", 
 pti <- proc.time()
 besresults <- parLapply(cl, 1:MCIter, function(i){
     ## print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
-    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000[],
+    bes2000 <- besiva("bindep", names(varstoreallyuse), anes2000,
                       iters = 5, sampseed = i,
                       showoutput = F, showforms = F, thresh = .001)
     bes2000}
