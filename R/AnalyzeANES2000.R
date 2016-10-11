@@ -22,7 +22,7 @@ varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", 
 cl <- makeCluster(no_cores, type = "FORK")
 MCIter <- 100
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
-clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr"))
+clusterExport(cl, c("glmnullifier", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr"))
 pti <- proc.time()
 besresults <- parLapply(cl, 1:MCIter, function(i){
     ## print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
@@ -54,7 +54,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 
 ## Maximum iterations
 cl <- makeCluster(no_cores)
-clusterExport(cl, c("findnew", "catprobfinder","modmaker",  "besiva", "getpcp", "predictr", "glmnullifier"))
+clusterExport(cl, c("glmnullifier", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr"))
 maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
@@ -91,12 +91,12 @@ finalout <- do.call(cbind, finalout)
 
 ## A few correlations/ one thing that seemed important to have
 
-length(which(unlist(lapply(savvars, function(x) "age" %in% x))))
-length(which(unlist(lapply(savvars, function(x) "age" %in% x | "agesq" %in% x))))
-length(which(unlist(lapply(savvars, function(x) "age" %in% x & "agesq" %in% x))))
-cor.test(anes2000$age, anes2000$houseTimeNum, use = "pairwise.complete.obs")
-cor.test(anes2000$houseTimeNum, anes2000$incNum, use = "pairwise.complete.obs")
-cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
+## length(which(unlist(lapply(savvars, function(x) "age" %in% x))))
+## length(which(unlist(lapply(savvars, function(x) "age" %in% x | "agesq" %in% x))))
+## length(which(unlist(lapply(savvars, function(x) "age" %in% x & "agesq" %in% x))))
+## cor.test(anes2000$age, anes2000$houseTimeNum, use = "pairwise.complete.obs")
+## cor.test(anes2000$houseTimeNum, anes2000$incNum, use = "pairwise.complete.obs")
+## cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 
 ## Make plot to explain number of variables selected
