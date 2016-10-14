@@ -93,5 +93,6 @@ effrec <- as.character(anes2000[, grep("Eff", colnames(anes2000))])
 effrec[grep("Agree", effrec)] <- 2
 effrec[grep("Disagree", effrec)] <- 0
 effrec[grep("Neither", effrec)] <- 1
+effrec[grep("DK", effrec)] <- NA
 anes2000$polEff <- as.character(anes2000$polEff)
-anes2000$polEff <- effrec
+anes2000$polEff <- as.numeric(effrec)

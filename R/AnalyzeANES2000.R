@@ -48,8 +48,8 @@ besforms <- lapply(seq_along(savvartab), function(x){
 })
 ##
 ftex <- formula(bindep ~ daysreadpaper + pidstr + polEff + ednum + incNum + age + houseTimeNum + divorced + minority + south + sex)
-michigan <- formula(bindep ~ pid7)
-RnH <- formula(bindep ~ polEff + ed + incGroup + partyContact + otherContact + churchBin)
+michigan <- formula(bindep ~ pidstr)
+RnH <- formula(bindep ~ polEff + ednum + incNum + partyContact + otherContact + churchBin)
 besforms <- c(besforms, ftex, michigan, RnH)
 
 ## Maximum iterations
@@ -233,7 +233,8 @@ graphics.off()
 
 ## Start working on a latex table featuring the best models
 mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
-lyxout <- outreg(mods[1:14], "latex", showAIC = T)
+names(mods) <- colnames(finalout)
+lyxout <- outreg(mods[14:16], "latex", showAIC = T)
 ## But look, there's a line with way too many *'s, and -2LLR twice, right here.
 badlineloc <- grep("[*]{5}", lyxout, T)
 badline <- lyxout[badlineloc]
