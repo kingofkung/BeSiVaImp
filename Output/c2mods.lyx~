@@ -97,8 +97,8 @@ hline
 
 \begin_layout Plain Layout
 
-                 & Iteration1 & Iteration2 & Iteration3 & Iteration4 & Iteration
-5 & Iteration6   
+                 & Iteration 1 & Iteration 2 & Iteration 3 & Iteration 4
+ & Iteration 5 & Iteration 6   
 \backslash
 tabularnewline
 \end_layout
@@ -536,8 +536,8 @@ hline
 
 \begin_layout Plain Layout
 
-                 & iteration7 & iteration8 & iteration9 & iteration10 &
- iteration11 & iteration12 & iteration13   
+                 & Iteration7 & Iteration8 & Iteration9 & Iteration10 &
+ Iteration11 & Iteration12 & Iteration13   
 \backslash
 tabularnewline
 \end_layout
@@ -885,7 +885,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  PartyContact      & .
+  NoPartyContact      & .
         & .
         & .
         & .
@@ -1130,6 +1130,591 @@ end{tabular}
 \begin_layout Standard
 \begin_inset ERT
 status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tabular}{*{4}{l}}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                 & Teixeira 1987 & Campbell et al.
+ 1960 & Rosenstone and Hansen 1993   
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                  &Estimate   &Estimate   &Estimate 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(S.E.)   &(S.E.)   &(S.E.) 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  (Intercept)     &-3.424*** &-0.106 &0.817 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.444)   &(0.097)   &(0.427)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Days Read Paper    &0.063*   & .
+        & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.027)   &         &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Party ID Strength          &0.517*** &0.431***   & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.075)   &(0.050)   &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Political Efficacy          &-0.221*   & .
+      &-0.278*** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.086)   &         &(0.083)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Education           &0.403***   & .
+      &0.307*** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.053)   &         &(0.049)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Income          &0.267***   & .
+      &0.239*** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.076)   &         &(0.070)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Age             &0.022***   & .
+        & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.005)   &         &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Time in House    &0.229**   & .
+        & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.072)   &         &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Divorced        &-0.121   & .
+        & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.206)   &         &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Minority        &0.029   & .
+        & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.178)   &         &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  South          &-0.089   & .
+        & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.153)   &         &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Female    &-0.062   & .
+        & .
+      
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &(0.150)   &         &        
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  NoPartyContact      & .
+        & .
+      &-1.478*** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &(0.191)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  NoOtherContact      & .
+        & .
+      &-0.587 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &(0.304)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  Church Binary        & .
+        & .
+      &0.551*** 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                &         &         &(0.147)  
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+N                 &1289       &1792       &1298       
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Deviance         &1155.593   &2232.100   &1196.546   
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+$-2LLR (Model 
+\backslash
+chi^2)$       & 280.212       & 78.031       & 253.305 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+AIC
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1179.593
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 2236.100
+\end_layout
+
+\begin_layout Plain Layout
+
+     & 1210.546
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+multicolumn{4}{c}{${*  p}
+\backslash
+le 0.05$${*
+\backslash
+!
+\backslash
+!*  p}
+\backslash
+le 0.01$${*
+\backslash
+!
+\backslash
+!*
+\backslash
+!
+\backslash
+!*  p}
+\backslash
+le 0.001$}
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
 
 \begin_layout Plain Layout
 

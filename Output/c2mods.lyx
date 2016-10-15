@@ -54,7 +54,7 @@
 \shortcut idx
 \color #008000
 \end_index
-\paperwidth 8.5in
+\paperwidth 10.5in
 \paperheight 11in
 \secnumdepth 3
 \tocdepth 3
@@ -97,8 +97,8 @@ hline
 
 \begin_layout Plain Layout
 
-                 & Iteration1 & Iteration2 & Iteration3 & Iteration4 & Iteration
-5 & Iteration6   
+                 & Iteration 1 & Iteration 2 & Iteration 3 & Iteration 4
+ & Iteration 5 & Iteration 6   
 \backslash
 tabularnewline
 \end_layout
@@ -379,8 +379,10 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-$-2LLR (Model chi^2)$        & 141.568         & 204.886       & 231.273  
-     & 290.672       & 294.574       & 295.738 
+$-2LLR (Model 
+\backslash
+chi^2)$        & 141.568         & 204.886       & 231.273       & 290.672 
+      & 294.574       & 295.738 
 \backslash
 tabularnewline
 \end_layout
@@ -536,8 +538,8 @@ hline
 
 \begin_layout Plain Layout
 
-                 & iteration7 & iteration8 & iteration9 & iteration10 &
- iteration11 & iteration12 & iteration13   
+                 & Iteration 7 & Iteration 8 & Iteration 9 & Iteration 10
+ & Iteration 11 & Iteration 12 & Iteration 13   
 \backslash
 tabularnewline
 \end_layout
@@ -885,7 +887,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  PartyContact      & .
+  NoPartyContact      & .
         & .
         & .
         & .
@@ -989,8 +991,10 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-$-2LLR (Model chi^2)$        & 307.526         & 306.695       & 315.261  
-     & 315.555       & 323.634       & 388.614       & 389.248 
+$-2LLR (Model 
+\backslash
+chi^2)$        & 307.526         & 306.695       & 315.261       & 315.555 
+      & 323.634       & 388.614       & 389.248 
 \backslash
 tabularnewline
 \end_layout
@@ -1151,7 +1155,8 @@ hline
 
 \begin_layout Plain Layout
 
-                 & teixeira1987ish & CCMS1960ish & RnH1993ish   
+                 & Teixeira 1987 & Campbell et al.
+ 1960 & Rosenstone and Hansen 1993   
 \backslash
 tabularnewline
 \end_layout
@@ -1206,7 +1211,7 @@ hline
 
 \begin_layout Plain Layout
 
-  (Intercept)     &-3.384*** &0.972*** &1.781*** 
+  (Intercept)     &-3.424*** &-0.106 &0.817 
 \backslash
 tabularnewline
 \end_layout
@@ -1217,7 +1222,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &(0.447)   &(0.120)   &(0.499)  
+                &(0.444)   &(0.097)   &(0.427)  
 \backslash
 tabularnewline
 \end_layout
@@ -1228,7 +1233,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  daysreadpaper    &0.062*   & .
+  Days Read Paper    &0.063*   & .
         & .
       
 \backslash
@@ -1252,8 +1257,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  pidstr          &0.526***   & .
-        & .
+  Party ID Strength          &0.517*** &0.431***   & .
       
 \backslash
 tabularnewline
@@ -1265,7 +1269,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &(0.074)   &         &        
+                &(0.075)   &(0.050)   &        
 \backslash
 tabularnewline
 \end_layout
@@ -1276,8 +1280,8 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  polEff1         &-0.364   & .
-      &-0.462 
+  Political Efficacy          &-0.221*   & .
+      &-0.278*** 
 \backslash
 tabularnewline
 \end_layout
@@ -1288,7 +1292,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &(0.263)   &         &(0.258)  
+                &(0.086)   &         &(0.083)  
 \backslash
 tabularnewline
 \end_layout
@@ -1299,8 +1303,8 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  polEff2         &-0.456**   & .
-      &-0.545** 
+  Education           &0.403***   & .
+      &0.307*** 
 \backslash
 tabularnewline
 \end_layout
@@ -1311,7 +1315,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &(0.175)   &         &(0.172)  
+                &(0.053)   &         &(0.049)  
 \backslash
 tabularnewline
 \end_layout
@@ -1322,9 +1326,8 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  polEff9.
- DK; not sure; it depends; can't say; refused to say    &-2.015   & .
-      &-2.305* 
+  Income          &0.267***   & .
+      &0.239*** 
 \backslash
 tabularnewline
 \end_layout
@@ -1335,7 +1338,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &(1.035)   &         &(0.952)  
+                &(0.076)   &         &(0.070)  
 \backslash
 tabularnewline
 \end_layout
@@ -1346,55 +1349,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  ednum           &0.402***   & .
-        & .
-      
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &(0.052)   &         &        
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  incNum          &0.265***   & .
-        & .
-      
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &(0.077)   &         &        
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  age             &0.022***   & .
+  Age             &0.022***   & .
         & .
       
 \backslash
@@ -1418,7 +1373,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  houseTimeNum    &0.225**   & .
+  Time in House    &0.229**   & .
         & .
       
 \backslash
@@ -1442,7 +1397,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  divorced        &-0.130   & .
+  Divorced        &-0.121   & .
         & .
       
 \backslash
@@ -1466,7 +1421,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  minority        &0.009   & .
+  Minority        &0.029   & .
         & .
       
 \backslash
@@ -1479,7 +1434,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &(0.177)   &         &        
+                &(0.178)   &         &        
 \backslash
 tabularnewline
 \end_layout
@@ -1490,7 +1445,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  south1          &-0.095   & .
+  South          &-0.089   & .
         & .
       
 \backslash
@@ -1514,8 +1469,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  sex2.
- Female    &-0.053   & .
+  Female    &-0.062   & .
         & .
       
 \backslash
@@ -1539,160 +1493,9 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  pid72.
- Weak Democrat      & .
-      &-0.423*   & .
-      
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &(0.174)   &        
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  pid73.
- Independent - Democrat      & .
-      &-0.588***   & .
-      
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &(0.173)   &        
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  pid74.
- Independent - Independent      & .
-      &-1.333***   & .
-      
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &(0.182)   &        
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  pid75.
- Independent - Republican      & .
-      &-0.186   & .
-      
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &(0.186)   &        
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  pid76.
- Weak Republican      & .
-      &-0.250   & .
-      
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &(0.189)   &        
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  pid77.
- Strong Republican      & .
-      &0.588**   & .
-      
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &(0.210)   &        
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  ed2.
- 9-12 grades ('high school'), no diploma/equivalency      & .
+  NoPartyContact      & .
         & .
-      &-0.482 
+      &-1.478*** 
 \backslash
 tabularnewline
 \end_layout
@@ -1703,7 +1506,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &         &         &(0.409)  
+                &         &         &(0.191)  
 \backslash
 tabularnewline
 \end_layout
@@ -1714,10 +1517,9 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  ed3.
- 12 grades, diploma or equivalency      & .
+  NoOtherContact      & .
         & .
-      &0.094 
+      &-0.587 
 \backslash
 tabularnewline
 \end_layout
@@ -1728,7 +1530,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &         &         &(0.355)  
+                &         &         &(0.304)  
 \backslash
 tabularnewline
 \end_layout
@@ -1739,10 +1541,9 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  ed5.
- Some college, no degree; junior/community college      & .
+  Church Binary        & .
         & .
-      &0.489 
+      &0.551*** 
 \backslash
 tabularnewline
 \end_layout
@@ -1753,232 +1554,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-                &         &         &(0.359)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  ed6.
- BA level degrees      & .
-        & .
-      &1.324*** 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.402)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  ed7.
- Advanced degrees incl.
- LLB      & .
-        & .
-      &1.544** 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.489)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  incGroup2.
- 17 to 33 percentile      & .
-        & .
-      &0.580** 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.211)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  incGroup3.
- 34 to 67 percentile      & .
-        & .
-      &0.393 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.213)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  incGroup4.
- 68 to 95 percentile      & .
-        & .
-      &0.917*** 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.250)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  incGroup5.
- 96 to 100 percentile      & .
-        & .
-      &0.960* 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.462)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  partyContact2.
- No contact by major party      & .
-        & .
-      &-1.447*** 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.190)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  otherContact5.
- No      & .
-        & .
-      &-0.589 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.306)  
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-  churchBin1        & .
-        & .
-      &0.552*** 
-\backslash
-tabularnewline
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-                &         &         &(0.148)  
+                &         &         &(0.147)  
 \backslash
 tabularnewline
 \end_layout
@@ -2000,7 +1576,7 @@ hline
 
 \begin_layout Plain Layout
 
-N                 &1295       &1792       &1304       
+N                 &1289       &1792       &1298       
 \backslash
 tabularnewline
 \end_layout
@@ -2023,7 +1599,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-Deviance         &1159.998   &2206.339   &1188.684   
+Deviance         &1155.593   &2232.100   &1196.546   
 \backslash
 tabularnewline
 \end_layout
@@ -2034,8 +1610,9 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-$-2LLR (Model chi^2)$ ***       & 288.152***$-2LLR (Model chi^2)$ ***   
-    & 103.792**       & 273.475* 
+$-2LLR (Model 
+\backslash
+chi^2)$       & 280.212       & 78.031       & 253.305 
 \backslash
 tabularnewline
 \end_layout
@@ -2051,17 +1628,17 @@ AIC
 
 \begin_layout Plain Layout
 
-     & 1187.998
+     & 1179.593
 \end_layout
 
 \begin_layout Plain Layout
 
-     & 2220.339
+     & 2236.100
 \end_layout
 
 \begin_layout Plain Layout
 
-     & 1220.684
+     & 1210.546
 \end_layout
 
 \begin_layout Plain Layout
