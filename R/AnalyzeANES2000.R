@@ -55,7 +55,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 cl <- makeCluster(no_cores)
 clusterExport(cl, c("glmnullifier", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr"))
-maxIT <- 100
+maxIT <- 1000
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes2000"))
