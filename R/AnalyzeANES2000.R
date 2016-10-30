@@ -258,3 +258,6 @@ lyxout[badlineloc] <- fixline
 ##
 ##
 write.table(lyxout, file = paste0("/Users/bjr/GitHub/BeSiVaImp/Output/", "convMods", note,".txt"), row.names = F, col.names = F, quote = FALSE)
+
+library(xtable)
+print.xtable(xtable( t(finaloutdf["mean", ]), digits = 4))

@@ -351,6 +351,13 @@ tabularnewline
 
 \begin_layout Plain Layout
 
+mean(PCP)		&0.6719		&0.6848	&0.6961	&0.7063	&0.7053		&0.7053		
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -809,7 +816,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  DaysReadPaper      & .
+  Days Read Paper      & .
         & .
       &0.059** &0.059** &0.058** &0.073** &0.072** 
 \backslash
@@ -887,7 +894,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  NoPartyContact      & .
+  No Party Contact      & .
         & .
         & .
         & .
@@ -963,6 +970,10 @@ tabularnewline
 
 \begin_layout Plain Layout
 
+mean(PCP)	&0.7053     &0.7025     &0.7035     & 0.7024      &0.6994      &0.6764		&0.67
+61		
+\backslash
+tabularnewline
 \end_layout
 
 \begin_layout Plain Layout
@@ -1493,7 +1504,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  NoPartyContact      & .
+  No Party Contact      & .
         & .
       &-1.478*** 
 \backslash
@@ -1517,7 +1528,7 @@ tabularnewline
 
 \begin_layout Plain Layout
 
-  NoOtherContact      & .
+  No Other Contact      & .
         & .
       &-0.587 
 \backslash
@@ -1587,6 +1598,9 @@ tabularnewline
 
 \begin_layout Plain Layout
 
+mean(PCP)		&0.5674      &0.6703     &0.5567	
+\backslash
+tabularnewline
 \end_layout
 
 \begin_layout Plain Layout
@@ -1714,6 +1728,235 @@ tabularnewline
 
 \backslash
 end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{table}[ht]
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tabular}{lr}
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+Variable or Model & mean(PCP) 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+Education & 0.6719 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Party ID Strength & 0.6848 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Time in House & 0.6961 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Age & 0.7063 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Age$^2$ & 0.7053 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Female & 0.7053 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Minority & 0.7053 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Divorced & 0.7025 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Days Read Paper & 0.7035 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  South & 0.7024 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Church Binary & 0.6994 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  No Party Contact & 0.6764 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  No Other Contact & 0.6761 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Teixeira 1987 & 0.5674 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Campbell et al.
+ 1960  & 0.6703 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Rosenstone and Hansen 1993 & 0.5567 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{table}
 \end_layout
 
 \begin_layout Plain Layout
