@@ -178,7 +178,10 @@ colnames(finalout)[RnHloc] <- "RnH1993ish"
 finaloutdf <- as.data.frame(apply(finalout, 2, summarizeNumerics))
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[[1]]))
 ## get bootstrapped confidence intervals
-btstpCI <- apply(finalout, 2, quantile, probs = c(.025, .975), na.rm = T) *100
+btstpCI <- apply(finalout, 2, quantile, probs = c(.025, .975), na.rm = T) * 100
+## If we want 50% confidence intervals, the line below should give it to us
+## btstpCI <- apply(finalout, 2, quantile, probs = c(.25, .75), na.rm = T) * 100
+
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
 modalcat <- prop.table(table(anes2000$bindep)) * 100
 ##
