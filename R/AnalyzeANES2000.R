@@ -20,7 +20,7 @@ varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", 
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores, type = "FORK")
-MCIter <- 100
+MCIter <- 10000
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
 clusterExport(cl, c("glmnullifier", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr"))
 pti <- proc.time()
