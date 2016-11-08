@@ -26,30 +26,48 @@ anes$pid7num ## And one control. We've used PID as a continuous and control vari
 
 
 
-varstoavoid <- c("ftsanders")
+varstoavoid <- c("ftsanders", "religpew_t", "pid2r", "optintimestamp")
 varstouse <- colnames(anes)[!colnames(anes) %in% varstoavoid]
 
 theform <- formula(ftsanders ~ ladder + birthyr + pid7num + gender)
 
+iVars <- unlist(strsplit(as.character(theform)[[3]], split = "\\s[+]\\s"))
+devee <- as.character(theform)[[2]]
+
 fullmod <- lm(theform, data = anes)
 summary(fullmod)
 
-rmses <- lapply(1:1000, function(i, myform = theform){
+rmses <- lapply(1:10, function(i, myform = theform){
     set.seed(i)
     anesSub <- sample(1:nrow(anes), size = round(nrow(anes) * .2))
-    lmod <- lm(theform, data = anes[-anesSub,] )
+    lmod <- lm(theform, data = anes[-anesSub,], model = F )
     RMSE(predict(lmod, newdata = anes[anesSub,]), anes[anesSub, "ftsanders"], TRUE)
 })
 rmses <- unlist(rmses)
 summarize(rmses)
 hist(rmses)
 
+anesSub <- sample(1:nrow(anes), size = round(nrow(anes) * .2))
+mod1 <- modmakerlm(theform, anes[-anesSub,], loud = T)
 
+getrmses(mod1, anes[, c( devee, iVars)], "ftsanders", anesSub)
 
 ## For when we do it and don't want to rely on caret
 tstrmse <- sqrt(mean(
-    (anes[anesSub, "ftsanders"] - predict(lmod, newdata = anes[anesSub,]))^2,
+    (anes[anesSub, "ftsanders"] - predict(lmod, newdata = anes[anesSub, ]))^2,
     na.rm = TRUE))
+
+source("besivafunctionslm.R")
+
+realvarstouse <- varstouse[sample(1:length(varstouse), 20)]
+
+set.seed(12345)
+tr <- sample(nrow(anes), round(nrow(anes)* .2))
+fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
+
+anesrec <- bettercpf(anes[, c("ftsanders", realvarstouse)], tr,fvars )
+
+besivalm("ftsanders", realvarstouse, anes, iters =4)
 
 ## Outreg is part of the rockchalk package, and it makes it easy to
 ## copy and paste the table into Word.
