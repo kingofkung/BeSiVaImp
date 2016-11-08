@@ -30,6 +30,10 @@ varstoavoid <- c("ftsanders")
 varstouse <- colnames(anes)[!colnames(anes) %in% varstoavoid]
 
 theform <- formula(ftsanders ~ ladder + birthyr + pid7num)
+
+fullmod <- lm(theform, data = anes)
+summary(fullmod)
+
 rmses <- lapply(1:40, function(i, myform = theform){
     set.seed(i)
     anesSub <- sample(1:nrow(anes), size = round(nrow(anes) * .2))
