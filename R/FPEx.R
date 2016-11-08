@@ -29,12 +29,12 @@ anes$pid7num ## And one control. We've used PID as a continuous and control vari
 varstoavoid <- c("ftsanders")
 varstouse <- colnames(anes)[!colnames(anes) %in% varstoavoid]
 
-theform <- formula(ftsanders ~ ladder + birthyr + pid7num)
+theform <- formula(ftsanders ~ ladder + birthyr + pid7num + gender)
 
 fullmod <- lm(theform, data = anes)
 summary(fullmod)
 
-rmses <- lapply(1:40, function(i, myform = theform){
+rmses <- lapply(1:1000, function(i, myform = theform){
     set.seed(i)
     anesSub <- sample(1:nrow(anes), size = round(nrow(anes) * .2))
     lmod <- lm(theform, data = anes[-anesSub,] )
