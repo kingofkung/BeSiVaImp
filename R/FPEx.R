@@ -97,7 +97,7 @@ library(caret)
 varstoavoid <- c("ftsanders")
 varstouse <- colnames(anes)[!colnames(anes) %in% varstoavoid]
 
-
+theform <- formula(ftsanders ~ ladder + birthyr + pid7num)
 rmses <- lapply(1:40, function(i, myform = theform){
     set.seed(i)
     anesSub <- sample(1:nrow(anes), size = round(nrow(anes) * .2))
