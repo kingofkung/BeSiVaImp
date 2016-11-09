@@ -11,6 +11,9 @@ library(caret)
 
 ## Read in and attach the data
 anes <- read.csv("/Users/bjr/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHuntFindings/anes_pilot_2016recoded.csv")
+anes <- anes[, -nearZeroVar(anes)]
+anes <- anes[, unlist(lapply(anes, is.numeric))]
+
 
 ## So I'll be going with a question concerning the sanders Campaign in
 ## the 2016 presidential primary, as it's something no student did and
@@ -58,7 +61,6 @@ tstrmse <- sqrt(mean(
     na.rm = TRUE))
 
 source("besivafunctionslm.R")
-
 realvarstouse <- varstouse[sample(1:length(varstouse), 20)]
 
 set.seed(12345)
@@ -68,6 +70,13 @@ fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 anesrec <- bettercpf(anes[, c("ftsanders", realvarstouse)], tr,fvars )
 
 besivalm("ftsanders", realvarstouse, anes, iters =4)
+
+
+na.omit(anes[-tr, c("ftsanders", "skintone", "skintone_mob", "ideo5num")])
+
+
+besivalm("mpg", colnames(mtcars)[-1], mtcars, sampseed = 2)
+
 
 ## Outreg is part of the rockchalk package, and it makes it easy to
 ## copy and paste the table into Word.
