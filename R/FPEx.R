@@ -69,8 +69,8 @@ fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
 anesrec <- bettercpf(anes[, c("ftsanders", realvarstouse)], tr,fvars )
 
-besivalm("ftsanders", realvarstouse, anes, iters =4)
-
+tst <- besivalm("ftsanders", realvarstouse, anes, iters = 5)
+lm(ftsanders ~ ftblack + skintone_mob + ideo5num + ftmuslim, anes[-tr,])
 
 na.omit(anes[-tr, c("ftsanders", "skintone", "skintone_mob", "ideo5num")])
 
