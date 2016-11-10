@@ -110,10 +110,10 @@ getpcp <- function(preds, realresults, fullpreds = TRUE) {
 
 
 getrmses <- function(model, data, dvname, rowstouse, naremove = TRUE){
-    tstrmse <- sqrt(mean(
-    (data[rowstouse, dvname] - predict(model, newdata = data[rowstouse,]))^2,
-    na.rm = naremove))
-    tstrmse
+    try(tstrmse <- sqrt(mean((data[rowstouse, dvname] -
+             predict(model, newdata = data[rowstouse,]))^2,
+        na.rm = naremove)))
+    try(tstrmse)
 
 }
 
@@ -207,6 +207,8 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## modmaker makes glms according to our specifications
             lms <- lapply(forms, modmakerlm, thedat = dat[-testrows,], loud = showforms)
             rmses <- unlist(lapply(lms, function(x) getrmses(x, data = dat, dvname = devee, testrows )))
+            print(rmses)
+
 
 
             ## predvals <- lapply(lms,

@@ -67,12 +67,10 @@ set.seed(12345)
 tr <- sample(nrow(anes), round(nrow(anes)* .2))
 fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
-anesrec <- bettercpf(anes[, c("ftsanders", realvarstouse)], tr,fvars )
+tst <- besivalm("ftsanders", realvarstouse, anes, iters = 3, showforms = T)
 
-tst <- besivalm("ftsanders", realvarstouse, anes, iters = 5)
-lm(ftsanders ~ ftblack + skintone_mob + ideo5num + ftmuslim, anes[-tr,])
 
-na.omit(anes[-tr, c("ftsanders", "skintone", "skintone_mob", "ideo5num")])
+tstmod <- lm(ftsanders ~ skintone + skintone_mob + ideo5num, data = anes[-tr,])
 
 
 besivalm("mpg", colnames(mtcars)[-1], mtcars, sampseed = 2)
