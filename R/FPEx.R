@@ -67,7 +67,7 @@ set.seed(12345)
 tr <- sample(nrow(anes), round(nrow(anes)* .2))
 fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
-tst <- besivalm("ftsanders", realvarstouse, anes, iters = 3, showforms = T)
+tst <- besivalm("ftsanders", realvarstouse, anes, iters = 5, showforms = T)
 
 
 tstmod <- lm(ftsanders ~ skintone + skintone_mob + ideo5num, data = anes[-tr,])

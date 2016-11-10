@@ -206,15 +206,15 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## issue: when attempting to run speedglm, it doesn't recognize the data
             ## modmaker makes glms according to our specifications
             lms <- lapply(forms, modmakerlm, thedat = dat[-testrows,], loud = showforms)
-            rmses <- unlist(lapply(lms, function(x) getrmses(x, data = dat, dvname = devee, testrows )))
-            print(rmses)
+            ## print(lapply(lms, class))
+            rmses <- unlist(lapply(lms, function(x){
+                ifelse(class(x) == "lm",
+                       yes = getrmses(x, data = dat, dvname = devee, testrows ),
+                       no = NA)
+            }))
+            ## print(sort(rmses))
 
 
-
-            ## predvals <- lapply(lms,
-            ##                    function(x) try(predictr(x,
-            ##                                         data = dat, rowstouse = testrows, loud = showforms)))
-            ## pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))
 
             ## round to a given threshold, as per user preference.
             if(thresh != 0) rmses <- plyr::round_any(rmses, thresh)
@@ -226,7 +226,9 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## So we've got the formula that yields the best
             ## predictions. This is how we extract everything from that
             ## formula after the ~ sign.
-            mincriter <- which(rmses == min(rmses))
+            ## print(paste("min rmse ="))
+            mincriter <- which(rmses %in% sort(rmses)[1])
+            ## print(mincriter)
             ## So it turned out that if there was a tie, the code
             ## would return an error. To remedy this, I break out of
             ## the for loop if we get more than 1 with a maximum pcp.
