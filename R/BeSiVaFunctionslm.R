@@ -68,18 +68,18 @@ bettercpf <- function(dat, holdoutRows, facvarnames){
 
 getrmses <- function(model, data, dvname, rowstouse, naremove = TRUE){
 
-    ## facstat <- lapply(model.frame(model), is.factor)
-    ## facnames <- names(facstat[unlist(facstat)])
+    facstat <- lapply(model.frame(model), is.factor)
+    facnames <- names(facstat[unlist(facstat)])
 
-    ## rownums <- as.numeric(rownames(model.frame(model)))
+    rownums <- as.numeric(rownames(model.frame(model)))
 
-    ## smalldf <- data[c(rownums, rowstouse),]
-    ## smalldf <- bettercpf(smalldf, seq_along(rowstouse) + length(rownums), facnames)
+    smalldf <- data[c(rownums, rowstouse),]
+    smalldf <- bettercpf(smalldf, seq_along(rowstouse) + length(rownums), facnames)
 
 
 
     try(tstrmse <- sqrt(mean((data[rowstouse, dvname] -
-             predict(model, newdata = data[rowstouse,]))^2,
+             predict(model, newdata = smalldf[ seq_along(rowstouse) + length(rownums),]))^2,
         na.rm = naremove)))
     ifelse(exists("tstrmse"), return(tstrmse), NA)
 
@@ -173,6 +173,7 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## modmaker makes glms according to our specifications
             lms <- lapply(forms, modmakerlm, thedat = dat[-testrows,], loud = showforms)
             ## print(lapply(lms, class))
+            browser()
             rmses <- unlist(lapply(lms, function(x){
                 ifelse(class(x) == "lm",
                        yes = getrmses(x, data = dat, dvname = devee, testrows),

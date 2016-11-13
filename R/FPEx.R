@@ -12,24 +12,17 @@ library(caret)
 
 ## Read in and attach the data
 anes <- read.csv("/Users/bjr/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHuntFindings/anes_pilot_2016recoded.csv")
+## Get rid of variables with low variance and high proportions of NA's
 anes <- anes[, -nearZeroVar(anes)]
 mostlynas <- sapply(anes, function(x) sum(is.na(x))/length(x))
-sort(mostlynas)
 anes <- anes[,mostlynas<.5 ]
 
-levels(anes$ua)
-levels(anes$os)
-
-
+## Get the test rows separately
 set.seed(12345)
 tr <- sample(nrow(anes), round(nrow(anes)* .2))
 sort(tr)
-summarize(anes$pid2r)
 
-facs <- unlist(lapply(anes, is.factor))
-anessub <- anes[,c("ua", "os")]
-exbcpf <- bettercpf(anessub, tr, names(anessub))
-any(is.na(exbcpf))
+
 
 varstouse <- colnames(anes)
 
@@ -45,7 +38,9 @@ vars <- c(tst$intvars[[1]][2:5], "religpew")
 
 bsform1 <- as.formula(paste("fttrump ~", paste(vars, collapse = " + ")))
 
-modpull <- lm(bsform1, anes[-tr,], model = F, y = F)
+model <- lm(bsform1, anes[-tr,], model = F, y = F)
+
+
 
 facstat <- lapply(model.frame(model), is.factor)
 facnames <- names(facstat[unlist(facstat)])
@@ -55,5 +50,5 @@ rownums <- as.numeric(rownames(model.frame(modpull)))
 smalldf <- anes[c(rownums, tr),]
 smalldf <- bettercpf(smalldf, seq_along(tr) + length(rownums), facnames)
 
-getrmses(modpull, anes, "fttrump", tr)
+getrmses(model, anes, "fttrump", tr)
 
