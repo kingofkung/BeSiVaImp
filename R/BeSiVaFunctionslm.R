@@ -68,13 +68,20 @@ bettercpf <- function(dat, holdoutRows, facvarnames){
 
 getrmses <- function(model, data, dvname, rowstouse, naremove = TRUE){
 
+    ## facstat <- lapply(model.frame(model), is.factor)
+    ## facnames <- names(facstat[unlist(facstat)])
+
+    ## rownums <- as.numeric(rownames(model.frame(model)))
+
+    ## smalldf <- data[c(rownums, rowstouse),]
+    ## smalldf <- bettercpf(smalldf, seq_along(rowstouse) + length(rownums), facnames)
 
 
 
     try(tstrmse <- sqrt(mean((data[rowstouse, dvname] -
              predict(model, newdata = data[rowstouse,]))^2,
         na.rm = naremove)))
-    try(tstrmse)
+    ifelse(exists("tstrmse"), return(tstrmse), NA)
 
 }
 
@@ -168,8 +175,14 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## print(lapply(lms, class))
             rmses <- unlist(lapply(lms, function(x){
                 ifelse(class(x) == "lm",
+                       yes = getrmses(x, data = dat, dvname = devee, testrows),
                        no = NA)
             }))
+            if(is.character(rmses)){
+                rmses[rmses %in% c("Error in try(tstrmse) : object 'tstrmse' not found\n", "NaN")] <- NA
+                rmses <- as.numeric(rmses)
+            }
+
             ## print(sort(rmses))
 
 
@@ -217,4 +230,5 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
         ## PCPs that are output at any time. This makes sure that the
         ## one set is the last one before the tie, if there is one.
         if(length(mincriter) > 1) rmses <- oldrmses
+        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "lms" = lms, "rmses" = rmses, "tstrows" = testrows)
 }

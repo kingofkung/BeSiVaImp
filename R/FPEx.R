@@ -46,13 +46,14 @@ vars <- c(tst$intvars[[1]][2:5], "religpew")
 bsform1 <- as.formula(paste("fttrump ~", paste(vars, collapse = " + ")))
 
 modpull <- lm(bsform1, anes[-tr,], model = F, y = F)
-facstat <- lapply(model.frame(modpull), is.factor)
+
+facstat <- lapply(model.frame(model), is.factor)
 facnames <- names(facstat[unlist(facstat)])
 
-rownums <- sort(as.numeric(rownames(model.frame(modpull))))
-smalldf <- anes[c(rownums, tr),]
+rownums <- as.numeric(rownames(model.frame(modpull)))
 
+smalldf <- anes[c(rownums, tr),]
 smalldf <- bettercpf(smalldf, seq_along(tr) + length(rownums), facnames)
 
-getrmses(modpull, smalldf, "fttrump", tr)
+getrmses(modpull, anes, "fttrump", tr)
 
