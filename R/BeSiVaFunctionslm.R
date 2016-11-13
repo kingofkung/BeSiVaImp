@@ -46,8 +46,8 @@ bettercpf <- function(dat, holdoutRows, facvarnames){
     goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = dat[-holdoutRows , ], tesdat = dat[holdoutRows , ]){
         ## Get the levels for the factor of choice
         fac <- facnames[x]
-        trlvls <- levels(trdat[,fac])
-        teslvls <- levels(tesdat[,fac])
+        trlvls <- levels(factor(trdat[,fac]))
+        teslvls <- levels(factor(tesdat[,fac]))
         ## Figure out which levels are/aren't in the training data.
         ## These are bad levels, as they screw with our ability to predict
         badlvlbool <- !teslvls %in% trlvls
@@ -66,58 +66,17 @@ bettercpf <- function(dat, holdoutRows, facvarnames){
 
 
 
-##' predictr
-##'
-##' make predictions for the glm models of BeSiVa
-##' @title
-##' @param x a glm model to make predictions
-##' @param data # the entire dataset
-##' @param rowstouse row information for the holdout set. Set to
-##' @param loud If loud is true, then print the formulae. Should be based on showoutput
-##' @return the predictions: Usually vector of 0's and 1's, but this might change in future
-##' @author Benjamin Rogers
-predictr <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
-
-    ## So right here: Somewhere between where the data in newdata
-    ## comes in and the predict function is where we could place our
-    ## variables
-    if(loud == T) print(formula(x))
-
-    ## tryCatch(cpf <- catprobfinder(nx = x, data, rowstouse ), warning = "nu")
-    ## if(!is.null(cpf$tstdatnu)){
-    ##     thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
-    ## } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-    ifelse(thepreds >=.5, 1, 0)
-    ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
-}
-
-##' getpcp
-##'
-##' Get percent correctly predicted (PCP) for the models
-##' @title
-##' @param preds
-##' @param realresults
-##' @param fullpreds Do you use all predictions, or just the ones that were possible to predict?
-##' @return
-##' @author Benjamin Rogers
-getpcp <- function(preds, realresults, fullpreds = TRUE) {
-    ifelse(fullpreds == TRUE , denom <- length(preds), denom <- length(na.omit(preds)))
-    out <- length(which(preds == realresults))/denom
-    out
-
-}
-
-
 getrmses <- function(model, data, dvname, rowstouse, naremove = TRUE){
+
+
+
+
     try(tstrmse <- sqrt(mean((data[rowstouse, dvname] -
              predict(model, newdata = data[rowstouse,]))^2,
         na.rm = naremove)))
     try(tstrmse)
 
 }
-
-## Function wishlist
 
 ##' Display the full model and that with just training data
 ##'
@@ -209,7 +168,6 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## print(lapply(lms, class))
             rmses <- unlist(lapply(lms, function(x){
                 ifelse(class(x) == "lm",
-                       yes = getrmses(x, data = dat, dvname = devee, testrows ),
                        no = NA)
             }))
             ## print(sort(rmses))
@@ -259,5 +217,4 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
         ## PCPs that are output at any time. This makes sure that the
         ## one set is the last one before the tie, if there is one.
         if(length(mincriter) > 1) rmses <- oldrmses
-        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "lms" = lms, "predvals" = NULL, "rmses" = rmses, "tstrows" = testrows)
 }

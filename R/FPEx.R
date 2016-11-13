@@ -1,6 +1,7 @@
 ## Supporting the Populist: The Sanders Campaign and the 2016
 ## Democratic Primary.
-
+rm(list = ls())
+source("BeSiVaFunctionslm.R")
 library(rockchalk)
 library(ggplot2)
 library(caret)
@@ -12,7 +13,9 @@ library(caret)
 ## Read in and attach the data
 anes <- read.csv("/Users/bjr/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHuntFindings/anes_pilot_2016recoded.csv")
 anes <- anes[, -nearZeroVar(anes)]
-anes <- anes[, ]
+mostlynas <- sapply(anes, function(x) sum(is.na(x))/length(x))
+sort(mostlynas)
+anes <- anes[,mostlynas<.5 ]
 
 levels(anes$ua)
 levels(anes$os)
@@ -21,28 +24,35 @@ levels(anes$os)
 set.seed(12345)
 tr <- sample(nrow(anes), round(nrow(anes)* .2))
 sort(tr)
-
+summarize(anes$pid2r)
 
 facs <- unlist(lapply(anes, is.factor))
-debug(bettercpf)
-bettercpf(anes[,c("ua", "os")], tr, names(facs[facs %in% c("ua", "os")]))
+anessub <- anes[,c("ua", "os")]
+exbcpf <- bettercpf(anessub, tr, names(anessub))
+any(is.na(exbcpf))
 
 varstouse <- colnames(anes)
 
-
-source("besivafunctionslm.R")
-realvarstouse <- varstouse[!varstouse %in% "fttrump"]
+realvarstouse <- varstouse[!varstouse %in% c("fttrump", "ua", "os", "browser", "repcand")]
 
 fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
-tst <- besivalm("fttrump", realvarstouse, anes, iters = 5, showforms = T, sampseed = 45 )
+tst <- besivalm("fttrump", realvarstouse, anes, iters = 5, showforms = T, sampseed = 45, thresh = .01 )
 
-tstmod <- lm(ftsanders ~ skintone + skintone_mob + ideo5num, data = anes[-tr,])
+sort(tst$rmses)
 
+vars <- c(tst$intvars[[1]][2:5], "religpew")
 
-## besivalm("mpg", colnames(mtcars)[-1], mtcars, sampseed = 2)
+bsform1 <- as.formula(paste("fttrump ~", paste(vars, collapse = " + ")))
 
+modpull <- lm(bsform1, anes[-tr,], model = F, y = F)
+facstat <- lapply(model.frame(modpull), is.factor)
+facnames <- names(facstat[unlist(facstat)])
 
-## Outreg is part of the rockchalk package, and it makes it easy to
-## copy and paste the table into Word.
-## outreg(lmod, type = 'html')
+rownums <- sort(as.numeric(rownames(model.frame(modpull))))
+smalldf <- anes[c(rownums, tr),]
+
+smalldf <- bettercpf(smalldf, seq_along(tr) + length(rownums), facnames)
+
+getrmses(modpull, smalldf, "fttrump", tr)
+
