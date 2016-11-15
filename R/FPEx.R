@@ -32,23 +32,28 @@ fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
 tst <- besivalm("fttrump", realvarstouse, anes, iters = 5, showforms = T, sampseed = 45, thresh = .01 )
 
-sort(tst$rmses)
+## sort(tst$rmses)
 
 vars <- c(tst$intvars[[1]][2:5], "religpew")
 
 bsform1 <- as.formula(paste("fttrump ~", paste(vars, collapse = " + ")))
 
-model <- lm(bsform1, anes[-tr,], model = F, y = F)
+mod <- modmakerlm(fttrump ~ syrians_b + pid3, anes[-tr,])
+summary(mod)
 
+tstfun <- function(model, mydat = NULL){
+    model.frame(model, data = mydat)
+}
+tstfun(mod, anes[-tr,])
 
+## facstat <- lapply(model.frame(model), is.factor)
+## facnames <- names(facstat[unlist(facstat)])
 
-facstat <- lapply(model.frame(model), is.factor)
-facnames <- names(facstat[unlist(facstat)])
+## rownums <- as.numeric(rownames(model.frame(modpull)))
 
-rownums <- as.numeric(rownames(model.frame(modpull)))
+## smalldf <- anes[c(rownums, tr),]
+## smalldf <- bettercpf(smalldf, seq_along(tr) + length(rownums), facnames)
 
-smalldf <- anes[c(rownums, tr),]
-smalldf <- bettercpf(smalldf, seq_along(tr) + length(rownums), facnames)
+getrmses(mod, anes, "fttrump", tr)
 
-getrmses(model, anes, "fttrump", tr)
-
+RMSE(predict(mod, newdata = anes[tr,]), anes[tr, "fttrump"], TRUE)
