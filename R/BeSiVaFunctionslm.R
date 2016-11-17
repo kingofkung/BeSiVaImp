@@ -1,5 +1,29 @@
 ## Any functions that were created will be kept separate here
 
+##' remove observations that are not useful for predicting
+##' by marking them as missing.
+##' @title Remove Levels
+##' @param x
+##' @param facnames names of factor variables in the dataset
+##' @param trdat the training data frame
+##' @param tesdat the test data frame
+##' @return the test dataframe column, minus the levels that are being a problem
+##' @author Benjamin Rogers
+lvlrm <- function(x, facnames = facvarnames, trdat, tesdat){
+        ## Get the levels for the factor of choice
+        fac <- facnames[x]
+        trlvls <- unique(factor(trdat[,fac]))
+        teslvls <- unique(factor(tesdat[,fac]))
+        ## Figure out which levels are/aren't in the training data.
+        ## These are bad levels, as they screw with our ability to predict
+        badlvlbool <- !teslvls %in% trlvls
+        badlvls <- teslvls[badlvlbool]
+        ## Remove the bad levels, and return the column without the bad levels
+        tesdat[tesdat[, fac] %in% badlvls, fac] <- NA
+        tesdat[ , fac]
+    }
+
+
 
 ##' A Faster way of Eliminating problem Categorical variables
 ##'
@@ -12,6 +36,7 @@
 ##' @author Benjamin Rogers
 bettercpf <- function(dat, holdoutRows, facvarnames){
     goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = dat[-holdoutRows , ], tesdat = dat[holdoutRows , ]){
+        browser()
         ## Get the levels for the factor of choice
         fac <- facnames[x]
         trlvls <- unique(factor(trdat[,fac]))

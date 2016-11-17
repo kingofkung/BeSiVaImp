@@ -40,29 +40,7 @@ mod <- modmakerlm(fttrump ~ syrians_b + pid3, anes[-tr,])
 summary(mod)
 
 
-##' remove levels that are not useful fory
-##'
-##' .. content for \details{} ..
-##' @title
-##' @param x
-##' @param facnames names of factor variables in the dataset
-##' @param trdat the training data frame
-##' @param tesdat the test data frame
-##' @return the test dataframe column, with levels that are being a problem set to NA
-##' @author Benjamin Rogers
-lvlrm <- function(x, facnames = facvarnames, trdat, tesdat){
-        ## Get the levels for the factor of choice
-        fac <- facnames[x]
-        trlvls <- unique(factor(trdat[,fac]))
-        teslvls <- unique(factor(tesdat[,fac]))
-        ## Figure out which levels are/aren't in the training data.
-        ## These are bad levels, as they screw with our ability to predict
-        badlvlbool <- !teslvls %in% trlvls
-        badlvls <- teslvls[badlvlbool]
-        ## Remove the bad levels, and return the column without the bad levels
-        tesdat[tesdat[, fac] %in% badlvls, fac] <- NA
-        tesdat[ , fac]
-    }
+
 
 set.seed(5)
 tr1 <- sample(1:nrow(anes), round(nrow(anes) * .2))
@@ -72,21 +50,24 @@ table(as.character(anes[-tr, "race"] ))
 table(anes[tr, "race"])
 table(lvlrm(3, c("pid7", "rr1", "race", "gender", "syrians_b", "os"), anes[-tr,], anes[tr, ]))
 
-bettercpf(anes[, c("pid7", "rr1", "race", "gender", "syrians_b", "os")], tr, c("pid7", "rr1", "race", "gender", "syrians_b", "os"))
-
 
 
 m <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b, anes[,])
 summary(m)
-trsupp <- unlist(lapply(1:100, function(x){
+trsupp <- unlist(lapply(1:2, function(x){
     print(x)
     set.seed(x)
     tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
     modo <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b, anes[-tr,])
-    predict(modo, newdata = anes[tr, ])
-
+    predict(modo, newdata = bettercpf(anes, tr, colnames(model.frame(modo))))
 }
 ))
 rockchalk::summarize(trsupp)
 hist(trsupp)
 
+set.seed(2)
+tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
+modo <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b, anes[-tr,])
+ivs <- colnames(model.frame(modo))[-1]
+tes <- bettercpf(anes, tr, ivs)
+predict(modo, newdata = tes)
