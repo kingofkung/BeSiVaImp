@@ -36,7 +36,6 @@ lvlrm <- function(x, facnames = facvarnames, trdat, tesdat){
 ##' @author Benjamin Rogers
 bettercpf <- function(dat, holdoutRows, facvarnames){
     goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = dat[-holdoutRows , ], tesdat = dat[holdoutRows , ]){
-        browser()
         ## Get the levels for the factor of choice
         fac <- facnames[x]
         trlvls <- unique(factor(trdat[,fac]))

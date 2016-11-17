@@ -58,7 +58,7 @@ trsupp <- unlist(lapply(1:2, function(x){
     print(x)
     set.seed(x)
     tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
-    modo <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b, anes[-tr,])
+    modo <- lm(fttrump ~ pid7 + rr1 + gender  + syrians_b+ race, anes[-tr,])
     predict(modo, newdata = bettercpf(anes, tr, colnames(model.frame(modo))))
 }
 ))
@@ -67,7 +67,47 @@ hist(trsupp)
 
 set.seed(2)
 tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
-modo <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b, anes[-tr,])
-ivs <- colnames(model.frame(modo))[-1]
-tes <- bettercpf(anes, tr, ivs)
-predict(modo, newdata = tes)
+modo <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b + birthyr, anes[-tr,])
+summary(modo)
+levels(anes[-tr,]$rr1)
+
+model.frame(modo)$race %in% "Middle Eastern"
+mododat <- rockchalk::model.data(modo)
+
+## getgoodlevels
+## in goes regression model
+## return legal levels
+lapply(model.data(modo), is.factor)
+
+getgoodlevels <- function(varname, regmod){
+    thedat <- rockchalk::model.data(regmod)
+    levels(factor(thedat[, varname, drop = TRUE]))
+}
+getgoodlevels(c("race", "rr1"), modo)
+
+terms(modo)
+
+
+## fixbadlevels
+## in goes regression model/legal levels
+## in goes candidate dataset
+## out comes candidate dataset with illegal levels nuked
+fixbadlevels <- function(testdat, mod){
+    datClassIVs <- attr(terms(mod), "dataClasses")[-1]
+    whichFacs <- datClassIVs %in% "factor"
+    facIVs <- names(datClassIVs[whichFacs])
+    for(i in facIVs){
+        ## testdat[!testdat[,i] %in% getgoodlevels(i, mod) , i] <- NA
+        levels(testdat[,i])[!levels(testdat[,i]) %in% getgoodlevels(i, mod)] <- NA
+    }
+    testdat
+}
+
+z <- fixbadlevels(anes[tr, ], modo)
+table(z$race)
+
+## use model.data from rockchalk, model.frame doesn't have data in its original condition
+## get levels from factors in model.data
+## iterate over regression factors
+
+predict(modo, newdata  = z)
