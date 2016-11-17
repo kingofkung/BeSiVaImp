@@ -1,38 +1,6 @@
 ## Any functions that were created will be kept separate here
 
 
-##' This function gets rid of everything that can slow down a glm
-##' model, without breaking predict.
-##' Based on the notes at
-##' http://www.win-vector.com/blog/2014/05/trimming-the-fat-from-glm-models-in-r/
-##'
-##' @title Removes Unnecessary elements of glm Models
-##' @param mod a glm model
-##' @return just enough of the glm model to make predictions
-##' @author Nina Zumel
-glmnullifier <- function(mod){
-    mod$data <- NULL
-    mod$y <- NULL
-    mod$linear.predictors <- NULL
-    mod$weights <- NULL
-    mod$fitted.values <- NULL
-    mod$model <- NULL
-    mod$prior.weights <- NULL
-    mod$residuals <- NULL
-    mod$effects <- NULL
-    mod$qr$qr <- NULL
-##
-    mod$family$variance <- NULL
-    mod$family$def.resids <- NULL
-    mod$family$aic <- NULL
-    mod$family$validmu <- NULL
-    mod$family$simulate <- NULL
-##
-##
-    mod
-}
-
-
 ##' A Faster way of Eliminating problem Categorical variables
 ##'
 ##' .. content for \details{} ..
@@ -40,14 +8,14 @@ glmnullifier <- function(mod){
 ##' @param dat The data with potential problem variables
 ##' @param holdoutRows how the variables are divided
 ##' @param facvarnames names of factors variables to check
-##' @return the data, sans problem variables
+##' @return the test data, sans problem variables
 ##' @author Benjamin Rogers
 bettercpf <- function(dat, holdoutRows, facvarnames){
     goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = dat[-holdoutRows , ], tesdat = dat[holdoutRows , ]){
         ## Get the levels for the factor of choice
         fac <- facnames[x]
-        trlvls <- levels(factor(trdat[,fac]))
-        teslvls <- levels(factor(tesdat[,fac]))
+        trlvls <- unique(factor(trdat[,fac]))
+        teslvls <- unique(factor(tesdat[,fac]))
         ## Figure out which levels are/aren't in the training data.
         ## These are bad levels, as they screw with our ability to predict
         badlvlbool <- !teslvls %in% trlvls
@@ -73,6 +41,7 @@ getrmses <- function(model, datain, dvname, rowstouse, naremove = TRUE){
     rownums <- as.numeric(rownames(model.frame(model, data = datain)))
 
     smalldf <- datain[c(rownums, rowstouse),]
+    tesrows <- seq_along(rowstouse) + length(rownums)
     smalldf <- bettercpf(smalldf, seq_along(rowstouse) + length(rownums), facnames)
 
 
@@ -172,17 +141,16 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## modmaker makes glms according to our specifications
             lms <- lapply(forms, modmakerlm, thedat = dat[-testrows,], loud = showforms)
             ## print(lapply(lms, class))
-            rmses <- unlist(lapply(lms, function(x){
+            rmses <- unlist(lapply(lms, function(x, dattmp = dat, dv = devee, tr = testrows){
                 ifelse(class(x) == "lm",
-                       yes = getrmses(x, data = dat, dvname = devee, testrows),
+                       yes = getrmses(x, data = dattmp, dvname = dv, tr),
                        no = NA)
             }))
             if(is.character(rmses)){
                 rmses[rmses %in% c("Error in try(tstrmse) : object 'tstrmse' not found\n", "NaN")] <- NA
                 rmses <- as.numeric(rmses)
             }
-
-            ## print(sort(rmses))
+            print(sort(rmses))
 
 
 

@@ -18,7 +18,7 @@ mostlynas <- sapply(anes, function(x) sum(is.na(x))/length(x))
 anes <- anes[,mostlynas<.5 ]
 
 ## Get the test rows separately
-set.seed(12345)
+set.seed(45)
 tr <- sample(nrow(anes), round(nrow(anes)* .2))
 sort(tr)
 
@@ -30,30 +30,63 @@ realvarstouse <- varstouse[!varstouse %in% c("fttrump", "ua", "os", "browser", "
 
 fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
-tst <- besivalm("fttrump", realvarstouse, anes, iters = 5, showforms = T, sampseed = 45, thresh = .01 )
 
 ## sort(tst$rmses)
 
-vars <- c(tst$intvars[[1]][2:5], "religpew")
-
-bsform1 <- as.formula(paste("fttrump ~", paste(vars, collapse = " + ")))
+hist(anes[ , "fttrump"], main = "Affect Towards Donald Trump")
+hist(anes[grepl("republican", anes$pid7, TRUE) , "fttrump"], main = "Republican Affect Towards Donald Trump", xlab = "Feeling Thermometer of Donald Trump")
 
 mod <- modmakerlm(fttrump ~ syrians_b + pid3, anes[-tr,])
 summary(mod)
 
-tstfun <- function(model, mydat = NULL){
-    model.frame(model, data = mydat)
+
+##' remove levels that are not useful fory
+##'
+##' .. content for \details{} ..
+##' @title
+##' @param x
+##' @param facnames names of factor variables in the dataset
+##' @param trdat the training data frame
+##' @param tesdat the test data frame
+##' @return the test dataframe column, with levels that are being a problem set to NA
+##' @author Benjamin Rogers
+lvlrm <- function(x, facnames = facvarnames, trdat, tesdat){
+        ## Get the levels for the factor of choice
+        fac <- facnames[x]
+        trlvls <- unique(factor(trdat[,fac]))
+        teslvls <- unique(factor(tesdat[,fac]))
+        ## Figure out which levels are/aren't in the training data.
+        ## These are bad levels, as they screw with our ability to predict
+        badlvlbool <- !teslvls %in% trlvls
+        badlvls <- teslvls[badlvlbool]
+        ## Remove the bad levels, and return the column without the bad levels
+        tesdat[tesdat[, fac] %in% badlvls, fac] <- NA
+        tesdat[ , fac]
+    }
+
+set.seed(5)
+tr1 <- sample(1:nrow(anes), round(nrow(anes) * .2))
+## New Tr
+tr <- c(tr1, which(anes$race %in% "Other"))
+table(as.character(anes[-tr, "race"] ))
+table(anes[tr, "race"])
+table(lvlrm(3, c("pid7", "rr1", "race", "gender", "syrians_b", "os"), anes[-tr,], anes[tr, ]))
+
+bettercpf(anes[, c("pid7", "rr1", "race", "gender", "syrians_b", "os")], tr, c("pid7", "rr1", "race", "gender", "syrians_b", "os"))
+
+
+
+m <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b, anes[,])
+summary(m)
+trsupp <- unlist(lapply(1:100, function(x){
+    print(x)
+    set.seed(x)
+    tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
+    modo <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b, anes[-tr,])
+    predict(modo, newdata = anes[tr, ])
+
 }
-tstfun(mod, anes[-tr,])
+))
+rockchalk::summarize(trsupp)
+hist(trsupp)
 
-## facstat <- lapply(model.frame(model), is.factor)
-## facnames <- names(facstat[unlist(facstat)])
-
-## rownums <- as.numeric(rownames(model.frame(modpull)))
-
-## smalldf <- anes[c(rownums, tr),]
-## smalldf <- bettercpf(smalldf, seq_along(tr) + length(rownums), facnames)
-
-getrmses(mod, anes, "fttrump", tr)
-
-RMSE(predict(mod, newdata = anes[tr,]), anes[tr, "fttrump"], TRUE)
