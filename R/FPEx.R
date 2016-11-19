@@ -112,7 +112,7 @@ mododat <- rockchalk::model.data(modo)
 
 predict(modo, newdata  = z)
 
-tst <- besivalm("ftsanders", colnames(anes), anes, iters = 15, thresh = .05)
+tst <- besivalm("ftsanders", colnames(anes), anes, iters = 5, thresh = .05)
 
 sort(tst$rmses, na.last = F)
 bigform <- paste("ftsanders ~", paste(unlist(tst$intvars), collapse = " + "))
