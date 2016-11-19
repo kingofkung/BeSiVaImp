@@ -1,5 +1,31 @@
 ## Any functions that were created will be kept separate here
 
+
+## getgoodlevels
+## in goes regression model
+## return legal levels
+
+getgoodlevels <- function(varname, regmod){
+    thedat <- rockchalk::model.data(regmod)
+    levels(factor(thedat[, varname, drop = TRUE]))
+}
+
+
+## fixbadlevels
+## in goes regression model/legal levels
+## in goes candidate dataset
+## out comes candidate dataset with illegal levels nuked
+fixbadlevels <- function(testdat, mod){
+    datClassIVs <- attr(terms(mod), "dataClasses")[-1]
+    whichFacs <- datClassIVs %in% "factor"
+    facIVs <- names(datClassIVs[whichFacs])
+    for(i in facIVs){
+        ## testdat[!testdat[,i] %in% getgoodlevels(i, mod) , i] <- NA
+        levels(testdat[,i])[!levels(testdat[,i]) %in% getgoodlevels(i, mod)] <- NA
+    }
+    testdat
+}
+
 ##' remove observations that are not useful for predicting
 ##' by marking them as missing.
 ##' @title Remove Levels
