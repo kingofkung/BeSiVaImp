@@ -6,8 +6,9 @@
 ## return legal levels
 
 getgoodlevels <- function(varname, regmod){
-    thedat <- rockchalk::model.data(regmod)
-    levels(factor(thedat[, varname, drop = TRUE]))
+    ## gldat <- rockchalk::model.data(regmod)
+    gldat <- model.frame(regmod)
+    levels(factor(gldat[, varname]))
 }
 
 
@@ -16,6 +17,8 @@ getgoodlevels <- function(varname, regmod){
 ## in goes candidate dataset
 ## out comes candidate dataset with illegal levels nuked
 fixbadlevels <- function(testdat, mod){
+    ## browser()
+
     datClassIVs <- attr(terms(mod), "dataClasses")[-1]
     whichFacs <- datClassIVs %in% "factor"
     facIVs <- names(datClassIVs[whichFacs])
@@ -86,18 +89,8 @@ bettercpf <- function(dat, holdoutRows, facvarnames){
 
 getrmses <- function(model, datain, dvname, rowstouse, naremove = TRUE){
 
-    facstat <- lapply(model.frame(model, data = datain), is.factor)
-    facnames <- names(facstat[unlist(facstat)])
-    rownums <- as.numeric(rownames(model.frame(model, data = datain)))
-
-    smalldf <- datain[c(rownums, rowstouse),]
-    tesrows <- seq_along(rowstouse) + length(rownums)
-    smalldf <- bettercpf(smalldf, seq_along(rowstouse) + length(rownums), facnames)
-
-
-
     try(tstrmse <- sqrt(mean((datain[rowstouse, dvname] -
-             predict(model, newdata = smalldf[ seq_along(rowstouse) + length(rownums),]))^2,
+             predict(model, newdata = fixbadlevels(datain[rowstouse,], model) ))^2,
         na.rm = naremove)))
     ifelse(exists("tstrmse"), return(tstrmse), NA)
 
@@ -128,9 +121,10 @@ dispboth <- function(model, fulldata){
 ##' @author Benjamin Rogers
 modmakerlm <- function(x, thedat, loud = FALSE){
     eval(bquote(
-        try(junker <- (lm(.(x), data = model.frame(.(x), thedat), model = FALSE, y = FALSE)))
+        try(junker <- (lm(.(x), data = model.frame(.(x), thedat), model = TRUE, y = FALSE)))
     ))
     if(loud == TRUE) eval(bquote(print(.(x))))
+    ## try(junker <- lm(x, data = model.frame(x, thedat)))
 
     try(junker)
 }
@@ -190,6 +184,7 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## issue: when attempting to run speedglm, it doesn't recognize the data
             ## modmaker makes glms according to our specifications
             lms <- lapply(forms, modmakerlm, thedat = dat[-testrows,], loud = showforms)
+            ## lms <- lapply(forms, lm, data = dat[-testrows,])
             ## print(lapply(lms, class))
             rmses <- unlist(lapply(lms, function(x, dattmp = dat, dv = devee, tr = testrows){
                 ifelse(class(x) == "lm",
@@ -200,12 +195,13 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
                 rmses[rmses %in% c("Error in try(tstrmse) : object 'tstrmse' not found\n", "NaN")] <- NA
                 rmses <- as.numeric(rmses)
             }
-            print(sort(rmses))
 
 
 
             ## round to a given threshold, as per user preference.
             if(thresh != 0) rmses <- plyr::round_any(rmses, thresh)
+            print(sort(rmses))
+
             ## Here is where it would end. Basically we'd need to run
             ## it over the different folds of data.
 
@@ -247,5 +243,5 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
         ## PCPs that are output at any time. This makes sure that the
         ## one set is the last one before the tie, if there is one.
         if(length(mincriter) > 1) rmses <- oldrmses
-        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "lms" = lms, "rmses" = rmses, "tstrows" = testrows)
+        list("intvars" = unlist(intvars), "tieforms" = tieforms, "forms" = forms, "lms" = lms, "rmses" = rmses, "tstrows" = testrows)
 }

@@ -1,6 +1,6 @@
 ## Supporting the Populist: The Sanders Campaign and the 2016
 ## Democratic Primary.
-rm(list = ls())
+rm(list = ls()[!ls()%in% "anes"] )
 source("BeSiVaFunctionslm.R")
 library(rockchalk)
 library(ggplot2)
@@ -15,7 +15,7 @@ anes <- read.csv("/Users/bjr/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHu
 ## Get rid of variables with low variance and high proportions of NA's
 anes <- anes[, -nearZeroVar(anes)]
 mostlynas <- sapply(anes, function(x) sum(is.na(x))/length(x))
-anes <- anes[,mostlynas<.5 ]
+anes <- anes[,mostlynas<.7 ]
 
 ## Get the test rows separately
 set.seed(45)
@@ -77,37 +77,43 @@ mododat <- rockchalk::model.data(modo)
 ## getgoodlevels
 ## in goes regression model
 ## return legal levels
-lapply(model.data(modo), is.factor)
+## lapply(model.data(modo), is.factor)
 
-getgoodlevels <- function(varname, regmod){
-    thedat <- rockchalk::model.data(regmod)
-    levels(factor(thedat[, varname, drop = TRUE]))
-}
-getgoodlevels(c("race", "rr1"), modo)
+## getgoodlevels <- function(varname, regmod){
+##     thedat <- rockchalk::model.data(regmod)
+##     levels(factor(thedat[, varname, drop = TRUE]))
+## }
+## getgoodlevels(c("race", "rr1"), modo)
 
-terms(modo)
+## terms(modo)
 
 
-## fixbadlevels
-## in goes regression model/legal levels
-## in goes candidate dataset
-## out comes candidate dataset with illegal levels nuked
-fixbadlevels <- function(testdat, mod){
-    datClassIVs <- attr(terms(mod), "dataClasses")[-1]
-    whichFacs <- datClassIVs %in% "factor"
-    facIVs <- names(datClassIVs[whichFacs])
-    for(i in facIVs){
-        ## testdat[!testdat[,i] %in% getgoodlevels(i, mod) , i] <- NA
-        levels(testdat[,i])[!levels(testdat[,i]) %in% getgoodlevels(i, mod)] <- NA
-    }
-    testdat
-}
+## ## fixbadlevels
+## ## in goes regression model/legal levels
+## ## in goes candidate dataset
+## ## out comes candidate dataset with illegal levels nuked
+## fixbadlevels <- function(testdat, mod){
+##     datClassIVs <- attr(terms(mod), "dataClasses")[-1]
+##     whichFacs <- datClassIVs %in% "factor"
+##     facIVs <- names(datClassIVs[whichFacs])
+##     for(i in facIVs){
+##         ## testdat[!testdat[,i] %in% getgoodlevels(i, mod) , i] <- NA
+##         levels(testdat[,i])[!levels(testdat[,i]) %in% getgoodlevels(i, mod)] <- NA
+##     }
+##     testdat
+## }
 
-z <- fixbadlevels(anes[tr, ], modo)
-table(z$race)
+## z <- fixbadlevels(anes[tr, ], modo)
+## table(z$race)
 
-## use model.data from rockchalk, model.frame doesn't have data in its original condition
+## ## use model.data from rockchalk, model.frame doesn't have data in its original condition
 ## get levels from factors in model.data
 ## iterate over regression factors
 
 predict(modo, newdata  = z)
+
+tst <- besivalm("ftsanders", colnames(anes), anes, iters = 15, thresh = .05)
+
+sort(tst$rmses, na.last = F)
+bigform <- paste("ftsanders ~", paste(unlist(tst$intvars), collapse = " + "))
+summary(lm(bigform, data = anes))
