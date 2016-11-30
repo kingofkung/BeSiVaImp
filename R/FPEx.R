@@ -22,7 +22,7 @@ set.seed(45)
 tr <- sample(nrow(anes), round(nrow(anes)* .2))
 sort(tr)
 
-
+anes$age <- 2016 - anes$birthyr
 
 varstouse <- colnames(anes)
 
@@ -50,20 +50,26 @@ table(as.character(anes[-tr, "race"] ))
 table(anes[tr, "race"])
 table(lvlrm(3, c("pid7", "rr1", "race", "gender", "syrians_b", "os"), anes[-tr,], anes[tr, ]))
 
+anes$minority <- ifelse(anes$race %in% "White", 0, 1)
+anes$minority[is.na(anes$race)] <- NA
+table(anes$race, anes$minority, useNA = "always")
 
-
-m <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b, anes[,])
-summary(m)
-trsupp <- unlist(lapply(1:2, function(x){
+## myform <- fttrump ~ age + minority + gender + pid7num + ideo5num
+## myform <- fttrump ~ rr1 + violenth + birthright_b
+myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+trsupp <- unlist(lapply(1:100, function(x){
     print(x)
     set.seed(x)
     tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
-    modo <- lm(fttrump ~ pid7 + rr1 + gender  + syrians_b+ race, anes[-tr,])
-    predict(modo, newdata = bettercpf(anes, tr, colnames(model.frame(modo))))
+    modo <- lm(myform, anes[-tr,])
+    ## pr <- predict(modo, newdata = fixbadlevels(anes[tr,], modo))
+    getrmses(modo, anes, "fttrump", tr)
 }
 ))
-rockchalk::summarize(trsupp)
+summarize(trsupp)
 hist(trsupp)
+fullmodo <- lm(myform, anes)
+## outreg(fullmodo, type = "html")
 
 set.seed(2)
 tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
@@ -74,45 +80,15 @@ levels(anes[-tr,]$rr1)
 model.frame(modo)$race %in% "Middle Eastern"
 mododat <- rockchalk::model.data(modo)
 
-## getgoodlevels
-## in goes regression model
-## return legal levels
-## lapply(model.data(modo), is.factor)
+## Start thinking about PCP
+thresh <- 25
+mod <- modo
+obs <- anes[tr, 'fttrump']
+preds <- predict(modo, newdata = fixbadlevels(anes[tr,], modo))
+PCP <- sum(abs(obs - preds) < thresh, na.rm = T)/length(obs)
+print(PCP)
 
-## getgoodlevels <- function(varname, regmod){
-##     thedat <- rockchalk::model.data(regmod)
-##     levels(factor(thedat[, varname, drop = TRUE]))
-## }
-## getgoodlevels(c("race", "rr1"), modo)
-
-## terms(modo)
-
-
-## ## fixbadlevels
-## ## in goes regression model/legal levels
-## ## in goes candidate dataset
-## ## out comes candidate dataset with illegal levels nuked
-## fixbadlevels <- function(testdat, mod){
-##     datClassIVs <- attr(terms(mod), "dataClasses")[-1]
-##     whichFacs <- datClassIVs %in% "factor"
-##     facIVs <- names(datClassIVs[whichFacs])
-##     for(i in facIVs){
-##         ## testdat[!testdat[,i] %in% getgoodlevels(i, mod) , i] <- NA
-##         levels(testdat[,i])[!levels(testdat[,i]) %in% getgoodlevels(i, mod)] <- NA
-##     }
-##     testdat
-## }
-
-## z <- fixbadlevels(anes[tr, ], modo)
-## table(z$race)
-
-## ## use model.data from rockchalk, model.frame doesn't have data in its original condition
-## get levels from factors in model.data
-## iterate over regression factors
-
-predict(modo, newdata  = z)
-
-tst <- besivalm("ftsanders", colnames(anes), anes, iters = 5, thresh = .05)
+tst <- besivalm("fttrump", colnames(anes), anes, iters = 5, thresh = .05)
 
 sort(tst$rmses, na.last = F)
 bigform <- paste("ftsanders ~", paste(unlist(tst$intvars), collapse = " + "))
