@@ -54,9 +54,9 @@ anes$minority <- ifelse(anes$race %in% "White", 0, 1)
 anes$minority[is.na(anes$race)] <- NA
 table(anes$race, anes$minority, useNA = "always")
 
-## myform <- fttrump ~ age + minority + gender + pid7num + ideo5num
-## myform <- fttrump ~ rr1 + violenth + birthright_b
-myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+myform <- fttrump ~ age + minority + gender + pid7num + ideo5num
+## myform <- fttrump ~ rr1  + violenth + birthright_b
+## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
 trsupp <- unlist(lapply(1:100, function(x){
     print(x)
     set.seed(x)
@@ -70,6 +70,8 @@ summarize(trsupp)
 hist(trsupp)
 fullmodo <- lm(myform, anes)
 ## outreg(fullmodo, type = "html")
+summary(fullmodo)
+
 
 set.seed(2)
 tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
