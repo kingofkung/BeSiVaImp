@@ -26,7 +26,7 @@ anes$age <- 2016 - anes$birthyr
 
 varstouse <- colnames(anes)
 
-realvarstouse <- varstouse[!varstouse %in% c("fttrump", "ua", "os", "browser", "repcand")]
+realvarstouse <- varstouse[!varstouse %in% c("fttrump", "repcand", 'starttime', "count")]
 
 fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
@@ -82,15 +82,30 @@ levels(anes[-tr,]$rr1)
 model.frame(modo)$race %in% "Middle Eastern"
 mododat <- rockchalk::model.data(modo)
 
-## Start thinking about PCP
-thresh <- 25
-mod <- modo
-obs <- anes[tr, 'fttrump']
-preds <- predict(modo, newdata = fixbadlevels(anes[tr,], modo))
-PCP <- sum(abs(obs - preds) < thresh, na.rm = T)/length(obs)
-print(PCP)
+## ## Start thinking about PCP
+## thresh <- 25
+## mod <- modo
+## obs <- anes[tr, 'fttrump']
+## preds <- predict(modo, newdata = fixbadlevels(anes[tr,], modo))
+## PCP <- sum(abs(obs - preds) < thresh, na.rm = T)/length(obs)
+## print(PCP)
 
-tst <- besivalm("fttrump", colnames(anes), anes, iters = 5, thresh = .05)
+
+varls <- lapply(1:20, function(i){
+    tst <- besivalm("fttrump", sort(realvarstouse), anes,
+                    iters = 5, thresh = 1E-5, sampseed = i, hc = 5, showoutput = FALSE, showforms = FALSE)
+    tst$intvars
+    })
+
+lapply(tst$lms, function(x) {
+    ifelse(class(x) == "lm", {
+        mypreds <- predict(x, newdata = fixbadlevels(anes[tst$tstrows,], x))
+        makepclp(x,anes[tst$tstrows, 'fttrump'],mypreds,5)
+    },
+    NA)
+    })
+
+summary( lm(fttrump ~ lcself, anes))
 
 sort(tst$rmses, na.last = F)
 bigform <- paste("ftsanders ~", paste(unlist(tst$intvars), collapse = " + "))

@@ -96,6 +96,10 @@ getrmses <- function(model, datain, dvname, rowstouse, naremove = TRUE){
 
 }
 
+makepclp <- function(mod, obs, preds, howclose){
+    sum(abs(obs - preds) < howclose, na.rm = T)/length(obs)
+}
+
 ##' Display the full model and that with just training data
 ##'
 ##' @title dispboth
@@ -152,7 +156,7 @@ foldmaker <- function(foldnum = 3){}
 ##' @param showforms Do I want to see the formulae on screen, or not? Best to see them if I've got a lot of variables, but not if there's only a few.
 ##' @return  the IVs of the best model based on subset selection, as well as the percent correctly predicted by that model.
 ##' @author Benjamin Rogers
-besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = TRUE, showforms = TRUE){
+besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = TRUE, showforms = TRUE, hc = 10, ...){
         set.seed(sampseed)
         ## divy up data
         dat <- dat[,c(devee, ivs)]
@@ -181,26 +185,32 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ##
 
             ## Here is where the k-fold cross-validation would need to begin
-            ## issue: when attempting to run speedglm, it doesn't recognize the data
-            ## modmaker makes glms according to our specifications
             lms <- lapply(forms, modmakerlm, thedat = dat[-testrows,], loud = showforms)
             ## lms <- lapply(forms, lm, data = dat[-testrows,])
-            ## print(lapply(lms, class))
-            rmses <- unlist(lapply(lms, function(x, dattmp = dat, dv = devee, tr = testrows){
-                ifelse(class(x) == "lm",
-                       yes = getrmses(x, data = dattmp, dvname = dv, tr),
-                       no = NA)
+            ## rmses <- unlist(lapply(lms, function(x, dattmp = dat, dv = devee, tr = testrows){
+            ##     ifelse(class(x) == "lm",
+            ##            yes = getrmses(x, data = dattmp, dvname = dv, tr),
+            ##            no = NA)
+            ## }))
+            ## if(is.character(rmses)){
+            ##     rmses[rmses %in% c("Error in try(tstrmse) : object 'tstrmse' not found\n", "NaN")] <- NA
+            ##     rmses <- as.numeric(rmses)
+            ## }
+
+            pclps <- unlist(lapply(lms, function(x, dattmp = dat, dv = devee, tr = testrows, closeness = hc){
+                ifelse(class(x) == "lm", {
+                    mypreds <- predict(x, newdata = fixbadlevels(dat[tr,], x))
+                    makepclp(x, dat[tr, dv], mypreds, closeness)
+                },
+                NA)
             }))
-            if(is.character(rmses)){
-                rmses[rmses %in% c("Error in try(tstrmse) : object 'tstrmse' not found\n", "NaN")] <- NA
-                rmses <- as.numeric(rmses)
-            }
+
 
 
 
             ## round to a given threshold, as per user preference.
-            if(thresh != 0) rmses <- plyr::round_any(rmses, thresh)
-            print(sort(rmses))
+            if(thresh != 0) pclps <- plyr::round_any(pclps, thresh)
+            ## print(sort(pclps))
 
             ## Here is where it would end. Basically we'd need to run
             ## it over the different folds of data.
@@ -211,25 +221,25 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
             ## predictions. This is how we extract everything from that
             ## formula after the ~ sign.
             ## print(paste("min rmse ="))
-            mincriter <- which(rmses %in% sort(rmses)[1])
+            maxcriter <- which(pclps %in% sort(pclps, TRUE)[1])
             ## print(mincriter)
             ## So it turned out that if there was a tie, the code
             ## would return an error. To remedy this, I break out of
             ## the for loop if we get more than 1 with a maximum pcp.
-            if(length(mincriter) > 1) {
-                if(i == 1) oldrmses <- rmses
-                tieforms <- forms[mincriter]
+            if(length(maxcriter) > 1) {
+                if(i == 1) oldpclps <- pclps
+                tieforms <- forms[maxcriter]
                 if(showoutput == TRUE) print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
                 break} else tieforms <- NA
             ## print(maxpcp)
-            vars <- as.character(forms[[mincriter]]) [3]
+            vars <- as.character(forms[[maxcriter]]) [3]
             if(showoutput == TRUE) {
                 print(vars)
                 print(i)
             }
             ## by saving the pcps here, if the loop breaks first, then
             ## the old pcps are saved, without having them be rewritten
-            oldrmses <- rmses
+            oldpclps <- pclps
         }
 
         ## What do we output?
@@ -242,6 +252,6 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
         ## So when we end the loop, there should only be one set of
         ## PCPs that are output at any time. This makes sure that the
         ## one set is the last one before the tie, if there is one.
-        if(length(mincriter) > 1) rmses <- oldrmses
-        list("intvars" = unlist(intvars), "tieforms" = tieforms, "forms" = forms, "lms" = lms, "rmses" = rmses, "tstrows" = testrows)
+        if(length(maxcriter) > 1) pclps <- oldpclps
+        list("intvars" = unlist(intvars), "tieforms" = tieforms, "forms" = forms, "lms" = lms, "pclps" = pclps, "tstrows" = testrows)
 }
