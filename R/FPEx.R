@@ -91,13 +91,14 @@ mododat <- rockchalk::model.data(modo)
 ## print(PCP)
 
 
-tst <- besivalm("fttrump", sort(realvarstouse), anes,
-                iters = 5, thresh = 1E-5, sampseed = 1, hc = 5, showoutput = FALSE, showforms = FALSE)
+tste <- besivalm("fttrump", sort(realvarstouse), anes,
+                iters = 5, thresh = 1E-5, sampseed = 1, hc = 15, showoutput = FALSE, showforms = FALSE)
+tste$intvars
+max(tste$pclps)
 
-
-varls <- lapply(1:3, function(i){
+varls <- lapply(1:25, function(i){
     tst <- besivalm("fttrump", sort(realvarstouse), anes,
-                    iters = 5, thresh = 1E-5, sampseed = i, hc = 5, showoutput = FALSE, showforms = FALSE)
+                    iters = 5, thresh = 1E-5, sampseed = i, hc = 10, showoutput = FALSE, showforms = FALSE)
     tst$intvars
 })
 sort(table(unlist(varls)))

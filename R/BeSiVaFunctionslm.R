@@ -112,7 +112,7 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
         ## get rid of any variable categories that might be a problem
         facvars <- unlist(lapply(dat, is.factor))
         factorVars <- names(facvars[facvars])
-        dat <- bettercpf(dat, testrows, facvarnames = factorVars)
+        ## dat <- bettercpf(dat, testrows, facvarnames = factorVars)
 
         for(i in 1:iters){
             ## Make some formulas
