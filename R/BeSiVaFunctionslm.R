@@ -29,61 +29,6 @@ fixbadlevels <- function(testdat, mod){
     testdat
 }
 
-##' remove observations that are not useful for predicting
-##' by marking them as missing.
-##' @title Remove Levels
-##' @param x
-##' @param facnames names of factor variables in the dataset
-##' @param trdat the training data frame
-##' @param tesdat the test data frame
-##' @return the test dataframe column, minus the levels that are being a problem
-##' @author Benjamin Rogers
-lvlrm <- function(x, facnames = facvarnames, trdat, tesdat){
-        ## Get the levels for the factor of choice
-        fac <- facnames[x]
-        trlvls <- unique(factor(trdat[,fac]))
-        teslvls <- unique(factor(tesdat[,fac]))
-        ## Figure out which levels are/aren't in the training data.
-        ## These are bad levels, as they screw with our ability to predict
-        badlvlbool <- !teslvls %in% trlvls
-        badlvls <- teslvls[badlvlbool]
-        ## Remove the bad levels, and return the column without the bad levels
-        tesdat[tesdat[, fac] %in% badlvls, fac] <- NA
-        tesdat[ , fac]
-    }
-
-
-
-##' A Faster way of Eliminating problem Categorical variables
-##'
-##' .. content for \details{} ..
-##' @title
-##' @param dat The data with potential problem variables
-##' @param holdoutRows how the variables are divided
-##' @param facvarnames names of factors variables to check
-##' @return the test data, sans problem variables
-##' @author Benjamin Rogers
-bettercpf <- function(dat, holdoutRows, facvarnames){
-    goodfac <- lapply(seq_along(facvarnames), function(x, facnames = facvarnames, trdat = dat[-holdoutRows , ], tesdat = dat[holdoutRows , ]){
-        ## Get the levels for the factor of choice
-        fac <- facnames[x]
-        trlvls <- unique(factor(trdat[,fac]))
-        teslvls <- unique(factor(tesdat[,fac]))
-        ## Figure out which levels are/aren't in the training data.
-        ## These are bad levels, as they screw with our ability to predict
-        badlvlbool <- !teslvls %in% trlvls
-        badlvls <- teslvls[badlvlbool]
-        ## Remove the bad levels, and return the column without the bad levels
-        tesdat[tesdat[, fac] %in% badlvls, fac] <- NA
-        tesdat[ , fac]
-    })
-    ## make sure the names match the data
-    names(goodfac) <- facvarnames
-    goodfac <- as.data.frame(goodfac)
-    dat[holdoutRows, colnames(goodfac)] <- goodfac
-    dat
-}
-
 
 
 
@@ -231,7 +176,7 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
                 tieforms <- forms[maxcriter]
                 if(showoutput == TRUE) print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
                 break} else tieforms <- NA
-            ## print(maxpcp)
+            ##
             vars <- as.character(forms[[maxcriter]]) [3]
             if(showoutput == TRUE) {
                 print(vars)
