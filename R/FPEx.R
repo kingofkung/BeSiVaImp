@@ -34,9 +34,20 @@ fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
 
 ## sort(tst$rmses)
+dev.new()
+pdf(paste0(writeloc, "OverallTrumpFeelings.pdf"))
+hist(anes[ , "fttrump"], freq = F,
+     main = "Trump Support Across ANES Respondents",
+     xlab = "Trump Feeling Thermometer Response")
+lines(density(anes$fttrump, na.rm = TRUE))
+graphics.off()
 
-hist(anes[ , "fttrump"], main = "Affect Towards Donald Trump")
-hist(anes[grepl("republican", anes$pid7, TRUE) , "fttrump"], main = "Republican Affect Towards Donald Trump", xlab = "Feeling Thermometer of Donald Trump")
+dev.new()
+pdf(paste0(writeloc, "RepublicanTrumpFeelings.pdf"))
+hist(anes[grepl("republican", anes$pid7, TRUE) , "fttrump"],
+     main = "Republican Affect Towards Donald Trump",
+     xlab = "Feeling Thermometer of Donald Trump")
+graphics.off()
 
 mod <- modmakerlm(fttrump ~ syrians_b + pid3, anes[-tr,])
 summary(mod)
@@ -50,7 +61,6 @@ tr1 <- sample(1:nrow(anes), round(nrow(anes) * .2))
 tr <- c(tr1, which(anes$race %in% "Other"))
 table(as.character(anes[-tr, "race"] ))
 table(anes[tr, "race"])
-table(lvlrm(3, c("pid7", "rr1", "race", "gender", "syrians_b", "os"), anes[-tr,], anes[tr, ]))
 
 anes$minority <- ifelse(anes$race %in% "White", 0, 1)
 anes$minority[is.na(anes$race)] <- NA
@@ -59,7 +69,7 @@ table(anes$race, anes$minority, useNA = "always")
 myform <- fttrump ~ age + minority + gender + pid7num + ideo5num
 ## myform <- fttrump ~ rr1  + violenth + birthright_b
 ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
-trsupp <- unlist(lapply(1:100, function(x){
+trsupprmses <- unlist(lapply(1:100, function(x){
     print(x)
     set.seed(x)
     tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
@@ -72,7 +82,7 @@ summarize(trsupp)
 ##
 dev.new()
 pdf(paste0(writeloc, "trumpSupportRMSE.pdf"))
-hist(trsupp)
+hist(trsupprmses)
 graphics.off()
 
 fullmodo <- lm(myform, anes)
@@ -88,7 +98,7 @@ tste$intvars
 max(tste$pclps)
 
 closeness <- 20
-varls <- lapply(1:100, function(i){
+varls <- lapply(1:10, function(i){
     tst <- besivalm("fttrump", sort(realvarstouse), anes,
                     iters = 5, thresh = 1E-5, sampseed = i, hc = closeness, showoutput = FALSE, showforms = FALSE)
     c("intvars" = list(tst$intvars), "maxpclp" = max(tst$pclps))
