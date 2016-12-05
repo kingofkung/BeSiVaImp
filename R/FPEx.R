@@ -6,6 +6,8 @@ library(rockchalk)
 library(ggplot2)
 library(caret)
 
+writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
+
 ## The hashtags at the start comment a line out, meaning I can write
 ## whatever I want and R will ignore it. It's handy for leaving
 ## notes/thourghts/what I was trying to do.
@@ -67,53 +69,40 @@ trsupp <- unlist(lapply(1:100, function(x){
 }
 ))
 summarize(trsupp)
+##
+dev.new()
+pdf(paste0(writeloc, "trumpSupportRMSE.pdf"))
 hist(trsupp)
+graphics.off()
+
 fullmodo <- lm(myform, anes)
 ## outreg(fullmodo, type = "html")
 summary(fullmodo)
 
 
-set.seed(2)
-tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
-modo <- lm(fttrump ~ pid7 + rr1 + gender + race + syrians_b + birthyr, anes[-tr,])
-summary(modo)
-levels(anes[-tr,]$rr1)
-
-model.frame(modo)$race %in% "Middle Eastern"
-mododat <- rockchalk::model.data(modo)
-
-## ## Start thinking about PCP
-## thresh <- 25
-## mod <- modo
-## obs <- anes[tr, 'fttrump']
-## preds <- predict(modo, newdata = fixbadlevels(anes[tr,], modo))
-## PCP <- sum(abs(obs - preds) < thresh, na.rm = T)/length(obs)
-## print(PCP)
 
 
 tste <- besivalm("fttrump", sort(realvarstouse), anes,
-                iters = 5, thresh = 1E-5, sampseed = 1, hc = 15, showoutput = FALSE, showforms = FALSE)
+                iters = 5, thresh = 1E-5, sampseed = 50, hc = 20, showoutput = TRUE, showforms = FALSE)
 tste$intvars
 max(tste$pclps)
 
-varls <- lapply(1:25, function(i){
+closeness <- 20
+varls <- lapply(1:100, function(i){
     tst <- besivalm("fttrump", sort(realvarstouse), anes,
-                    iters = 5, thresh = 1E-5, sampseed = i, hc = 10, showoutput = FALSE, showforms = FALSE)
-    tst$intvars
+                    iters = 5, thresh = 1E-5, sampseed = i, hc = closeness, showoutput = FALSE, showforms = FALSE)
+    c("intvars" = list(tst$intvars), "maxpclp" = max(tst$pclps))
 })
-sort(table(unlist(varls)))
+varlintvar <- unlist( lapply(varls, function(x) x$intvars))
+varlpclp <- unlist( lapply(varls, function(x) x$maxpclp))
+
+dev.new()
+pdf(paste0(writeloc, "pclp; closeness = ", closeness, ".pdf"))
+hist(varlpclp)
+graphics.off()
+
+summarize(varlpclp)
+
+sort(table(varlintvar))
 
 
-lapply(tst$lms, function(x) {
-    ifelse(class(x) == "lm", {
-        mypreds <- predict(x, newdata = fixbadlevels(anes[tst$tstrows,], x))
-        makepclp(x,anes[tst$tstrows, 'fttrump'],mypreds,5)
-    },
-    NA)
-    })
-
-summary( lm(fttrump ~ lcself, anes))
-
-sort(tst$rmses, na.last = F)
-bigform <- paste("ftsanders ~", paste(unlist(tst$intvars), collapse = " + "))
-summary(lm(bigform, data = anes))
