@@ -86,7 +86,7 @@ hist(trsupprmses)
 graphics.off()
 
 fullmodo <- lm(myform, anes)
-## outreg(fullmodo, type = "html")
+outreg(fullmodo, type = "html", tight = FALSE)
 summary(fullmodo)
 
 
@@ -98,14 +98,14 @@ tste$intvars
 max(tste$pclps)
 
 closeness <- 20
-varls <- lapply(1:10, function(i){
+varls <- lapply(1:200, function(i){
     tst <- besivalm("fttrump", sort(realvarstouse), anes,
                     iters = 5, thresh = 1E-5, sampseed = i, hc = closeness, showoutput = FALSE, showforms = FALSE)
     c("intvars" = list(tst$intvars), "maxpclp" = max(tst$pclps))
 })
 varlintvar <- unlist( lapply(varls, function(x) x$intvars))
 varlpclp <- unlist( lapply(varls, function(x) x$maxpclp))
-
+##
 dev.new()
 pdf(paste0(writeloc, "pclp; closeness = ", closeness, ".pdf"))
 hist(varlpclp)
