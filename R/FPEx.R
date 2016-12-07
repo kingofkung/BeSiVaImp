@@ -28,7 +28,7 @@ anes$age <- 2016 - anes$birthyr
 
 varstouse <- colnames(anes)
 
-realvarstouse <- varstouse[!varstouse %in% c("fttrump", "repcand", 'starttime', "count")]
+realvarstouse <- varstouse[!varstouse %in% c("fttrump", "repcand", 'starttime', "count", "optintimestamp")]
 
 fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
@@ -98,7 +98,7 @@ tste$intvars
 max(tste$pclps)
 
 closeness <- 20
-varls <- lapply(1:200, function(i){
+varls <- lapply(1:1, function(i){
     tst <- besivalm("fttrump", sort(realvarstouse), anes,
                     iters = 5, thresh = 1E-5, sampseed = i, hc = closeness, showoutput = FALSE, showforms = FALSE)
     c("intvars" = list(tst$intvars), "maxpclp" = max(tst$pclps))
@@ -115,4 +115,18 @@ summarize(varlpclp)
 
 sort(table(varlintvar))
 
+source("BeSiVaFunctions.R")
 
+anes$trumpFans <- ifelse(anes$fttrump > 50, 1, 0)
+## table(anes$fttrump, anes$trumpFans)
+prop.table(table(anes$trumpFans))
+
+
+tf <- lapply(1:100, function(i){
+    tfbin <- besiva("trumpFans", sort(realvarstouse), anes, sampseed = i, showforms = FALSE)
+    ## anes$trumpFans[unlist(tfbin$tstrows)]
+    tfbin})
+selectvars <- unlist(lapply(tf, function(x) x$intvars))
+sort(table(selectvars))
+pcpVals <- unlist(lapply(tf, function(x) max(x$pcps)))
+hist(pcpVals)

@@ -1,6 +1,35 @@
 ## Any functions that were created will be kept separate here
 
 
+## getgoodlevels
+## in goes regression model
+## return legal levels
+
+getgoodlevels <- function(varname, regmod){
+    ## gldat <- rockchalk::model.data(regmod)
+    gldat <- model.frame(regmod)
+    levels(factor(gldat[, varname]))
+}
+
+
+## fixbadlevels
+## in goes regression model/legal levels
+## in goes candidate dataset
+## out comes candidate dataset with illegal levels nuked
+fixbadlevels <- function(testdat, mod){
+    ## browser()
+
+    datClassIVs <- attr(terms(mod), "dataClasses")[-1]
+    whichFacs <- datClassIVs %in% "factor"
+    facIVs <- names(datClassIVs[whichFacs])
+    for(i in facIVs){
+        ## testdat[!testdat[,i] %in% getgoodlevels(i, mod) , i] <- NA
+        levels(testdat[,i])[!levels(testdat[,i]) %in% getgoodlevels(i, mod)] <- NA
+    }
+    testdat
+}
+
+
 ##' This function gets rid of everything that can slow down a glm
 ##' model, without breaking predict.
 ##' Based on the notes at
@@ -87,7 +116,7 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
     ## if(!is.null(cpf$tstdatnu)){
     ##     thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
     ## } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
+    thepreds <- predict(x, newdata = fixbadlevels(data[rowstouse, , drop = FALSE], x), "response")
     ifelse(thepreds >=.5, 1, 0)
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }
@@ -135,8 +164,8 @@ dispboth <- function(model, fulldata){
 ##' @author Benjamin Rogers
 modmaker <- function(x, thedat, famille = binomial(), loud = TRUE){
     eval(bquote(
-        try(junker <- glmnullifier(glm(.(x), data = model.frame(.(x), thedat), family = famille, model = FALSE, y = FALSE)))
-    ))
+        try(junker <- glm(.(x), data = model.frame(.(x), thedat), family = binomial(), model = TRUE, y = TRUE)))
+    )
     if(loud == TRUE) eval(bquote(print(.(x))))
 
     try(junker)
