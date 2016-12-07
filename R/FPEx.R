@@ -127,6 +127,6 @@ tf <- lapply(1:100, function(i){
     ## anes$trumpFans[unlist(tfbin$tstrows)]
     tfbin})
 selectvars <- unlist(lapply(tf, function(x) x$intvars))
-sort(table(selectvars))
+sort(table(selectvars), decreasing = TRUE)
 pcpVals <- unlist(lapply(tf, function(x) max(x$pcps)))
 hist(pcpVals)
