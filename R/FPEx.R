@@ -30,10 +30,10 @@ varstouse <- colnames(anes)
 
 realvarstouse <- varstouse[!varstouse %in% c("fttrump", "repcand", 'starttime', "count", "optintimestamp")]
 
-fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
+## fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
 
-## sort(tst$rmses)
+## Make a few preliminary plots:
 dev.new()
 pdf(paste0(writeloc, "OverallTrumpFeelings.pdf"))
 hist(anes[ , "fttrump"], freq = F,
@@ -43,25 +43,28 @@ lines(density(anes$fttrump, na.rm = TRUE))
 graphics.off()
 
 dev.new()
+pdf(paste0(writeloc, "OverallTrumpFeelingsLogged.pdf"))
+hist(log(anes[ , "fttrump"]), freq = F,
+     main = "Trump Support Across ANES Respondents",
+     xlab = "Logarithm of Trump Feeling Thermometer Response")
+lines(density(log(anes$fttrump), na.rm = TRUE))
+graphics.off()
+
+
+dev.new()
 pdf(paste0(writeloc, "RepublicanTrumpFeelings.pdf"))
 hist(anes[grepl("republican", anes$pid7, TRUE) , "fttrump"],
      main = "Republican Affect Towards Donald Trump",
      xlab = "Feeling Thermometer of Donald Trump")
 graphics.off()
 
-mod <- modmakerlm(fttrump ~ syrians_b + pid3, anes[-tr,])
-summary(mod)
 
 
 
 
-set.seed(5)
-tr1 <- sample(1:nrow(anes), round(nrow(anes) * .2))
-## New Tr
-tr <- c(tr1, which(anes$race %in% "Other"))
-table(as.character(anes[-tr, "race"] ))
-table(anes[tr, "race"])
 
+
+## Recode race to minority, in conjunction with
 anes$minority <- ifelse(anes$race %in% "White", 0, 1)
 anes$minority[is.na(anes$race)] <- NA
 table(anes$race, anes$minority, useNA = "always")
@@ -78,13 +81,16 @@ trsupprmses <- unlist(lapply(1:100, function(x){
     getrmses(modo, anes, "fttrump", tr)
 }
 ))
-summarize(trsupp)
+summarize(trsupprmses)
 ##
+## Plot RMSES on a histogram
 dev.new()
 pdf(paste0(writeloc, "trumpSupportRMSE.pdf"))
-hist(trsupprmses)
+hist(trsupprmses, freq = F)
+lines(density(trsupprmses, na.rm = T))
 graphics.off()
 
+## Make full model
 fullmodo <- lm(myform, anes)
 outreg(fullmodo, type = "html", tight = FALSE)
 summary(fullmodo)
@@ -135,7 +141,7 @@ hist(pcpVals)
 ## install.packages(c("GGally", "VGAM"))
 library(VGAM)
 
-lapply(1:10, function(i){
+tobcriters <- lapply(1:100, function(i){
     set.seed(i)
     testingrows <- sample(1:nrow(anes), nrow(anes)*.2)
     tsttobit <- vglm(myform, family = tobit(Upper = 100), data = anes[-tr, ])
@@ -143,6 +149,11 @@ lapply(1:10, function(i){
 ##
     tobpreds <- predict(tsttobit, newdata = anes[testingrows,])
     tobobs <- anes$fttrump[testingrows[testingrows %in% rownames(tobpreds)]]
-    RMSE(tobpreds, tobobs, TRUE)
-    makepclp(tsttobit, tobobs, tobpreds, 10)
+    c(RMSE(tobpreds, tobobs, TRUE),
+    ## Note: The NA rows are taken out, requiring the correction seen below
+    makepclp(tsttobit, tobobs, tobpreds, 10)*length(tobobs)/length(testingrows))
 })
+tobcriters <- as.data.frame(do.call(rbind, tobcriters))
+colnames(tobcriters) <- c("rmse", "pclp")
+
+hist(tobcriters$pclp)
