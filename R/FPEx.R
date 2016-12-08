@@ -122,7 +122,7 @@ anes$trumpFans <- ifelse(anes$fttrump > 50, 1, 0)
 prop.table(table(anes$trumpFans))
 
 
-tf <- lapply(1:100, function(i){
+tf <- lapply(1:10, function(i){
     tfbin <- besiva("trumpFans", sort(realvarstouse), anes, sampseed = i, showforms = FALSE)
     ## anes$trumpFans[unlist(tfbin$tstrows)]
     tfbin})
@@ -130,3 +130,19 @@ selectvars <- unlist(lapply(tf, function(x) x$intvars))
 sort(table(selectvars), decreasing = TRUE)
 pcpVals <- unlist(lapply(tf, function(x) max(x$pcps)))
 hist(pcpVals)
+
+
+## install.packages(c("GGally", "VGAM"))
+library(VGAM)
+
+lapply(1:10, function(i){
+    set.seed(i)
+    testingrows <- sample(1:nrow(anes), nrow(anes)*.2)
+    tsttobit <- vglm(myform, family = tobit(Upper = 100), data = anes[-tr, ])
+##
+##
+    tobpreds <- predict(tsttobit, newdata = anes[testingrows,])
+    tobobs <- anes$fttrump[testingrows[testingrows %in% rownames(tobpreds)]]
+    RMSE(tobpreds, tobobs, TRUE)
+    makepclp(tsttobit, tobobs, tobpreds, 10)
+})
