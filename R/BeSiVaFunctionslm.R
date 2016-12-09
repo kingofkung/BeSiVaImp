@@ -233,7 +233,7 @@ besivatobit <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2,
             ##
 
             ## Here is where the k-fold cross-validation would need to begin
-            tobits <- lapply(forms, modmakertobit, thedat = dat[-testrows,])
+            tobits <- lapply(forms, VGAM::vglm, data = dat[-testrows,], family = tobit(Upper = 100))
             browser()
 
             pclps <- unlist(lapply(tobits, function(x, funcdata = dat, dv = devee, tr = testrows, closeness = hc){

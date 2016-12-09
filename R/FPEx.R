@@ -168,5 +168,6 @@ colnames(tobcriters) <- c("rmse", "pclp")
 summarizeNumerics(tobcriters)
 
 hist(tobcriters$pclp)
+source("BeSiVaFunctionslm.R")
 
 besivatobit('fttrump', sort(realvarstouse), anes)
