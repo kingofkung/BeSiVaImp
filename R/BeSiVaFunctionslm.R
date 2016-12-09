@@ -200,3 +200,97 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
         if(length(maxcriter) > 1) pclps <- oldpclps
         list("intvars" = unlist(intvars), "tieforms" = tieforms, "forms" = forms, "lms" = lms, "pclps" = pclps, "tstrows" = testrows)
 }
+
+
+
+
+besivatobit <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = TRUE, showforms = TRUE, hc = 10, ...){
+        set.seed(sampseed)
+        ## divy up data
+        dat <- dat[,c(devee, ivs)]
+        testrows <- sample(nrow(dat), round(nrow(dat)* perc))
+
+        ## calculate appropriate number of digits to round to
+        ## if(thresh != 0) digs = -1 * log(thresh, base = 10)
+        ## get rid of any variable categories that might be a problem
+        facvars <- unlist(lapply(dat, is.factor))
+        factorVars <- names(facvars[facvars])
+        ## dat <- bettercpf(dat, testrows, facvarnames = factorVars)
+
+        for(i in 1:iters){
+            ## Make some formulas
+            ## Set vars as blank if i == 1
+            if(i == 1) vars <- ""
+            ## make it clear which variables are no longer considered
+            outvars <- unlist(strsplit(vars, "\\s[+]\\s"))
+
+
+            forms <- lapply(ivs[!ivs %in% outvars], function(x, deev = devee, invars = vars){
+                if(vars == ""){ as.formula(paste(deev, "~", x))}
+                else {as.formula(paste(deev, "~", x, "+", vars))}
+
+            })
+            ##
+
+            ## Here is where the k-fold cross-validation would need to begin
+            tobits <- lapply(forms, modmakertobit, thedat = dat[-testrows,])
+            browser()
+
+            pclps <- unlist(lapply(tobits, function(x, funcdata = dat, dv = devee, tr = testrows, closeness = hc){
+                ifelse(class(x) == "vglm", {
+                    mypreds <- predict(x, newdata = fixbadlevels(funcdata[tr, ], x))[, 'mu']
+                    makepclp(x, funcdata[tr, dv], mypreds, closeness)*length(mypreds)/length(tr)
+                },
+                NA)
+            }))
+
+            ## browser()
+
+
+            ## round to a given threshold, as per user preference.
+            if(thresh != 0) pclps <- plyr::round_any(pclps, thresh)
+            ## print(sort(pclps))
+
+            ## Here is where it would end. Basically we'd need to run
+            ## it over the different folds of data.
+
+
+
+            ## So we've got the formula that yields the best
+            ## predictions. This is how we extract everything from that
+            ## formula after the ~ sign.
+            ## print(paste("min rmse ="))
+            maxcriter <- which(pclps %in% sort(pclps, TRUE)[1])
+            ## print(mincriter)
+            ## So it turned out that if there was a tie, the code
+            ## would return an error. To remedy this, I break out of
+            ## the for loop if we get more than 1 with a maximum pcp.
+            if(length(maxcriter) > 1) {
+                if(i == 1) oldpclps <- pclps
+                tieforms <- forms[maxcriter]
+                if(showoutput == TRUE) print(paste("We have a tie between: ", paste(tieforms, sep = " \n "), "", sep = ""))
+                break} else tieforms <- NA
+            ##
+            vars <- as.character(forms[[maxcriter]]) [3]
+            if(showoutput == TRUE) {
+                print(vars)
+                print(i)
+            }
+            ## by saving the pcps here, if the loop breaks first, then
+            ## the old pcps are saved, without having them be rewritten
+            oldpclps <- pclps
+        }
+
+        ## What do we output?
+        ## The sorted percents correctly predicted
+        ## print(sort(pcps), digits = 10)
+        ## print(predvals)
+        ## This one gives the list of variables
+        intvars <- strsplit( vars, split = "\\s[+]\\s")
+        if(showoutput == TRUE) print(intvars)
+        ## So when we end the loop, there should only be one set of
+        ## PCPs that are output at any time. This makes sure that the
+        ## one set is the last one before the tie, if there is one.
+        if(length(maxcriter) > 1) pclps <- oldpclps
+        list("intvars" = unlist(intvars), "tieforms" = tieforms, "forms" = forms, "lms" = lms, "pclps" = pclps, "tstrows" = testrows)
+}

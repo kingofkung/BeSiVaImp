@@ -92,7 +92,7 @@ graphics.off()
 
 ## Make full model
 fullmodo <- lm(myform, anes)
-outreg(fullmodo, type = "html", tight = FALSE)
+## outreg(fullmodo, type = "html", tight = FALSE)
 summary(fullmodo)
 
 
@@ -123,37 +123,50 @@ sort(table(varlintvar))
 
 source("BeSiVaFunctions.R")
 
-anes$trumpFans <- ifelse(anes$fttrump > 50, 1, 0)
-## table(anes$fttrump, anes$trumpFans)
-prop.table(table(anes$trumpFans))
+## anes$trumpFans <- ifelse(anes$fttrump > 50, 1, 0)
+## ## table(anes$fttrump, anes$trumpFans)
+## prop.table(table(anes$trumpFans))
 
 
-tf <- lapply(1:10, function(i){
-    tfbin <- besiva("trumpFans", sort(realvarstouse), anes, sampseed = i, showforms = FALSE)
-    ## anes$trumpFans[unlist(tfbin$tstrows)]
-    tfbin})
-selectvars <- unlist(lapply(tf, function(x) x$intvars))
-sort(table(selectvars), decreasing = TRUE)
-pcpVals <- unlist(lapply(tf, function(x) max(x$pcps)))
-hist(pcpVals)
+## tf <- lapply(1:10, function(i){
+##     tfbin <- besiva("trumpFans", sort(realvarstouse), anes, sampseed = i, showforms = FALSE)
+##     ## anes$trumpFans[unlist(tfbin$tstrows)]
+##     tfbin})
+## selectvars <- unlist(lapply(tf, function(x) x$intvars))
+## sort(table(selectvars), decreasing = TRUE)
+## pcpVals <- unlist(lapply(tf, function(x) max(x$pcps)))
+## hist(pcpVals)
 
 
 ## install.packages(c("GGally", "VGAM"))
 library(VGAM)
 
+modmakertobit <- function(x, thedat, upperVal = 100){
+    try(junker <- VGAM::vglm(x, data = model.frame(x, thedat), family = tobit(Upper = upperVal)))
+}
+
+predict( modmakertobit(myform, anes[-tr,]))[, 'mu']
+
+
+closethresh <- 15
+##
 tobcriters <- lapply(1:100, function(i){
+    print(i)
     set.seed(i)
     testingrows <- sample(1:nrow(anes), nrow(anes)*.2)
-    tsttobit <- vglm(myform, family = tobit(Upper = 100), data = anes[-tr, ])
+    tsttobit <- modmakertobit(myform, anes[-testingrows,])
 ##
 ##
     tobpreds <- predict(tsttobit, newdata = anes[testingrows,])
     tobobs <- anes$fttrump[testingrows[testingrows %in% rownames(tobpreds)]]
     c(RMSE(tobpreds, tobobs, TRUE),
     ## Note: The NA rows are taken out, requiring the correction seen below
-    makepclp(tsttobit, tobobs, tobpreds, 10)*length(tobobs)/length(testingrows))
+    makepclp(tsttobit, tobobs, tobpreds, closethresh)*length(tobobs)/length(testingrows))
 })
 tobcriters <- as.data.frame(do.call(rbind, tobcriters))
 colnames(tobcriters) <- c("rmse", "pclp")
+summarizeNumerics(tobcriters)
 
 hist(tobcriters$pclp)
+
+besivatobit('fttrump', sort(realvarstouse), anes)
