@@ -201,6 +201,9 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
         list("intvars" = unlist(intvars), "tieforms" = tieforms, "forms" = forms, "lms" = lms, "pclps" = pclps, "tstrows" = testrows)
 }
 
+modmakertobit <- function(x, thedat, upperVal = 100){
+    try(junker <- VGAM::vglm(x, data = model.frame(x, thedat), family = VGAM::tobit(Upper = upperVal)))
+}
 
 
 
@@ -233,18 +236,17 @@ besivatobit <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2,
             ##
 
             ## Here is where the k-fold cross-validation would need to begin
-            tobits <- lapply(forms, VGAM::vglm, data = dat[-testrows,], family = tobit(Upper = 100))
-            browser()
+            tobits <- lapply(forms, modmakertobit, thedat = dat)
+            ## browser()
 
             pclps <- unlist(lapply(tobits, function(x, funcdata = dat, dv = devee, tr = testrows, closeness = hc){
                 ifelse(class(x) == "vglm", {
-                    mypreds <- predict(x, newdata = fixbadlevels(funcdata[tr, ], x))[, 'mu']
+                    mypreds <- predict(x, newdata = funcdata[tr, ])[, 'mu']
                     makepclp(x, funcdata[tr, dv], mypreds, closeness)*length(mypreds)/length(tr)
                 },
                 NA)
             }))
 
-            ## browser()
 
 
             ## round to a given threshold, as per user preference.
@@ -292,5 +294,5 @@ besivatobit <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2,
         ## PCPs that are output at any time. This makes sure that the
         ## one set is the last one before the tie, if there is one.
         if(length(maxcriter) > 1) pclps <- oldpclps
-        list("intvars" = unlist(intvars), "tieforms" = tieforms, "forms" = forms, "lms" = lms, "pclps" = pclps, "tstrows" = testrows)
+        list("intvars" = unlist(intvars), "tieforms" = tieforms, "forms" = forms, "tobits" = tobits, "pclps" = pclps, "tstrows" = testrows)
 }

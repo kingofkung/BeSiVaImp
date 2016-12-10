@@ -28,7 +28,7 @@ anes$age <- 2016 - anes$birthyr
 
 varstouse <- colnames(anes)
 
-realvarstouse <- varstouse[!varstouse %in% c("fttrump", "repcand", 'starttime', "count", "optintimestamp")]
+realvarstouse <- varstouse[!varstouse %in% c("fttrump", "repcand", 'starttime', "count", "optintimestamp", "ua", "os", "browser")]
 
 ## fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
 
@@ -98,13 +98,10 @@ summary(fullmodo)
 
 
 
-tste <- besivalm("fttrump", sort(realvarstouse), anes,
-                iters = 5, thresh = 1E-5, sampseed = 50, hc = 20, showoutput = TRUE, showforms = FALSE)
-tste$intvars
-max(tste$pclps)
 
 closeness <- 20
-varls <- lapply(1:1, function(i){
+varls <- lapply(1:5, function(i){
+    print(paste("iter = ", i))
     tst <- besivalm("fttrump", sort(realvarstouse), anes,
                     iters = 5, thresh = 1E-5, sampseed = i, hc = closeness, showoutput = FALSE, showforms = FALSE)
     c("intvars" = list(tst$intvars), "maxpclp" = max(tst$pclps))
@@ -113,13 +110,40 @@ varlintvar <- unlist( lapply(varls, function(x) x$intvars))
 varlpclp <- unlist( lapply(varls, function(x) x$maxpclp))
 ##
 dev.new()
-pdf(paste0(writeloc, "pclp; closeness = ", closeness, ".pdf"))
-hist(varlpclp)
+pdf(paste0(writeloc, "pclp on fttrump; closeness = ", closeness, ".pdf"))
+hist(varlpclp, main = paste0("PCLP on Trump Feeling Thermometer\n","closeness = ", closeness))
 graphics.off()
+
+## Bernie, Bernie
+lapply(1:5, function(i){
+    bern <- besivalm("ftsanders", c("fttrump", realvarstouse), dat = anes, sampseed = i, perc = .2, hc = 10, showforms = F, showoutput = F)
+    max(bern$pclps)
+})
 
 summarize(varlpclp)
 
 sort(table(varlintvar))
+
+smallrangevar <- c(realvarstouse[!realvarstouse %in% grep("pid", colnames(anes), value = T)], 'fttrump')
+pideotry <- lapply(1:10, function(x){
+    print(paste("iter =", x))
+##
+    junker <- besivalm("pid7num", smallrangevar, anes, hc = 1, sampseed = x, showforms = FALSE, showoutput = FALSE)
+    junker
+}
+                  )
+
+ideopclps <- unlist(lapply(pideotry, function(x) max(x$pclps)))
+summarize(ideopclps)
+ideointvars <- lapply(pideotry, function(x) max(x$intvars))
+
+range(mtcars$mpg)
+mpgMods <- lapply(1:100, function(i) besivalm("mpg", colnames(mtcars)[!colnames(mtcars) %in% "mpg"], mtcars, perc = .5, hc = 2, thresh = .001, sampseed = i))
+
+mpgMods[[1]]$tstrows
+mpgPCLPs <- unlist(lapply(mpgMods, function(x) max(x$pclps)))
+table(mpgPCLPs)
+hist(mpgPCLPs, breaks = 5)
 
 source("BeSiVaFunctions.R")
 
@@ -141,14 +165,11 @@ source("BeSiVaFunctions.R")
 ## install.packages(c("GGally", "VGAM"))
 library(VGAM)
 
-modmakertobit <- function(x, thedat, upperVal = 100){
-    try(junker <- VGAM::vglm(x, data = model.frame(x, thedat), family = tobit(Upper = upperVal)))
-}
 
-predict( modmakertobit(myform, anes[-tr,]))[, 'mu']
+## predict( modmakertobit(myform, anes[-tr,]))[, 'mu']
 
 
-closethresh <- 15
+closethresh <- 10
 ##
 tobcriters <- lapply(1:100, function(i){
     print(i)
@@ -156,9 +177,10 @@ tobcriters <- lapply(1:100, function(i){
     testingrows <- sample(1:nrow(anes), nrow(anes)*.2)
     tsttobit <- modmakertobit(myform, anes[-testingrows,])
 ##
-##
-    tobpreds <- predict(tsttobit, newdata = anes[testingrows,])
-    tobobs <- anes$fttrump[testingrows[testingrows %in% rownames(tobpreds)]]
+    ##
+    ## browser()
+    tobpreds <- predict(tsttobit, newdata = anes[testingrows,])[,'mu']
+    tobobs <- anes$fttrump[testingrows[testingrows %in% names(tobpreds)]]
     c(RMSE(tobpreds, tobobs, TRUE),
     ## Note: The NA rows are taken out, requiring the correction seen below
     makepclp(tsttobit, tobobs, tobpreds, closethresh)*length(tobobs)/length(testingrows))
@@ -169,5 +191,6 @@ summarizeNumerics(tobcriters)
 
 hist(tobcriters$pclp)
 source("BeSiVaFunctionslm.R")
-
-besivatobit('fttrump', sort(realvarstouse), anes)
+library(VGAM)
+trumptobit <- besivatobit('fttrump', sort(realvarstouse), anes, hc = 10)
+summarize(trumptobit$pclps)
