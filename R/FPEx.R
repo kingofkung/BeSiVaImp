@@ -194,3 +194,47 @@ source("BeSiVaFunctionslm.R")
 library(VGAM)
 trumptobit <- besivatobit('fttrump', sort(realvarstouse), anes, hc = 10)
 summarize(trumptobit$pclps)
+
+
+anes$trumpBin <- ifelse( anes$repcand == "Donald Trump" ,1, 0)
+anes$trumpBin[anes$repcand %in% "None"] <- NA
+## table(anes$trumpBin, anes$repcand, useNA = "always")
+## prop.table(table(anes$trumpBin))
+
+PCPTrump <- lapply(1:200,function(i){
+    print(paste("iter =", i))
+##
+    trumpAlg <- besiva("trumpBin", sort(realvarstouse), sampseed = i,
+                       perc = .2, anes, showforms = F, showoutput = F)
+    max(trumpAlg$pcps)})
+PCPTrump <- unlist(PCPTrump)
+write.csv((PCPTrump), paste0(writeloc,"trumpBeSiVaLogitPCPs.csv"))
+
+dev.new()
+pdf(paste0(writeloc, "BeSiVaLogitTrump.pdf"))
+hist(PCPTrump)
+graphics.off()
+
+anes$bernieBin <- ifelse(anes$demcand == "Bernie Sanders", 1, 0)
+anes$bernieBin[anes$demcand %in% "None"] <- NA
+table(anes$bernieBin, anes$demcand, useNA = "always")
+prop.table(table(anes$bernieBin))
+
+
+varsftb <- realvarstouse[!realvarstouse %in% c("ftsanders", "demcand")]
+varsftb <- c(varsftb, "fttrump")
+
+besivaBern <- lapply(1:100, function(i){
+    print(paste("iter =", i))
+        junker <- besiva("bernieBin", sort(varsftb), sampseed = i,
+                       perc = .2, anes, showforms = F, showoutput = F)
+}
+                     )
+bernVars <- unlist(lapply(besivaBern, function(x) x$intvars))
+PCPBern <- unlist(lapply(besivaBern, function(x) max(x$pcps)))
+summarize(PCPBern)
+
+dev.new()
+pdf(paste0(writeloc, "BeSiVaLogitBernie.pdf"))
+hist(PCPBern)
+graphics.off()
