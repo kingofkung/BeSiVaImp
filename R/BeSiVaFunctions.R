@@ -227,10 +227,14 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
             ## modmaker makes glms according to our specifications
             glms <- lapply(forms, modmaker, thedat = dat[-testrows,], loud = showforms)
 
-
+            ## browser()
             predvals <- lapply(glms,
-                               function(x) try(predictr(x,
-                                                    data = dat, rowstouse = testrows, loud = showforms)))
+                               function(x) {
+                                  try(
+                                   ifelse("glm" %in% class(x),
+                                          u <- predictr(x, data = dat, rowstouse = testrows, loud = showforms),
+                                          u <- NA))
+                                        try(u)})
             pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))
 
             ## round to a given threshold, as per user preference.

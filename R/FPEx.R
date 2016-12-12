@@ -238,3 +238,30 @@ dev.new()
 pdf(paste0(writeloc, "BeSiVaLogitBernie.pdf"))
 hist(PCPBern)
 graphics.off()
+
+
+anes$clintonBin <- ifelse(anes$demcand == "Hillary Clinton", 1, 0)
+anes$clintonBin[anes$demcand %in% "None"] <- NA
+## prop.table(table(anes$clintonBin))
+
+
+
+## There's one middle eastern respondent who is messing up the
+## responses when race is included. Recoding the one middle eastern
+## respondent to NA below.
+anes$racecond <- anes$race
+anes$racecond[anes$racecond %in% "Middle Eastern"] <- NA
+varsclinton <- realvarstouse[!realvarstouse %in% c("fthrc", "demcand", "race")]
+besivaHRC <- lapply(1:25, function(i){
+    print(paste("iter =", i))
+    besivaClinton <- besiva("clintonBin", varsclinton, anes,
+                          sampseed = i, showforms = F, showoutput = F)
+    besivaClinton
+})
+
+table(anes$race, anes$clintonBin)
+lapply(besivaHRC,function(x) x$intvars)
+
+pcpHrc <- unlist(lapply(besivaHRC, function(x) max(x$pcps, na.rm = T)))
+summarize(pcpHrc)
+hist(pcpHrc)
