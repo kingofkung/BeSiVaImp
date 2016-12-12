@@ -26,3 +26,7 @@ Data/GSS_stata/datpres76kp.csv
 .DS_Store
 
 Data/GSS_stata/.DS_Store
+
+R/OpenANES1992.R~
+
+*.R~
