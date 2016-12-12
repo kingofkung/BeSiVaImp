@@ -5,7 +5,7 @@
 ## in goes regression model
 ## return legal levels
 
-getgoodlevels <- function(varname, regmod){
+getgoodlevels <- function(varname, regmod, ...){
     ## gldat <- rockchalk::model.data(regmod)
     gldat <- model.frame(regmod)
     levels(factor(gldat[, varname]))
@@ -16,7 +16,7 @@ getgoodlevels <- function(varname, regmod){
 ## in goes regression model/legal levels
 ## in goes candidate dataset
 ## out comes candidate dataset with illegal levels nuked
-fixbadlevels <- function(testdat, mod){
+fixbadlevels <- function(testdat, mod, ...){
     ## browser()
 
     datClassIVs <- attr(terms(mod), "dataClasses")[-1]
@@ -134,7 +134,7 @@ predictr2 <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
     ## if(!is.null(cpf$tstdatnu)){
     ##     thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
     ## } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-    thepreds <- predict(x, newdata = fixbadlevels(data[rowstouse, , drop = FALSE], x), "response")
+    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], x, "response")
     unlist(lapply(thepreds, function(x) rbinom(1,1, x)))
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }

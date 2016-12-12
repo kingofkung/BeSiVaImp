@@ -12,8 +12,8 @@ library(parallel)
 no_cores <- detectCores() - 4
 print(no_cores)
 
-writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3"
-note <- ""
+writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
+note <- "ANES92ForC3"
 
 varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
 
@@ -66,8 +66,8 @@ besforms <- c(besforms, ftex, michigan, RnH)
 
 ## Maximum iterations
 cl <- makeCluster(no_cores)
-clusterExport(cl, c("fixbadlevels", "getgoodlevels", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr"))
-maxIT <- 100
+clusterExport(cl, c("fixbadlevels", "getgoodlevels", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr", "predictr2"))
+maxIT <- 20
 sampsize <- round(nrow(anes92) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes92"))
@@ -78,13 +78,14 @@ finalout <- lapply(seq_along(besforms), function(u){
     print(paste("iteration", u))
     ## A loop designed to replicate the monte Carlo simulations of
     ## BeSiVa, but with a single model instead of many.
-    thepcps <- unlist(parLapply(cl, 1:maxIT, function(i, you = u, maxiter = maxIT, sampsz = sampsize, dat = anes92){
+    thepcps <- unlist(lapply( 1:maxIT, function(i, usub = u, maxiter = maxIT, sampsz = sampsize, dat = anes92){
+        print(usub)
         set.seed(i)
         ## sample the rows
         subsamp <- sample(1:nrow(dat), size = sampsz)
-        mod <- glm(besforms[[you]], family = binomial(logit), data = dat[-subsamp,], model = F, y = F)
+        mod <- glm(besforms[[usub]], family = binomial(logit), data = dat[-subsamp,], model = F, y = F)
         ## get the predictions and the pcps
-        predsb <- predictr(mod, data = dat, subsamp, loud = F)
+        predsb <- predictr2(mod, data = dat, subsamp, loud = F)
         junker <- getpcp(predsb, dat$bindep[subsamp])
         ## save the pcps
         junker
@@ -190,7 +191,7 @@ btstpCI <- apply(finalout, 2, quantile, probs = c(.025, .975), na.rm = T) * 100
 ## btstpCI <- apply(finalout, 2, quantile, probs = c(.25, .75), na.rm = T) * 100
 
 rownames(finaloutdf) <- rownames(summarizeNumerics(finalout[,1]))
-modalcat <- prop.table(table(anes2000$bindep)) * 100
+modalcat <- prop.table(table(anes92$bindep)) * 100
 ##
 write.csv(finaloutdf, paste0(writeloc, "pcpsum", "maxIter", maxIT, note, ".csv"))
 ##
