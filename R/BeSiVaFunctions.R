@@ -121,6 +121,26 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }
 
+
+
+predictr2 <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
+
+    ## So right here: Somewhere between where the data in newdata
+    ## comes in and the predict function is where we could place our
+    ## variables
+    if(loud == T) print(formula(x))
+
+    ## tryCatch(cpf <- catprobfinder(nx = x, data, rowstouse ), warning = "nu")
+    ## if(!is.null(cpf$tstdatnu)){
+    ##     thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
+    ## } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
+    thepreds <- predict(x, newdata = fixbadlevels(data[rowstouse, , drop = FALSE], x), "response")
+    unlist(lapply(thepreds, function(x) rbinom(1,1, x)))
+    ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
+}
+
+
+
 ##' getpcp
 ##'
 ##' Get percent correctly predicted (PCP) for the models
@@ -194,7 +214,7 @@ foldmaker <- function(foldnum = 3){}
 ##' @param showforms Do I want to see the formulae on screen, or not? Best to see them if I've got a lot of variables, but not if there's only a few.
 ##' @return  the IVs of the best model based on subset selection, as well as the percent correctly predicted by that model.
 ##' @author Benjamin Rogers
-besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = TRUE, showforms = TRUE){
+besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfolds = 1, thresh = 1E-6, sampseed = 12345, showoutput = TRUE, showforms = TRUE, ...){
         set.seed(sampseed)
         ## divy up data
         dat <- dat[,c(devee, ivs)]
@@ -232,7 +252,7 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
                                function(x) {
                                   try(
                                    ifelse("glm" %in% class(x),
-                                          u <- predictr(x, data = dat, rowstouse = testrows, loud = showforms),
+                                          u <- predictr2(x, data = dat, rowstouse = testrows, loud = showforms),
                                           u <- NA))
                                         try(u)})
             pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))
