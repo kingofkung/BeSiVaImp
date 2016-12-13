@@ -21,7 +21,7 @@ source("rmMissings.R")
 str(anes)
 data.frame(table(anes$vcf0004))
 
-yr <- 2012
+yr <- 2008
 anesSub <- anes[anes$vcf0004 == yr, ]
 
 

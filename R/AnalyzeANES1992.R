@@ -2,7 +2,8 @@
 ## getwd()
 ## source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES2000.R")
 rm(list = ls())
-anes92 <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/anes92.csv")
+yr <- 2008
+anes92 <- read.csv(paste0("/Users/bjr/GitHub/BeSiVaImp/Data/anes", yr,".csv"))
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/RecodeANES92.R")
 
@@ -16,6 +17,8 @@ writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
 note <- "ANES92ForC3"
 
 varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
+
+varstoreallyuse[!varstoreallyuse %in% colnames(anes92)]
 
 tst <- besiva("bindep", varstoreallyuse, anes92, perc = .25, sampseed = 950, loud = FALSE, showforms = F, showoutput = T)
 tst$glms

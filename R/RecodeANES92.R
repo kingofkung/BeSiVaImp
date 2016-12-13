@@ -1,13 +1,21 @@
 ## Move the recodes to another file, to make everything slightly more managable
 
-if(!exists("anes92")) anes92 <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/anes92.csv")
 
 anes92$bindep <- ifelse(anes92$vcf0702 %in% "2. Yes, voted", 1, 0)
 anes92$bindep[is.na(anes92$vcf0702)] <- NA
 
 varstochange <- c("pid7" = "vcf0301", "daysreadpaper" = "vcf9033", "polEff" =  "vcf0609", "ed" = "vcf0140a", "incGroup" = "vcf0114", "marital" = "vcf0147", "race7" = "vcf0105a", "region" = "vcf0112", "sex" = "vcf0104", "partyContact" = "vcf9030a", "demContact" = "vcf9030b", "repContact" = "vcf9030c", "otherContact" = "vcf9031", "work7" = "vcf0116" , "church" = "vcf0130", "union" = "vcf0127", "timeinHouse" = "vcf9002", "age" = "vcf0101", "pidstr" = "pidstr")
+vtc <- as.data.frame(varstochange)
+rownames(vtc)
+
 nucolnames <- colnames(anes92)
-nucolnames[na.omit(match(varstochange, nucolnames))] <- names(varstochange)[!names(varstochange) %in% "pidstr"]
+
+for(i in 1:nrow(vtc)) nucolnames[colnames(anes92) %in% vtc[i,1]] <- rownames(vtc)[i]
+
+checkdf <- data.frame("orig" = colnames(anes92), "new" = nucolnames)
+checkdf <- checkdf[!grepl("vcf", checkdf$new)& !checkdf$new %in% c("version", "bindep"),]
+checkdf[order(checkdf$new),]
+sort(rownames(vtc))
 
 colnames(anes92) <- nucolnames
 
