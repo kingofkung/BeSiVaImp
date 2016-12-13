@@ -1,6 +1,5 @@
 ## This is where we'll store our analyses of the ANES data
 ## getwd()
-## source("/Users/bjr/GitHub/BeSiVaImp/R/OpenANES2000.R")
 rm(list = ls())
 yr <- 2008
 anes92 <- read.csv(paste0("/Users/bjr/GitHub/BeSiVaImp/Data/anes", yr,".csv"))
@@ -173,7 +172,7 @@ ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
 teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
 michiganloc <- ivlist %in% as.character(michigan)[[3]]
 ## Just in case the first one is PID
-michiganloc[[1]] <- FALSE
+ivlist[[1]] <- FALSE
 RnHloc <- ivlist %in% as.character(RnH)[[3]]
 ##
 colnames(finalout)[teixeiraloc] <- "teixeira1987ish"
@@ -240,7 +239,7 @@ graphics.off()
 
 
 ## Start working on a latex table featuring the best models
-mods <- lapply(besforms, function(x) glm(x, binomial, anes2000))
+mods <- lapply(besforms, function(x) glm(x, binomial, anes92))
 names(mods) <- colnames(finalout)
 lyxout <- outreg(mods[14:16], "latex", showAIC = T)
 ## But look, there's a line with way too many *'s, and -2LLR twice, right here.
