@@ -134,7 +134,7 @@ predictr2 <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
     ## if(!is.null(cpf$tstdatnu)){
     ##     thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
     ## } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], x, "response")
+    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
     unlist(lapply(thepreds, function(x) rbinom(1,1, x)))
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }

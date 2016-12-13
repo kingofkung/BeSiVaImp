@@ -21,12 +21,13 @@ source("rmMissings.R")
 str(anes)
 data.frame(table(anes$vcf0004))
 
-anes92 <- anes[anes$vcf0004 == 1992, ]
+yr <- 2012
+anesSub <- anes[anes$vcf0004 == yr, ]
 
 
-notmissing92 <- colSums(!is.na(anes92)) > 0
-anes92 <- anes92[, notmissing92]
+notmissing <- colSums(!is.na(anesSub)) > 0
+anesSub <- anesSub[, notmissing]
 
 ## turns out rmMissings.R changes the location of loc. I changed it back.
 loc <- "/Users/bjr/GitHub/BeSiVaImp/Data/"
-write.csv(anes92, file = paste0(loc,"anes92.csv"), row.names = F)
+write.csv(anesSub, file = paste0(loc,"anes", yr, ".csv"), row.names = F)
