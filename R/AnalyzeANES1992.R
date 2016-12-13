@@ -14,7 +14,7 @@ no_cores <- detectCores() - 4
 print(no_cores)
 
 writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
-note <- "ANES92ForC3"
+note <- paste0("ANES, ", yr, "ForC3")
 
 varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
 
@@ -37,7 +37,7 @@ lapply(tst$glms, function(x){
 cl <- makeCluster(no_cores, type = "FORK")
 MCIter <- 1000
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes92"))
-clusterExport(cl, c("fixbadlevels", "getgoodlevels", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr"))
+clusterExport(cl, c("fixbadlevels", "getgoodlevels", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr", "predictr2"))
 pti <- proc.time()
 besresults <- parLapply(cl, 1:MCIter, function(i){
     ## print(paste0("MC Progress = ", round(i/MCIter * 100), "%"))
@@ -70,7 +70,7 @@ besforms <- c(besforms, ftex, michigan, RnH)
 ## Maximum iterations
 cl <- makeCluster(no_cores)
 clusterExport(cl, c("fixbadlevels", "getgoodlevels", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr", "predictr2"))
-maxIT <- 20
+maxIT <- 100
 sampsize <- round(nrow(anes92) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes92"))
@@ -81,8 +81,8 @@ finalout <- lapply(seq_along(besforms), function(u){
     print(paste("iteration", u))
     ## A loop designed to replicate the monte Carlo simulations of
     ## BeSiVa, but with a single model instead of many.
-    thepcps <- unlist(lapply( 1:maxIT, function(i, usub = u, maxiter = maxIT, sampsz = sampsize, dat = anes92){
-        print(usub)
+    thepcps <- unlist(parLapply(cl, 1:maxIT, function(i, usub = u, maxiter = maxIT, sampsz = sampsize, dat = anes92){
+        ## print(usub)
         set.seed(i)
         ## sample the rows
         subsamp <- sample(1:nrow(dat), size = sampsz)
@@ -99,15 +99,6 @@ ptf3 <- proc.time() - pti2
 ##
 finalout <- do.call(cbind, finalout)
 
-
-## A few correlations/ one thing that seemed important to have
-
-## length(which(unlist(lapply(savvars, function(x) "age" %in% x))))
-## length(which(unlist(lapply(savvars, function(x) "age" %in% x | "agesq" %in% x))))
-## length(which(unlist(lapply(savvars, function(x) "age" %in% x & "agesq" %in% x))))
-## cor.test(anes2000$age, anes2000$houseTimeNum, use = "pairwise.complete.obs")
-## cor.test(anes2000$houseTimeNum, anes2000$incNum, use = "pairwise.complete.obs")
-## cor.test(anes2000$ednum, anes2000$pidstr, use = "pairwise.complete.obs")
 
 
 ## Make plot to explain number of variables selected
@@ -129,10 +120,11 @@ ggplot(data = proptabdf, aes(x = Var2, y =  Freq)) +
 svtabdf <- data.frame("Var" = unlist(lapply(seq_along(savvartab), function(x) rep(names(savvartab)[x], savvartab[x]))))
 svtabdf$Var <- as.character(svtabdf$Var)
 datrec <- read.csv("/Users/bjr/GitHub/BeSiVaImp/Data/uniquevarSels.csv")
-svtabdf$Var <- unlist(lapply(seq_along(datrec[,1]), function(x){
+
+for(x in seq_along(datrec[,1])){
     svtabdf$Var[svtabdf$Var %in% datrec$Var[x]] <- as.character(datrec$Recode[x])
     svtabdf$Var[svtabdf$Var %in% datrec$Recode[x]]
-}))
+}
 
 uniqueVar <- unique(svtabdf$Var)
 svtabdf$Var <- factor(svtabdf$Var, levels = uniqueVar[length(uniqueVar):1])
@@ -141,10 +133,10 @@ svtabdf$Var <- factor(svtabdf$Var, levels = uniqueVar[length(uniqueVar):1])
 dev.new()
 pdf(paste0(writeloc, "ANES2000", MCIter, "runs", note, ".pdf"))
 ggplot(data = svtabdf) +
-    geom_bar(aes(x = Var, stat = "identity"), fill = "darkgreen") +
-    theme_classic(10) +
+    geom_bar(aes(x = Var), fill = "darkgreen") +
+    theme_classic(10) + theme(plot.title = element_text(hjust = .5)) +
     xlab("Variable Names") + ylab("Count") +
-    ggtitle(paste("Number of times BeSiVa Selected a Variable Out of", MCIter, "Runs\n 2000 Election ANES Data")) +
+    ggtitle(paste("Number of times BeSiVa Selected a Variable Out of", MCIter, "Runs\n ", yr, "Election ANES Data")) +
     coord_flip()
 graphics.off()
 
@@ -180,6 +172,8 @@ colnames(finalout) <- paste0("iteration", seq_along(besforms))
 ivlist <- lapply(besforms, function(x) as.character(x)[[3]])
 teixeiraloc <- ivlist %in% as.character(ftex)[[3]]
 michiganloc <- ivlist %in% as.character(michigan)[[3]]
+## Just in case the first one is PID
+michiganloc[[1]] <- FALSE
 RnHloc <- ivlist %in% as.character(RnH)[[3]]
 ##
 colnames(finalout)[teixeiraloc] <- "teixeira1987ish"
@@ -211,7 +205,7 @@ plot(
     main = paste("Bootstrapped PCPs For Predictors \n BeSiVa Selected Over", maxIT, "iterations"),
     ylab = "Percent Correctly Predicted",
     xlab = "Number of Selected Independent Variables\n Included in the Model",
-    type = "p", ylim = c(0.45, 0.75)*100)
+    type = "p", ylim = c(0.25, 0.75)*100)
 lapply(seq_along(algIters), function(x) segments(x, btstpCI[2,x], x, btstpCI[1,x]))
 lapply(seq_along(algIters), function(g) segments(x0 = g - hbar, y0 = btstpCI[1,g], x1 = g + hbar , y1 = btstpCI[1,g]))
 lapply(seq_along(algIters), function(g) segments(x0 = g - hbar, y0 = btstpCI[2,g], x1 = g + hbar , y1 = btstpCI[2,g]))
