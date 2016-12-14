@@ -122,7 +122,6 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
 }
 
 
-
 predictr2 <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
 
     ## So right here: Somewhere between where the data in newdata
@@ -134,7 +133,7 @@ predictr2 <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
     ## if(!is.null(cpf$tstdatnu)){
     ##     thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
     ## } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-    thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
+    thepreds <- predict(x, newdata = fixbadlevels(data[rowstouse, , drop = FALSE], x), "response")
     unlist(lapply(thepreds, function(x) rbinom(1,1, x)))
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }
@@ -186,7 +185,7 @@ modmaker <- function(x, thedat, famille = binomial(), loud = TRUE){
     eval(bquote(
         try(junker <- glm(.(x), data = model.frame(.(x), thedat), family = binomial(), model = TRUE, y = TRUE)))
     )
-    if(loud == TRUE) eval(bquote(print(.(x))))
+    ## if(loud == TRUE) eval(bquote(print(.(x))))
 
     try(junker)
 }
@@ -252,7 +251,7 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
                                function(x) {
                                   try(
                                    ifelse("glm" %in% class(x),
-                                          u <- predictr2(x, data = dat, rowstouse = testrows, loud = showforms),
+                                          u <- predictr(x, data = dat, rowstouse = testrows, loud = showforms),
                                           u <- NA))
                                         try(u)})
             pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))

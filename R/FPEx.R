@@ -5,6 +5,9 @@ source("BeSiVaFunctionslm.R")
 library(rockchalk)
 library(ggplot2)
 library(caret)
+library(parallel)
+no_cores <- detectCores() - 4
+
 
 writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
 
@@ -95,17 +98,19 @@ fullmodo <- lm(myform, anes)
 ## outreg(fullmodo, type = "html", tight = FALSE)
 summary(fullmodo)
 
-
-
-
-
+MCIter <-  100
 closeness <- 20
-varls <- lapply(1:5, function(i){
+cl <- makeCluster(no_cores, type = "FORK")
+clusterExport(cl, c("realvarstouse", "MCIter", "anes"))
+clusterExport(cl, c("fixbadlevels", "getgoodlevels", "modmakerlm", "makepclp", "modmakerlm", "besivalm", "closeness"))
+varls <- parLapply(cl, 1:MCIter, function(i){
     print(paste("iter = ", i))
     tst <- besivalm("fttrump", sort(realvarstouse), anes,
                     iters = 5, thresh = 1E-5, sampseed = i, hc = closeness, showoutput = FALSE, showforms = FALSE)
     c("intvars" = list(tst$intvars), "maxpclp" = max(tst$pclps))
 })
+stopCluster(cl)
+
 varlintvar <- unlist( lapply(varls, function(x) x$intvars))
 varlpclp <- unlist( lapply(varls, function(x) x$maxpclp))
 ##
@@ -147,53 +152,12 @@ hist(mpgPCLPs, breaks = 5)
 
 source("BeSiVaFunctions.R")
 
-## anes$trumpFans <- ifelse(anes$fttrump > 50, 1, 0)
-## ## table(anes$fttrump, anes$trumpFans)
-## prop.table(table(anes$trumpFans))
 
 
-## tf <- lapply(1:10, function(i){
-##     tfbin <- besiva("trumpFans", sort(realvarstouse), anes, sampseed = i, showforms = FALSE)
-##     ## anes$trumpFans[unlist(tfbin$tstrows)]
-##     tfbin})
-## selectvars <- unlist(lapply(tf, function(x) x$intvars))
-## sort(table(selectvars), decreasing = TRUE)
-## pcpVals <- unlist(lapply(tf, function(x) max(x$pcps)))
-## hist(pcpVals)
-
-
-## install.packages(c("GGally", "VGAM"))
-library(VGAM)
-
-
-## predict( modmakertobit(myform, anes[-tr,]))[, 'mu']
 
 
 closethresh <- 10
 ##
-tobcriters <- lapply(1:100, function(i){
-    print(i)
-    set.seed(i)
-    testingrows <- sample(1:nrow(anes), nrow(anes)*.2)
-    tsttobit <- modmakertobit(myform, anes[-testingrows,])
-##
-    ##
-    ## browser()
-    tobpreds <- predict(tsttobit, newdata = anes[testingrows,])[,'mu']
-    tobobs <- anes$fttrump[testingrows[testingrows %in% names(tobpreds)]]
-    c(RMSE(tobpreds, tobobs, TRUE),
-    ## Note: The NA rows are taken out, requiring the correction seen below
-    makepclp(tsttobit, tobobs, tobpreds, closethresh)*length(tobobs)/length(testingrows))
-})
-tobcriters <- as.data.frame(do.call(rbind, tobcriters))
-colnames(tobcriters) <- c("rmse", "pclp")
-summarizeNumerics(tobcriters)
-
-hist(tobcriters$pclp)
-source("BeSiVaFunctionslm.R")
-library(VGAM)
-trumptobit <- besivatobit('fttrump', sort(realvarstouse), anes, hc = 10)
-summarize(trumptobit$pclps)
 
 
 anes$trumpBin <- ifelse( anes$repcand == "Donald Trump" ,1, 0)
@@ -201,7 +165,7 @@ anes$trumpBin[anes$repcand %in% "None"] <- NA
 ## table(anes$trumpBin, anes$repcand, useNA = "always")
 ## prop.table(table(anes$trumpBin))
 
-PCPTrump <- lapply(1:200,function(i){
+PCPTrump <- lapply(1:10,function(i){
     print(paste("iter =", i))
 ##
     trumpAlg <- besiva("trumpBin", sort(realvarstouse), sampseed = i,
@@ -224,7 +188,7 @@ prop.table(table(anes$bernieBin))
 varsftb <- realvarstouse[!realvarstouse %in% c("ftsanders", "demcand")]
 varsftb <- c(varsftb, "fttrump")
 
-besivaBern <- lapply(1:100, function(i){
+besivaBern <- lapply(1:10, function(i){
     print(paste("iter =", i))
         junker <- besiva("bernieBin", sort(varsftb), sampseed = i,
                        perc = .2, anes, showforms = F, showoutput = F)
@@ -265,3 +229,37 @@ lapply(besivaHRC,function(x) x$intvars)
 pcpHrc <- unlist(lapply(besivaHRC, function(x) max(x$pcps, na.rm = T)))
 summarize(pcpHrc)
 hist(pcpHrc)
+
+
+
+
+
+anes$sciBin <- ifelse(anes$ftsci > 50, 1, 0)
+anes$sciBin[anes$ftsci == 50 ||is.na(anes$ftsci)] <- NA
+
+cl <- makeCluster(no_cores, type = "FORK")
+clusterExport(cl, c("realvarstouse", "MCIter", "anes"))
+clusterExport(cl, c("fixbadlevels", "getgoodlevels", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr", "predictr2", "makepclp", "modmakerlm", "besivalm"))
+besivaSci <- parLapply(cl, 1:100, function(i){
+    print(paste("iter =", i))
+    bsSci <- besivalm("ftsci", realvarstouse[!realvarstouse %in% c("ftsci")], anes, hc = 10, sampseed = i, showforms = F)
+    bsSci
+})
+stopCluster(cl)
+
+
+sciVars <- unlist(lapply(besivaSci,function(x) x$intvars))
+sciTab <- table(sciVars)
+sort(sciTab, decreasing = TRUE)
+
+sciPclps <- unlist(lapply(besivaSci, function(x) max(x$pclps, na.rm = T)))
+hist(sciPclps)
+
+
+anes$hcdtBin <- as.character(anes$vote16dt)
+anes$hcdtBin[anes$hcdtBin %in% c("Probably not vote", "Someone else")] <- NA
+anes$hcdtBin <- ifelse(anes$hcdtBin == "Hillary Clinton", 1, 0)
+oLT <- besiva("hcdtBin", realvarstouse[!realvarstouse %in% c("hcdtBin", "vote16dt")], anes, showforms = F)
+
+
+max(oLT$pcps)

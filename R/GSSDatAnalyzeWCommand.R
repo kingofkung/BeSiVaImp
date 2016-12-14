@@ -55,7 +55,7 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/nrow(d
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 noVote08 <- "vote08"
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc) #, noVote08)
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
