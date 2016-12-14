@@ -9,6 +9,7 @@ source("BeSiVaFunctions.R")
 devee <- "vote12bin"
 ## colnames(dat)
 
+percdat <- prop.table(table(dat2$vote12)) * 100
 
 ## Keep some data held out
 ## First, make sure our DV Is included in all cases rows
@@ -42,7 +43,7 @@ allnas <- colnames(dat2)[whichcols]
 library(caret)
 mostlynas <- colnames(dat2)[nearZeroVar(dat2[,])]
 
-probvars <- read.csv("/Users/bjr/Dropbox/R_Projects/GSSThing/probkids.csv", stringsAsFactors = F)
+## probvars <- read.csv("/Users/bjr/Dropbox/R_Projects/GSSThing/probkids.csv", stringsAsFactors = F)
 
 
 
@@ -55,7 +56,7 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/nrow(d
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 noVote08 <- "vote08"
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc )#, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -65,9 +66,10 @@ length(colnames(dat2)) -  length(unique(avoidcols))
 
 length(unique(colstouse))
 
-colstoreallyuse <- sort(colstouse)
+colstouse <- sort(colstouse)
 
-mods <- besiva(devee, colstoreallyuse, dat2, iters = 5, perc = .1)
+mods <- besiva(devee, colstouse, dat2, iters = 5, perc = .1)
+max(mods$pcps)
 
 ## tstmod <- glm(vote12bin ~ sector, data = dat2[-test,], family = binomial)
 ## tstcpf <- catprobfinder(tstmod, dat2, test)
