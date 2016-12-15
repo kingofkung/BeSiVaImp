@@ -67,8 +67,9 @@ length(colnames(dat2)) -  length(unique(avoidcols))
 length(unique(colstouse))
 
 colstouse <- sort(colstouse)
+write.csv(colstouse, "/Users/bjr/GitHub/BeSiVaImp/Output/ColsC1ForAppendixA.csv", row.names = F)
 
-mods <- besiva(devee, colstouse, dat2, iters = 5, perc = .1)
+mods <- besiva(devee, colstouse, dat2, iters = 5, perc = .2, thresh = .01)
 max(mods$pcps)
 
 ## tstmod <- glm(vote12bin ~ sector, data = dat2[-test,], family = binomial)
