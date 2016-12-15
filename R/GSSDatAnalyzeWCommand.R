@@ -69,8 +69,15 @@ length(unique(colstouse))
 colstouse <- sort(colstouse)
 write.csv(colstouse, "/Users/bjr/GitHub/BeSiVaImp/Output/ColsC1ForAppendixA.csv", row.names = F)
 
-mods <- besiva(devee, colstouse, dat2, iters = 5, perc = .2, thresh = .01)
+mods <- besiva(devee, colstouse, dat2, iters = 5, perc = .1, thresh = .001)
 max(mods$pcps)
+
+modColl <- lapply(1:100, function(x){
+    junker <- besiva(devee, colstouse, dat2, perc = .1, thresh = .001, sampseed = x)
+    junker
+})
+lapply(modColl, function(x) max(x$pcps, na.rm = T))
+unlist(lapply(modColl, function(x) unlist(x$intvars)))
 
 ## tstmod <- glm(vote12bin ~ sector, data = dat2[-test,], family = binomial)
 ## tstcpf <- catprobfinder(tstmod, dat2, test)
