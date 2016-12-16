@@ -1,0 +1,107 @@
+\begin{tabular}{*{4}{l}}
+\hline
+
+                 & iteration14 & iteration15 & iteration16   \tabularnewline
+
+                  &Estimate   &Estimate   &Estimate \tabularnewline
+
+                &(S.E.)   &(S.E.)   &(S.E.) \tabularnewline
+
+\hline
+
+\hline
+
+  (Intercept)     &-4.612*** &-3.877*** &-3.326*** \tabularnewline
+
+                &(0.583)   &(0.649)   &(0.777)  \tabularnewline
+
+  ednum           &0.409*** &0.408*** &0.411*** \tabularnewline
+
+                &(0.046)   &(0.047)   &(0.048)  \tabularnewline
+
+  daysreadpaper    &0.083*** &0.079*** &0.079*** \tabularnewline
+
+                &(0.022)   &(0.023)   &(0.023)  \tabularnewline
+
+  houseTimeNum    &0.324*** &0.317*** &0.317*** \tabularnewline
+
+                &(0.058)   &(0.060)   &(0.060)  \tabularnewline
+
+  pidstr          &0.371*** &0.380*** &0.380*** \tabularnewline
+
+                &(0.064)   &(0.065)   &(0.065)  \tabularnewline
+
+  age             &0.135*** &0.127*** &0.128*** \tabularnewline
+
+                &(0.020)   &(0.021)   &(0.021)  \tabularnewline
+
+  churchBin1      &0.703*** &0.703*** &0.706*** \tabularnewline
+
+                &(0.169)   &(0.174)   &(0.174)  \tabularnewline
+
+  agesq           &-0.001*** &-0.001*** &-0.001*** \tabularnewline
+
+                &(0.000)   &(0.000)   &(0.000)  \tabularnewline
+
+  south1          &-0.274* &-0.308* &-0.299* \tabularnewline
+
+                &(0.132)   &(0.135)   &(0.135)  \tabularnewline
+
+  sex2. Female    &0.026 &0.059 &0.064 \tabularnewline
+
+                &(0.125)   &(0.128)   &(0.129)  \tabularnewline
+
+  polEff          &-0.240*** &-0.255*** &-0.254*** \tabularnewline
+
+                &(0.064)   &(0.065)   &(0.065)  \tabularnewline
+
+  minority        &-0.191 &-0.127 &-0.127 \tabularnewline
+
+                &(0.155)   &(0.159)   &(0.160)  \tabularnewline
+
+  divorced        &-0.384 &-0.422* &-0.425* \tabularnewline
+
+                &(0.204)   &(0.209)   &(0.209)  \tabularnewline
+
+  partyContact2. No contact by major party    &-0.728*** &-0.737** &0.234 \tabularnewline
+
+                &(0.178)   &(0.285)   &(0.705)  \tabularnewline
+
+  otherContact5. No    &-0.238 &-0.310 &-0.295 \tabularnewline
+
+                &(0.252)   &(0.270)   &(0.272)  \tabularnewline
+
+  repContact2. No contact by Republican party      & .      &-0.520 &-1.108 \tabularnewline
+
+                &         &(0.404)   &(0.602)  \tabularnewline
+
+  demContact2. No contact by Democratic party      & .        & .      &-0.973 \tabularnewline
+
+                &         &         &(0.646)  \tabularnewline
+
+\hline
+
+N                 &1845       &1789       &1789       \tabularnewline
+
+
+
+
+Deviance         &1639.293   &1560.671   &1558.208   \tabularnewline
+
+$-2LLR (Model chi^2)$ ***       & 459.011***$-2LLR (Model chi^2)$ ***       & 459.562**       & 462.025* \tabularnewline
+
+AIC
+     & 1669.293
+     & 1592.671
+     & 1592.208
+\tabularnewline
+
+\hline
+\hline
+
+
+
+\multicolumn{4}{c}{${*  p}\le 0.05$${*\!\!*  p}\le 0.01$${*\!\!*\!\!*  p}\le 0.001$}\tabularnewline
+
+\end{tabular}
+

@@ -1,7 +1,7 @@
 ## This is where we'll store our analyses of the ANES data
 ## getwd()
 rm(list = ls())
-yr <- 2008
+yr <- 1984
 anes92 <- read.csv(paste0("/Users/bjr/GitHub/BeSiVaImp/Data/anes", yr,".csv"))
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctions.R")
 source("/Users/bjr/GitHub/BeSiVaImp/R/RecodeANES92.R")
