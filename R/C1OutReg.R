@@ -40,7 +40,7 @@ colnames(vote08VarFac) <- "Var"
 
 library(ggplot2)
 dev.new()
-pdf(paste0(dbLoc, "GSS", 100, "runsC1.pdf"))
+pdf(paste0(dbLoc, "GSS", 100, "C1.pdf"))
 ggplot(data = vote08VarFac) +
     geom_bar(aes(x = Var, stat = "identity"), fill = "darkgreen") +
     theme_classic(10) +
@@ -51,10 +51,12 @@ graphics.off()
 
 
 
+library(rockchalk)
 
 
 vote08PCPs <- read.csv(paste0(dbLoc, "C1PCPsVote08.csv"), stringsAsFactors = FALSE)[, 2]
 hist(vote08PCPs*100)
 
-library(rockchalk)
 round(summarize(vote08PCPs * 100)$numerics, 2)
+
+NoVote08PCPs <- read.csv(paste0(dbLoc, "C1PCPs.csv"), stringsAsFactors = FALSE)[, 2]
