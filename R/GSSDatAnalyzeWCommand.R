@@ -56,7 +56,7 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/nrow(d
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
 noVote08 <- "vote08"
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc )#, noVote08)
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -73,11 +73,14 @@ mods <- besiva(devee, colstouse, dat2, iters = 5, perc = .1, thresh = .001)
 max(mods$pcps)
 
 modColl <- lapply(1:100, function(x){
-    junker <- besiva(devee, colstouse, dat2, perc = .1, thresh = .001, sampseed = x)
+    print(paste("iter =", x))
+    junker <- besiva(devee, colstouse, dat2, perc = .1, thresh = .001, sampseed = x, showforms = F)
     junker
 })
-lapply(modColl, function(x) max(x$pcps, na.rm = T))
-unlist(lapply(modColl, function(x) unlist(x$intvars)))
+mcPCPs <- unlist(lapply(modColl, function(x) max(x$pcps, na.rm = T)))
+write.csv(mcPCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1PCPs.csv")
+mcIntVars <- unlist(lapply(modColl, function(x) unlist(x$intvars)))
+write.csv(mcIntVars, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1IntVars.csv")
 
 ## tstmod <- glm(vote12bin ~ sector, data = dat2[-test,], family = binomial)
 ## tstcpf <- catprobfinder(tstmod, dat2, test)
