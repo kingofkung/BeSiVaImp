@@ -53,10 +53,11 @@ graphics.off()
 
 library(rockchalk)
 
-
 vote08PCPs <- read.csv(paste0(dbLoc, "C1PCPsVote08.csv"), stringsAsFactors = FALSE)[, 2]
 hist(vote08PCPs*100)
 
 round(summarize(vote08PCPs * 100)$numerics, 2)
 
 NoVote08PCPs <- read.csv(paste0(dbLoc, "C1PCPs.csv"), stringsAsFactors = FALSE)[, 2]
+hist(NoVote08PCPs*100)
+round(summarize(NoVote08PCPs * 100)$numerics, 2)
