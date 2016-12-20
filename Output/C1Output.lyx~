@@ -90,7 +90,7 @@ hline
 
 \begin_layout Plain Layout
 
-                  & First Attempt & Removed Prior Vote   
+                  & All Variables & Removed Prior Vote   
 \backslash
 tabularnewline
 \end_layout
@@ -356,22 +356,39 @@ hline
 
 \begin_layout Plain Layout
 
- N                 &2360       &2348       
+N                 &2360       &2348       
 \backslash
 tabularnewline
 \end_layout
 
 \begin_layout Plain Layout
 
-    Deviance         &1608.760   &2372.294   
+Deviance         &1608.760   &2372.294   
 \backslash
 tabularnewline
 \end_layout
 
 \begin_layout Plain Layout
 
- $-2LLR (Model chi^2)$ **       & 1282.942**$-2LLR (Model chi^2)$ **    
-   & 507.421* 
+$-2LLR (Model $chi$^2)$ **       & 1282.942**       & 507.421* 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+AIC      & 1616.760      & 2396.294 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+PCP 	&	88.0
+\backslash
+%			&79.7
+\backslash
+%			
 \backslash
 tabularnewline
 \end_layout

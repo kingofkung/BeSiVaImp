@@ -40,7 +40,7 @@ vote08VarFac <- factor(vote08Vars, levels = names(VarTab))
 ## The data.frame makes it so ggplot2 can use it
 vote08VarFac <- data.frame("Var" = vote08VarFac)
 ## Remove any only appearing one time.
-votegt2 <- names(which(table(vote08VarFac) > 1))
+votegt2 <- names(which(table(vote08VarFac) > 2))
 vote08VarFac <- data.frame("Var" = vote08VarFac[as.character(vote08VarFac$Var) %in% votegt2, ])
 
 
@@ -50,33 +50,49 @@ NoEducTab <- sort(table(NoEducVars), decreasing = FALSE)
 NoEducVarFac <- factor(NoEducVars, levels = names(NoEducTab))
 NoEducVarFac <- data.frame("Var" = NoEducVarFac)
 ## Remove the one again
-educgt2 <- names(which(table(NoEducVarFac) > 1))
+educgt2 <- names(which(table(NoEducVarFac) > 2))
 NoEducVarFac <- data.frame("Var" = NoEducVarFac[as.character(NoEducVarFac$Var) %in% educgt2,])
 
 
-
-
-
+noVoteVars <- read.csv(paste0(dbLoc, "C1IntVarsNoVote.csv"), stringsAsFactors = FALSE)[, 2]
+## Create Data Frame... If we do this again, we should make it a function, especially when we rename them all
+noVoteTab <- sort(table(noVoteVars), decreasing = FALSE)
+noVoteVarFac <- factor(noVoteVars, levels = names(noVoteTab))
+noVoteVarFac <- data.frame("Var" = noVoteVarFac)
+## Unique Variable Removal
+noVotegt2 <- names(which(noVoteTab > 2))
+noVotegt2bool <- as.character(noVoteVarFac$Var) %in% noVotegt2
+noVoteVarFac <- data.frame("Var" = noVoteVarFac[noVotegt2bool,])
 
 
 VarPlotFunc <- function(dat, title){
     ggplot(data = dat) +
-        geom_bar(aes(x = Var, stat = "identity"), fill = "darkgreen") +
-        theme_classic(10) +
-        xlab("Variable Names") + ylab("Count") +
-        ggtitle(title) +
-        coord_flip()
+        geom_bar(aes(x = Var), fill = "darkgreen") +
+            theme_classic(10) +
+                theme(plot.title = element_text(hjust = 0.5, family = "Helvetica", face = "bold"),
+                      panel.grid.major.x = element_line(color = "gray")) +
+                          xlab("Variable Names") +
+                              ylab("Count") +
+                                  ggtitle(title) +
+                                  coord_flip()
 }
 
 dev.new()
 pdf(paste0(dbLoc, "GSS", 100, "C1.pdf"))
-fullTitle <- paste("Number of times BeSiVa Selected a Variable Out of", 100, "Runs\n 2014 GSS Data")
+fullTitle <- paste("Number of times BeSiVa Selected a Variable Out of", 100, "Runs\n In the 2014 GSS Data")
 VarPlotFunc(vote08VarFac, title = fullTitle)
 graphics.off()
 
 dev.new()
+pdf(paste0(dbLoc, "GSS", 100, "C1NoVote08.pdf"))
+fullTitleNPV <- paste("Number of times BeSiVa Selected a Variable Out of", 100, "Runs\nIn the 2014 GSS Data Without Prior Vote")
+VarPlotFunc(noVoteVarFac, title = fullTitleNPV)
+graphics.off()
+
+
+dev.new()
 pdf(paste0(dbLoc, "GSS", 100, "C1NoEduc.pdf"))
-fullTitleNE <- paste("Number of times BeSiVa Selected a Variable Out of", 100, "Runs\n 2014 GSS Data Without Education")
+fullTitleNE <- paste("Number of times BeSiVa Selected a Variable Out of", 100, "Runs\nIn the 2014 GSS Data Without Education")
 VarPlotFunc(NoEducVarFac, title = fullTitleNE)
 graphics.off()
 
@@ -96,9 +112,16 @@ mainSumStats <- round(summarize(vote08PCPs * 100)$numerics, 2)
 ## erase their original names.
 colnames(mainSumStats) = NULL
 
-## NoVote08PCPs <- read.csv(paste0(dbLoc, "C1PCPs.csv"), stringsAsFactors = FALSE)[, 2]
-## hist(NoVote08PCPs*100)
-## round(summarize(NoVote08PCPs * 100)$numerics, 2)
+NoVote08PCPs <- read.csv(paste0(dbLoc, "C1PCPsNoVote.csv"), stringsAsFactors = FALSE)[, 2]
+dev.new()
+pdf(paste0(dbLoc, "noVote08HistGSS.pdf"))
+hist(NoVote08PCPs*100,
+     main = "A Histogram of PCPs for the GSS\n Without Prior Vote",
+     xlab = "Percent Correctly Predicted")
+graphics.off()
+
+noVote08SumStats <- round(summarize(NoVote08PCPs * 100)$numerics, 2)
+colnames(noVote08SumStats) <- NULL
 
 dev.new()
 pdf(paste0(dbLoc, "NoEducHistGSS.pdf"))
@@ -111,5 +134,5 @@ graphics.off()
 noEducSumStats <- round(summarize(NoEducPCPS * 100)$numerics, 2)
 colnames(noEducSumStats) <- NULL
 
-SumStatOut <- data.frame("All Variables" = mainSumStats, "Removed Education" = noEducSumStats)
+SumStatOut <- data.frame("All Variables" = mainSumStats, "Removed Prior Vote" = noVote08SumStats, "Removed Education" = noEducSumStats)
 write.csv(SumStatOut, paste0(dbLoc, "PCPSumStats.csv"))
