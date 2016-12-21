@@ -1,5 +1,6 @@
 library(rockchalk)
 library(ggplot2)
+library(xtable)
 
 
 datloc <- "/Users/bjr/GitHub/BeSiVaImp/Data/GSS_stata/"
@@ -39,8 +40,9 @@ VarTab <- sort(table(vote08Vars), decreasing = FALSE)
 vote08VarFac <- factor(vote08Vars, levels = names(VarTab))
 ## The data.frame makes it so ggplot2 can use it
 vote08VarFac <- data.frame("Var" = vote08VarFac)
-## Remove any only appearing one time.
-votegt2 <- names(which(table(vote08VarFac) > 2))
+## Remove any only appearing threshold times.
+threshold <- 1
+votegt2 <- names(which(table(vote08VarFac) > threshold))
 vote08VarFac <- data.frame("Var" = vote08VarFac[as.character(vote08VarFac$Var) %in% votegt2, ])
 
 
@@ -50,7 +52,7 @@ NoEducTab <- sort(table(NoEducVars), decreasing = FALSE)
 NoEducVarFac <- factor(NoEducVars, levels = names(NoEducTab))
 NoEducVarFac <- data.frame("Var" = NoEducVarFac)
 ## Remove the one again
-educgt2 <- names(which(table(NoEducVarFac) > 2))
+educgt2 <- names(which(table(NoEducVarFac) > threshold))
 NoEducVarFac <- data.frame("Var" = NoEducVarFac[as.character(NoEducVarFac$Var) %in% educgt2,])
 
 
@@ -60,7 +62,7 @@ noVoteTab <- sort(table(noVoteVars), decreasing = FALSE)
 noVoteVarFac <- factor(noVoteVars, levels = names(noVoteTab))
 noVoteVarFac <- data.frame("Var" = noVoteVarFac)
 ## Unique Variable Removal
-noVotegt2 <- names(which(noVoteTab > 2))
+noVotegt2 <- names(which(noVoteTab > threshold))
 noVotegt2bool <- as.character(noVoteVarFac$Var) %in% noVotegt2
 noVoteVarFac <- data.frame("Var" = noVoteVarFac[noVotegt2bool,])
 
@@ -136,3 +138,5 @@ colnames(noEducSumStats) <- NULL
 
 SumStatOut <- data.frame("All Variables" = mainSumStats, "Removed Prior Vote" = noVote08SumStats, "Removed Education" = noEducSumStats)
 write.csv(SumStatOut, paste0(dbLoc, "PCPSumStats.csv"))
+
+xtable(SumStatOut[, c(1,2)])

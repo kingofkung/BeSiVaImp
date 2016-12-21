@@ -5,9 +5,9 @@
 ## in goes regression model
 ## return legal levels
 
-getgoodlevels <- function(varname, regmod, ...){
+getgoodlevels <- function(varname, regmod, trdat, ...){
     ## gldat <- rockchalk::model.data(regmod)
-    gldat <- model.frame(regmod)
+    gldat <- model.frame(regmod, data = trdat)
     levels(factor(gldat[, varname]))
 }
 
@@ -16,7 +16,7 @@ getgoodlevels <- function(varname, regmod, ...){
 ## in goes regression model/legal levels
 ## in goes candidate dataset
 ## out comes candidate dataset with illegal levels nuked
-fixbadlevels <- function(testdat, mod, ...){
+fixbadlevels <- function(testdat, mod, traindat, ...){
     ## browser()
 
     datClassIVs <- attr(terms(mod), "dataClasses")[-1]
@@ -24,7 +24,7 @@ fixbadlevels <- function(testdat, mod, ...){
     facIVs <- names(datClassIVs[whichFacs])
     for(i in facIVs){
         ## testdat[!testdat[,i] %in% getgoodlevels(i, mod) , i] <- NA
-        levels(testdat[,i])[!levels(testdat[,i]) %in% getgoodlevels(i, mod)] <- NA
+        levels(testdat[,i])[!levels(testdat[,i]) %in% getgoodlevels(i, mod, traindat)] <- NA
     }
     testdat
 }
@@ -116,7 +116,7 @@ predictr <- function(x, data = mat, rowstouse = holdoutrows, loud = TRUE){
     ## if(!is.null(cpf$tstdatnu)){
     ##     thepreds <- predict(x, newdata = cpf$tstdatnu, "response")
     ## } else thepreds <- predict(x, newdata = data[rowstouse, , drop = FALSE], "response")
-    thepreds <- predict(x, newdata = fixbadlevels(data[rowstouse, , drop = FALSE], x), "response")
+    thepreds <- predict(x, newdata = fixbadlevels(data[rowstouse, , drop = FALSE], x, data[-rowstouse, ] ), "response")
     ifelse(thepreds >=.5, 1, 0)
     ## unlist(lapply(thepreds, function(x) rbinom(1, size = 1, prob = x)))
 }
@@ -183,7 +183,7 @@ dispboth <- function(model, fulldata){
 ##' @author Benjamin Rogers
 modmaker <- function(x, thedat, famille = binomial(), loud = TRUE){
     eval(bquote(
-        try(junker <- glm(.(x), data = model.frame(.(x), thedat), family = binomial(), model = TRUE, y = TRUE)))
+        try(junker <- glmnullifier(glm(.(x), data = model.frame(.(x), thedat), family = binomial(), model = TRUE, y = TRUE))))
     )
     ## if(loud == TRUE) eval(bquote(print(.(x))))
 
