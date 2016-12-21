@@ -253,7 +253,8 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
                                    ifelse("glm" %in% class(x),
                                           u <- predictr(x, data = dat, rowstouse = testrows, loud = showforms),
                                           u <- NA))
-                                        try(u)})
+                                  try(u)})
+            rm(glms)
             pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))
 
             ## round to a given threshold, as per user preference.
@@ -297,5 +298,5 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
         ## PCPs that are output at any time. This makes sure that the
         ## one set is the last one before the tie, if there is one.
         if(length(maxpcp) > 1) pcps <- oldpcps
-        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = glms, "predvals" = predvals, "pcps" = pcps, "tstrows" = testrows)
+        list("intvars" = intvars, "tieforms" = tieforms, "forms" = forms, "glms" = NULL, "predvals" = NULL, "pcps" = pcps, "tstrows" = testrows)
 }
