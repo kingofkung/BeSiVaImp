@@ -125,6 +125,7 @@ graphics.off()
 noVote08SumStats <- round(summarize(NoVote08PCPs * 100)$numerics, 2)
 colnames(noVote08SumStats) <- NULL
 
+
 dev.new()
 pdf(paste0(dbLoc, "NoEducHistGSS.pdf"))
 NoEducPCPS <- read.csv(paste0(dbLoc, "C1PCPsNoEduc.csv"), stringsAsFactors = FALSE)[, 2]
@@ -136,7 +137,30 @@ graphics.off()
 noEducSumStats <- round(summarize(NoEducPCPS * 100)$numerics, 2)
 colnames(noEducSumStats) <- NULL
 
-SumStatOut <- data.frame("All Variables" = mainSumStats, "Removed Prior Vote" = noVote08SumStats, "Removed Education" = noEducSumStats)
+dev.new()
+pdf(paste0(dbLoc, "JustPriorVoteHistGSS.pdf"))
+justVote08PCPs <- read.csv(paste0(dbLoc, "justVote08PCPs.csv"))[,2]
+hist(justVote08PCPs * 100)
+graphics.off()
+
+justPVSumStats <- round(summarize(justVote08PCPs * 100)$numerics, 2)
+colnames(justPVSumStats) <- NULL
+
+SumStatOut <- data.frame("All Variables" = mainSumStats, "Removed Prior Vote" = noVote08SumStats, "Only Prior Vote" = justPVSumStats)
 write.csv(SumStatOut, paste0(dbLoc, "PCPSumStats.csv"))
 
-xtable(SumStatOut[, c(1,2)])
+xtable(SumStatOut[, ])
+
+## get some confidence intervals of the mean prediction
+
+meanconfint <- function(x) {mean(x) + qt(c(.025, .975), df = length(x)-1) * sd(x)/sqrt(length(x))}
+
+vote08confint <- meanconfint(vote08PCPs)
+noVote08confint <- meanconfint(NoVote08PCPs)
+justVote08confint <- meanconfint(justVote08PCPs)
+
+
+confintdf <- rbind(vote08confint, noVote08confint, justVote08confint)
+rownames(confintdf) <- c("All Variables", "No Prior Vote", "Only Prior Vote")
+colnames(confintdf) <- c("Lower Bound", "Upper Bound")
+print(xtable(confintdf*100, digits =  2))

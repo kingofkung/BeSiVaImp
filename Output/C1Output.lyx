@@ -479,7 +479,7 @@ centering
 
 
 \backslash
-begin{tabular}{lll}
+begin{tabular}{*{4}l}
 \end_layout
 
 \begin_layout Plain Layout
@@ -491,7 +491,7 @@ hline
 
 \begin_layout Plain Layout
 
- & All Variables & Removed Prior Vote 
+ & All Variables & Removed Prior Vote & Only Prior Vote 
 \backslash
 
 \backslash
@@ -516,7 +516,7 @@ hline
 
 0
 \backslash
-% & 82.30 & 67.10 
+% & 82.30 & 67.10 & 82.28 
 \backslash
 
 \backslash
@@ -527,7 +527,7 @@ hline
 
   25
 \backslash
-% & 86.50 & 74.17 
+% & 86.50 & 74.17 & 85.65 
 \backslash
 
 \backslash
@@ -538,7 +538,7 @@ hline
 
   50
 \backslash
-% & 88.20 & 76.80 
+% & 88.20 & 76.80 & 86.92 
 \backslash
 
 \backslash
@@ -549,7 +549,7 @@ hline
 
   75
 \backslash
-% & 89.50 & 78.90 
+% & 89.50 & 78.90 & 88.61 
 \backslash
 
 \backslash
@@ -560,7 +560,7 @@ hline
 
   100
 \backslash
-% & 92.80 & 83.50 
+% & 92.80 & 83.50 & 92.83 
 \backslash
 
 \backslash
@@ -569,7 +569,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Mean & 87.97 & 76.48 
+  Mean & 87.97 & 76.48 & 87.17 
 \backslash
 
 \backslash
@@ -578,7 +578,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Standard Deviation & 2.11 & 3.37 
+  Standard Deviation & 2.11 & 3.37 & 2.09 
 \backslash
 
 \backslash
@@ -587,7 +587,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Variance & 4.45 & 11.36 
+  Variance & 4.45 & 11.36 & 4.37 
 \backslash
 
 \backslash
@@ -596,7 +596,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Skewness & -0.12 & -0.16 
+  Skewness & -0.12 & -0.16 & 0.10 
 \backslash
 
 \backslash
@@ -605,7 +605,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Kurtosis & -0.36 & -0.51 
+  Kurtosis & -0.36 & -0.51 & -0.46 
 \backslash
 
 \backslash
@@ -614,7 +614,7 @@ hline
 
 \begin_layout Plain Layout
 
-  NA's & 0.00 & 0.00 
+  NA's & 0.00 & 0.00 & 0.00 
 \backslash
 
 \backslash
@@ -623,7 +623,7 @@ hline
 
 \begin_layout Plain Layout
 
-  N & 100.00 & 100.00 
+  N & 100.00 & 100.00 & 100.00 
 \backslash
 
 \backslash
@@ -633,6 +633,136 @@ hline
 \begin_layout Plain Layout
 
    
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{table}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{table}[ht]
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tabular}{*{3}l}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+ & Lower Bound & Upper Bound 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+All Variables & 87.55 & 88.38 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  No Prior Vote & 75.81 & 77.15 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Only Prior Vote & 86.76 & 87.59 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+   
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
 \backslash
 hline
 \end_layout

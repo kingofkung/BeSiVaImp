@@ -78,9 +78,20 @@ modColl <- lapply(1:100, function(x){
     junker
 })
 mcPCPs <- unlist(lapply(modColl, function(x) max(x$pcps, na.rm = T)))
-write.csv(mcPCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1PCPs.csv")
+## write.csv(mcPCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1PCPs.csv")
 mcIntVars <- unlist(lapply(modColl, function(x) unlist(x$intvars)))
-write.csv(mcIntVars, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1IntVars.csv")
+## write.csv(mcIntVars, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1IntVars.csv")
+
+
+priorVotePCPs <- lapply(1:100, function(x){
+    print(paste0("iter = ", x))
+    set.seed(x)
+    trows <- sample(1:nrow(dat2), nrow(dat2) * .1)
+    myglm <- glm(vote12bin ~ vote08, data = dat2[-trows, ])
+    getpcp(predictr(myglm, dat2, trows), dat2$vote12bin[trows])
+})
+priorVotePCPs <- unlist(priorVotePCPs)
+write.csv(priorVotePCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/justVote08PCPs.csv")
 
 ## tstmod <- glm(vote12bin ~ sector, data = dat2[-test,], family = binomial)
 ## tstcpf <- catprobfinder(tstmod, dat2, test)

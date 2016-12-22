@@ -256,6 +256,7 @@ besiva <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nfol
                                   try(u)})
             rm(glms)
             pcps <- sapply(predvals, function(x) try(getpcp(x, dat[testrows, devee])))
+            rm(predvals)
 
             ## round to a given threshold, as per user preference.
             if(thresh != 0) pcps <- plyr::round_any(pcps, thresh)
