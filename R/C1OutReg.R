@@ -140,7 +140,10 @@ colnames(noEducSumStats) <- NULL
 dev.new()
 pdf(paste0(dbLoc, "JustPriorVoteHistGSS.pdf"))
 justVote08PCPs <- read.csv(paste0(dbLoc, "justVote08PCPs.csv"))[,2]
-hist(justVote08PCPs * 100)
+hist(justVote08PCPs * 100,
+     main = "A Histogram of PCPs for the GSS\n Using Only Prior Vote",
+     xlab = "Percent Correctly Predicted")
+)
 graphics.off()
 
 justPVSumStats <- round(summarize(justVote08PCPs * 100)$numerics, 2)
