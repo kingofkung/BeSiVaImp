@@ -370,15 +370,21 @@ tabularnewline
 
 \begin_layout Plain Layout
 
+<<<<<<< Updated upstream
 $-2LLR (Model~ 
 \backslash
 chi^2)$       & 1282.942       & 507.421 
+=======
+ $-2LLR (Model $chi$^2)$ **       & 1282.942**$-2LLR (Model chi^2)$ **  
+     & 507.421* 
+>>>>>>> Stashed changes
 \backslash
 tabularnewline
 \end_layout
 
 \begin_layout Plain Layout
 
+<<<<<<< Updated upstream
 AIC      & 1616.760      & 2396.294 
 \backslash
 tabularnewline
@@ -391,6 +397,9 @@ PCP 	&	88.0
 %			&79.7
 \backslash
 %			
+=======
+ AIC      & 1616.760      & 2396.294 
+>>>>>>> Stashed changes
 \backslash
 tabularnewline
 \end_layout

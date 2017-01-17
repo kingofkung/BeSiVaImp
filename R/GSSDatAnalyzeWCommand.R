@@ -67,16 +67,26 @@ length(colnames(dat2)) -  length(unique(avoidcols))
 length(unique(colstouse))
 
 colstouse <- sort(colstouse)
-write.csv(colstouse, "/Users/bjr/GitHub/BeSiVaImp/Output/ColsC1ForAppendixA.csv", row.names = F)
+## write.csv(colstouse, "/Users/bjr/GitHub/BeSiVaImp/Output/ColsC1ForAppendixA.csv", row.names = F)
 
 mods <- besiva(devee, colstouse, dat2, iters = 5, perc = .1, thresh = .001)
-max(mods$pcps)
+## max(mods$pcps)
 
+library(parallel)
+## noCores <- 10
+
+## cl <- makeCluster(noCores, type = "FORK")
+## clusterExport(cl, c("colstouse", "devee", "dat2"))
+## clusterExport(cl, c("besiva", "bettercpf", "predictr", "modmaker", "getpcp"))
+## ##
+## ##
 modColl <- lapply(1:100, function(x){
     print(paste("iter =", x))
     junker <- besiva(devee, colstouse, dat2, perc = .1, thresh = .001, sampseed = x, showforms = F)
     junker
 })
+## stopCluster(cl)
+#
 mcPCPs <- unlist(lapply(modColl, function(x) max(x$pcps, na.rm = T)))
 ## write.csv(mcPCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1PCPs.csv")
 mcIntVars <- unlist(lapply(modColl, function(x) unlist(x$intvars)))
