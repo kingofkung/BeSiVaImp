@@ -93,6 +93,18 @@ hist(trsupprmses, freq = F)
 lines(density(trsupprmses, na.rm = T))
 graphics.off()
 
+
+## Try a beta regression:
+library(betareg)
+anes$trumpThermScale <- anes$fttrump/100
+range(anes$trumpThermScale, na.rm = T)
+betareg(I(fttrump/100) ~ rr1, anes)
+
+candMod <- glm(trumpThermScale ~ rr1 + gender + race, quasibinomial, data = anes[-tr,])
+candPred <- predict(candMod, newdata = anes[tr, ], type = "response")
+getrmses(candMod, anes, "trumpThermScale", tr)
+makepclp(candMod, candPred, anes$trumpThermScale[tr], .05)
+
 ## Make full model
 fullmodo <- lm(myform, anes)
 ## outreg(fullmodo, type = "html", tight = FALSE)
