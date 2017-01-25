@@ -12,7 +12,8 @@ dat2$vote08nu <- factor(dat2$vote08, levels(dat2$vote08)[c(3, 2, 1)])
 dat2$partyidnu <- factor(dat2$partyid, levels(dat2$partyid)[c(8, 5, 2, 3, 1, 4, 7, 6)])
 ## table(dat2$partyid, dat2$partyidnu)
 
-varLabs <- c(vote08nuineligible = "Ineligible to Vote in 08",
+varLabs <- c(vote08bin = "Voted in 2008",
+             vote08nuineligible = "Ineligible to Vote in 08",
              "vote08nudid not vote" = "Did Not Vote in 08",
              educ = "Education (Years)",
              "degreegraduate" = "Graduate Degree",
@@ -27,13 +28,13 @@ varLabs <- c(vote08nuineligible = "Ineligible to Vote in 08",
              "partyidnustrong democrat" = "Strong Democrat",
              "partyidnuother party" = "Other Party")
 
-m1 <- glm(vote12bin ~ vote08nu + educ , family = binomial, data = dat2)
+m1 <- glm(vote12bin ~ vote08bin , family = binomial, data = dat2)
 m2 <- glm(vote12bin ~ degree + partyidnu, family = binomial, data = dat2)
 rockchalk::outreg(list("First Attempt" = m1, "Removed Prior Vote" =  m2), varLabels = varLabs, showAIC = T)
 
 
 dbLoc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/"
-vote08Vars <- read.csv(paste0(dbLoc, "C1IntVarsVote08.csv"), stringsAsFactors = FALSE)[, 2]
+vote08Vars <- read.csv(paste0(dbLoc, "C1IntVarsV08Bin.csv"), stringsAsFactors = FALSE)[, 2]
 ## Having read in the data, we sort it so that ggplot2 knows what
 ## order we'd like the data in.
 VarTab <- sort(table(vote08Vars), decreasing = FALSE)
@@ -41,7 +42,7 @@ vote08VarFac <- factor(vote08Vars, levels = names(VarTab))
 ## The data.frame makes it so ggplot2 can use it
 vote08VarFac <- data.frame("Var" = vote08VarFac)
 ## Remove any only appearing threshold times.
-threshold <- 1
+threshold <- 0
 votegt2 <- names(which(table(vote08VarFac) > threshold))
 vote08VarFac <- data.frame("Var" = vote08VarFac[as.character(vote08VarFac$Var) %in% votegt2, ])
 
@@ -102,7 +103,7 @@ graphics.off()
 
 
 
-vote08PCPs <- read.csv(paste0(dbLoc, "C1PCPsVote08.csv"), stringsAsFactors = FALSE)[, 2]
+vote08PCPs <- read.csv(paste0(dbLoc, "C1PCPsV08Bin.csv"), stringsAsFactors = FALSE)[, 2]
 dev.new()
 pdf(paste0(dbLoc, "vote08HistGSS.pdf"))
 hist(vote08PCPs*100,
@@ -139,11 +140,10 @@ colnames(noEducSumStats) <- NULL
 
 dev.new()
 pdf(paste0(dbLoc, "JustPriorVoteHistGSS.pdf"))
-justVote08PCPs <- read.csv(paste0(dbLoc, "justVote08PCPs.csv"))[,2]
+justVote08PCPs <- read.csv(paste0(dbLoc, "justVote08BinPCPs.csv"))[,2]
 hist(justVote08PCPs * 100,
      main = "A Histogram of PCPs for the GSS\n Using Only Prior Vote",
      xlab = "Percent Correctly Predicted")
-)
 graphics.off()
 
 justPVSumStats <- round(summarize(justVote08PCPs * 100)$numerics, 2)
