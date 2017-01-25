@@ -29,7 +29,7 @@ ncats <- lapply(colnames(dat2), function(x) length(unique(dat2[,x])))
 
 ## Keep some columns from being used. Specifically, columns that have
 ## either 1 or over 100 values, and those that
-avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "vote08bin", "vote12bin", "pres12", "if12who","wtcomb",  colnames(dat2)[ which(ncats>50)], colnames(dat2)[ which(ncats==1)] )
+avoidcols <- c("year", "id", "ballot", "version", "issp", "formwt", "sampcode", "sample", "phase", "spanself", "spanint", "spaneng", "vote12","wtss", "wtssnr", "wtssall", "vrstrat", "vpsu", "pres08", "vote12bin", "pres12", "if12who","wtcomb",  colnames(dat2)[ which(ncats>50)], colnames(dat2)[ which(ncats==1)], "vote08" )
 
 
 ## How can I figure out if a column is now all na's?
@@ -55,8 +55,8 @@ napercs <- lapply(colnames(dat2), function(x)  sum(is.na(dat2[-test, x]))/nrow(d
 
 
 varstoinc <-"" ##c("partyid","degree")  ##c("partyid", "degree", "sex", "race")
-noVote08 <- "vote08"
-avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc, noVote08)
+noVote08 <- "vote08bin"
+avoidcols <- c(avoidcols, allnas, mostlynas, colnames(dat2)[which(napercs>.8)], varstoinc) #, noVote08)
 
 
 ## Keep vote12, and the sample/weight info out of the data
@@ -88,20 +88,20 @@ modColl <- lapply(1:100, function(x){
 ## stopCluster(cl)
 #
 mcPCPs <- unlist(lapply(modColl, function(x) max(x$pcps, na.rm = T)))
-## write.csv(mcPCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1PCPs.csv")
+write.csv(mcPCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1PCPsV08Bin.csv")
 mcIntVars <- unlist(lapply(modColl, function(x) unlist(x$intvars)))
-## write.csv(mcIntVars, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1IntVars.csv")
+write.csv(mcIntVars, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/C1IntVarsV08Bin.csv")
 
 
 priorVotePCPs <- lapply(1:100, function(x){
     print(paste0("iter = ", x))
     set.seed(x)
     trows <- sample(1:nrow(dat2), nrow(dat2) * .1)
-    myglm <- glm(vote12bin ~ vote08, data = dat2[-trows, ])
+    myglm <- glm(vote12bin ~ vote08bin, data = dat2[-trows, ])
     getpcp(predictr(myglm, dat2, trows), dat2$vote12bin[trows])
 })
 priorVotePCPs <- unlist(priorVotePCPs)
-write.csv(priorVotePCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/justVote08PCPs.csv")
+write.csv(priorVotePCPs, "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/justVote08BinPCPs.csv")
 
 ## tstmod <- glm(vote12bin ~ sector, data = dat2[-test,], family = binomial)
 ## tstcpf <- catprobfinder(tstmod, dat2, test)
