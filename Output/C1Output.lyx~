@@ -489,7 +489,7 @@ hline
 
 0
 \backslash
-% & 82.30 & 67.10 & 82.28 
+% & 78.90 & 67.10 & 78.90 
 \backslash
 
 \backslash
@@ -500,7 +500,7 @@ hline
 
   25
 \backslash
-% & 86.50 & 74.17 & 85.65 
+% & 82.70 & 74.17 & 82.70 
 \backslash
 
 \backslash
@@ -511,7 +511,7 @@ hline
 
   50
 \backslash
-% & 88.20 & 76.80 & 86.92 
+% & 84.60 & 76.80 & 84.60 
 \backslash
 
 \backslash
@@ -522,7 +522,7 @@ hline
 
   75
 \backslash
-% & 89.50 & 78.90 & 88.61 
+% & 86.10 & 78.90 & 86.08 
 \backslash
 
 \backslash
@@ -533,7 +533,7 @@ hline
 
   100
 \backslash
-% & 92.80 & 83.50 & 92.83 
+% & 92.00 & 83.50 & 91.98 
 \backslash
 
 \backslash
@@ -542,7 +542,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Mean & 87.97 & 76.48 & 87.17 
+  mean & 84.60 & 76.48 & 84.59 
 \backslash
 
 \backslash
@@ -551,7 +551,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Standard Deviation & 2.11 & 3.37 & 2.09 
+  sd & 2.34 & 3.37 & 2.32 
 \backslash
 
 \backslash
@@ -560,7 +560,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Variance & 4.45 & 11.36 & 4.37 
+  var & 5.50 & 11.36 & 5.39 
 \backslash
 
 \backslash
@@ -569,7 +569,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Skewness & -0.12 & -0.16 & 0.10 
+  skewness & 0.26 & -0.16 & 0.24 
 \backslash
 
 \backslash
@@ -578,7 +578,7 @@ hline
 
 \begin_layout Plain Layout
 
-  Kurtosis & -0.36 & -0.51 & -0.46 
+  kurtosis & 0.01 & -0.51 & 0.01 
 \backslash
 
 \backslash
@@ -601,6 +601,10 @@ hline
 
 \backslash
  
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
