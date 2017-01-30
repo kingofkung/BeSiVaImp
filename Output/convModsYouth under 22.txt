@@ -1,0 +1,95 @@
+\begin{tabular}{*{4}{l}}
+\hline
+
+                 & M1 & M2 & M3   \tabularnewline
+
+                  &Estimate   &Estimate   &Estimate \tabularnewline
+
+                &(S.E.)   &(S.E.)   &(S.E.) \tabularnewline
+
+\hline
+
+\hline
+
+  (Intercept)     &-7.438 &-0.659 &-0.166 \tabularnewline
+
+                &(9.721)   &(0.393)   &(2.158)  \tabularnewline
+
+  daysreadpaper    &-0.095   & .        & .      \tabularnewline
+
+                &(0.174)   &         &        \tabularnewline
+
+  pidstr          &0.914 &0.314   & .      \tabularnewline
+
+                &(0.556)   &(0.252)   &        \tabularnewline
+
+  polEff          &-0.486   & .      &-0.191 \tabularnewline
+
+                &(0.431)   &         &(0.443)  \tabularnewline
+
+  ednum           &0.487   & .      &0.820* \tabularnewline
+
+                &(0.372)   &         &(0.342)  \tabularnewline
+
+  incNum          &0.108   & .      &0.263 \tabularnewline
+
+                &(0.332)   &         &(0.269)  \tabularnewline
+
+  age             &0.191   & .        & .      \tabularnewline
+
+                &(0.486)   &         &        \tabularnewline
+
+  houseTimeNum    &0.290   & .        & .      \tabularnewline
+
+                &(0.383)   &         &        \tabularnewline
+
+  minority        &0.009   & .        & .      \tabularnewline
+
+                &(0.860)   &         &        \tabularnewline
+
+  south1          &-0.726   & .        & .      \tabularnewline
+
+                &(0.852)   &         &        \tabularnewline
+
+  sex2. Female    &2.062*   & .        & .      \tabularnewline
+
+                &(0.935)   &         &        \tabularnewline
+
+  partyContact2. No contact by major party      & .        & .      &-2.339* \tabularnewline
+
+                &         &         &(1.076)  \tabularnewline
+
+  otherContact5. No      & .        & .      &-1.032 \tabularnewline
+
+                &         &         &(1.490)  \tabularnewline
+
+  churchBin1        & .        & .      &-0.372 \tabularnewline
+
+                &         &         &(0.732)  \tabularnewline
+
+\hline
+
+N                 &47       &74       &47       \tabularnewline
+
+
+
+
+Deviance         &48.347   &99.645   &53.114   \tabularnewline
+
+$-2LLR (Model chi^2)$        & 16.617       & 1.585       & 11.850 \tabularnewline
+
+AIC
+     & 70.347
+     & 103.645
+     & 67.114
+\tabularnewline
+
+\hline
+\hline
+
+
+
+\multicolumn{4}{c}{${*  p}\le 0.05$${*\!\!*  p}\le 0.01$${*\!\!*\!\!*  p}\le 0.001$}\tabularnewline
+
+\end{tabular}
+

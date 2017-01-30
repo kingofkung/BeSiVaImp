@@ -7,8 +7,8 @@
 
 getgoodlevels <- function(varname, regmod, trdat, ...){
     ## gldat <- rockchalk::model.data(regmod)
-    gldat <- model.frame(regmod, data = trdat)
-    levels(factor(gldat[, varname]))
+    ## gldat <- model.frame(regmod, data = trdat)
+    levels(factor(trdat[, varname]))
 }
 
 

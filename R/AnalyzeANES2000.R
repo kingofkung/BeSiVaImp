@@ -17,10 +17,12 @@ note <- ""
 
 varstoreallyuse <- c("ednum" = "ednum", "pidstr" = "pidstr", "agesq" = "agesq", "age" = "age", "minority" = "minority", "sex" = "sex", "incNum" = "incNum", "houseTimeNum" = "houseTimeNum", "south" = "south", "divorced" = "divorced", "churchBin" = "churchBin", "daysreadpaper" = "daysreadpaper", "polEff" = "polEff", "partyContact" = "partyContact", "demContact" = "demContact", "repContact" = "repContact", "otherContact" = "otherContact")
 
+## In this case
+## anes2000 <- anes2000[anes2000$age < 22, ]
 
 ## First effort at parallel programming:
 cl <- makeCluster(no_cores, type = "FORK")
-MCIter <- 10000
+MCIter <- 250
 clusterExport(cl, c("varstoreallyuse", "MCIter", "anes2000"))
 clusterExport(cl, c("glmnullifier", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr"))
 pti <- proc.time()
@@ -54,27 +56,25 @@ besforms <- c(besforms, ftex, michigan, RnH)
 
 ## Maximum iterations
 cl <- makeCluster(no_cores)
-clusterExport(cl, c("glmnullifier", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr"))
-maxIT <- 1000
+clusterExport(cl, c("glmnullifier", "bettercpf", "modmaker",  "besiva", "getpcp", "predictr", "fixbadlevels", "getgoodlevels"))
+maxIT <- 100
 sampsize <- round(nrow(anes2000) * .2)
 clusterExport(cl, c("besforms", "maxIT"))
 clusterExport(cl, c("anes2000"))
 clusterExport(cl, "sampsize")
 pti2 <- proc.time()
-finalout <- lapply(seq_along(besforms), function(u){
+finalout <- lapply(seq_along(besforms), function(ux){
     ##
-    print(paste("iteration", u))
+    print(paste("iteration", ux))
     ## A loop designed to replicate the monte Carlo simulations of
     ## BeSiVa, but with a single model instead of many.
-    thepcps <- unlist(parLapply(cl, 1:maxIT, function(i, you = u, maxiter = maxIT, sampsz = sampsize, dat = anes2000){
+    thepcps <- unlist(parLapply(cl, 1:maxIT, function(i, you = ux, maxiter = maxIT, sampsz = sampsize, dat = anes2000){
+        ## print(paste("i =", i))
         set.seed(i)
-        ## print progress
-        ## print(paste0("progress = ", round(i/maxiter * 100), "%" ))
         ## sample the rows
         subsamp <- sample(1:nrow(dat), size = sampsz)
         ## create the model, making sure to pull out some of the data
-        ## mod <- speedglm(besforms[[u]], family = binomial(logit), data = droplevels(anes2000[-subsamp,]), fitted = T)
-        mod <- glmnullifier(glm(besforms[[you]], family = binomial(logit), data = dat[-subsamp,], model = F, y = F))
+        mod <- glm(besforms[[you]], family = binomial(logit), data = dat[-subsamp,], model = F, y = F)
         ## get the predictions and the pcps
         ## predsb <- ifelse(predict(mod, newdata = droplevels(anes2000[subsamp,]), type = "response") > .5, 1, 0)
         predsb <- predictr(mod, data = dat, subsamp, loud = F)
