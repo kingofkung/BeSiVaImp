@@ -132,7 +132,7 @@ besivalm <- function(devee, ivs, dat, fam = binomial(), iters = 5, perc = .2, nf
 
             pclps <- unlist(lapply(lms, function(x, dattmp = dat, dv = devee, tr = testrows, closeness = hc){
                 ifelse(class(x) == "lm", {
-                    mypreds <- predict.lm(x, newdata = fixbadlevels(dat[tr,], x, dat[-tr,]))
+                    mypreds <- predict.lm(x, newdata = fixbadlevels(dat[tr,], x, model.frame(x)))
                     makepclp(x, dat[tr, dv], mypreds, closeness)
                 },
                 NA)
