@@ -6,6 +6,8 @@
 
 rm(list = ls())
 datloc <- "/Users/bjr/GitHub/BeSiVaImp/Data/GSS_stata/"
+writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
+note <- ""
 
 library(foreign)
 gss <- read.spss(paste0(datloc, "GSS2000.sav"), to.data.frame = T)
@@ -21,7 +23,7 @@ gss$armdv1[which(gss$armdv == Inf)] <- NA
 
 library(caret)
 
-dv <- "ushisp"
+dv <- "usblk"
 
 gssdv <- gss[complete.cases(gss[, dv]), ]
 nrow(gssdv)
@@ -33,7 +35,9 @@ gssdv <- gssdv[, sapply(gssdv, function(x) !all(is.na(x)))]
 
 ## and mostly NA's
 sum(is.na(gssdv[,dv]))
-gssdv <- gssdv[, sapply(gssdv, function(x) sum(is.na(x))) < nrow(gssdv) * .85]
+missthresh <- round(nrow(gssdv) * .7)
+## Only allow columns whose proportion of NAs is less than missthresh
+gssdv <- gssdv[, sapply(gssdv, function(x) sum(is.na(x))) < missthresh]
 
 
 ## Get rid of values with near Zero Variance
@@ -41,7 +45,7 @@ gssdv <- gssdv[, -nearZeroVar(gssdv)]
 
 ## find variables with excess levels
 CatBin <- lapply(gssdv, function(x) {
-    if(is.factor(x)) length(levels(x)) > 50
+    if(is.factor(x)) length(levels(x)) > 20
 })
 
 ## get their names
@@ -55,31 +59,30 @@ varsToUse <- sort(varsToUse)
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctionslm.R")
 
 ## Rprof()
-multirnd <- lapply(1:100, function(i){
-    rnd1 <- besivalm(dv, varsToUse, gssdv, sampseed = i, hc = 10, showforms = F)
+seeds <- 1:100
+multirnd <- lapply(seeds, function(i){
+    print(paste("iteration", i))
+    rnd1 <- besivalm(dv, varsToUse, gssdv, sampseed = i, hc = 10, showforms = F, showoutput = F)
 })
 
+
 ## Grab pclps, intvars
-mrpclps <- unlist(lapply(multirnd, function(x) max(x$pclps)))
+mrpclps <- unlist(lapply(multirnd, function(x) max(x$pclps, na.rm = TRUE)))
 mrintvars <- lapply(multirnd, function(x) x$intvars)
+
 
 ## prep intvars for inclusion in dataframe
 mrintForDf <- unlist(lapply(mrintvars, paste, collapse = ", "))
-
 ## create dataframe, and write to a file
-infoDF <- data.frame(mrpclps, mrintForDf)
-writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
-write.csv(infoDF, paste0(writeloc, dv, ".csv"),  row.names = F)
+infoDF <- data.frame(seeds, mrpclps, mrintForDf)
+write.csv(infoDF, paste0(writeloc, note, dv, min(seeds),"to", max(seeds), ".csv"),  row.names = F)
+
+myMessage <- "The simulation is done!"
+number <- readLines("~/Dropbox/myno.txt")
+command <- paste0("osascript -e 'tell application \"Messages\" to send \"", myMessage, "\" to buddy \"+",number,"\" of service \"SMS\"'")
+system(command)
 
 
-## Rprof(NULL)
-## summaryRprof()
 
 
-## lm(ushisp ~ where4 + mobile16 + teens + wrkstat, gssdv)
-
-sort(rnd1$pclps)
-
-gssdv$found
-lm(armdv1 ~ prestg10, gssdv)
-
+tst <- besivalm(dv, varsToUse, gssdv, sampseed = 94, hc = 10, showforms = F, showoutput = F)
