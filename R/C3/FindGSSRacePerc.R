@@ -35,7 +35,7 @@ gssdv <- gssdv[, sapply(gssdv, function(x) !all(is.na(x)))]
 
 ## and mostly NA's
 sum(is.na(gssdv[,dv]))
-missthresh <- round(nrow(gssdv) * .7)
+missthresh <- round(nrow(gssdv) * .5)
 ## Only allow columns whose proportion of NAs is less than missthresh
 gssdv <- gssdv[, sapply(gssdv, function(x) sum(is.na(x))) < missthresh]
 
@@ -75,9 +75,9 @@ mrintvars <- lapply(multirnd, function(x) x$intvars)
 mrintForDf <- unlist(lapply(mrintvars, paste, collapse = ", "))
 ## create dataframe, and write to a file
 infoDF <- data.frame(seeds, mrpclps, mrintForDf)
-write.csv(infoDF, paste0(writeloc, note, dv, min(seeds),"to", max(seeds), ".csv"),  row.names = F)
+write.csv(infoDF, paste0(writeloc, note, dv, min(seeds),"to", max(seeds),"missthresh of", missthresh, ".csv"),  row.names = F)
 
-myMessage <- "The simulation is done!"
+myMessage <- "Ding! Simulation is done!"
 number <- readLines("~/Dropbox/myno.txt")
 command <- paste0("osascript -e 'tell application \"Messages\" to send \"", myMessage, "\" to buddy \"+",number,"\" of service \"SMS\"'")
 system(command)
@@ -85,4 +85,3 @@ system(command)
 
 
 
-tst <- besivalm(dv, varsToUse, gssdv, sampseed = 94, hc = 10, showforms = F, showoutput = F)
