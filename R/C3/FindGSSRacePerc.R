@@ -22,6 +22,7 @@ gss$armdv1[which(gss$armdv == Inf)] <- NA
 
 
 library(caret)
+library(rpart)
 
 dv <- "usblk"
 
@@ -58,23 +59,34 @@ varsToUse <- sort(varsToUse)
 
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctionslm.R")
 
+makeForm <- as.formula(paste(dv, "~", paste(varsToUse, collapse = " + ")))
+
 ## Rprof()
+myThresh <- 10
 seeds <- 1:100
 multirnd <- lapply(seeds, function(i){
     print(paste("iteration", i))
-    rnd1 <- besivalm(dv, varsToUse, gssdv, sampseed = i, hc = 10, showforms = F, showoutput = F)
+    rnd1 <- besivalm(dv, varsToUse, gssdv, sampseed = i, hc = myThresh, showforms = F, showoutput = F)
+})
+
+multiRpart <- lapply(seeds, function(i){
+        set.seed(i)
+        tst <- sample(1:nrow(gssdv), size = round(nrow(gssdv) * .2))
+        myRpart <- rpart(makeForm, data = gssdv[-tst, ])
+        myPreds <- predict(myRpart, newdata = gssdv[tst, ])
+        myPclp <- makepclp(NULL, gssdv[tst, dv], myPreds, myThresh)
 })
 
 
 ## Grab pclps, intvars
 mrpclps <- unlist(lapply(multirnd, function(x) max(x$pclps, na.rm = TRUE)))
 mrintvars <- lapply(multirnd, function(x) x$intvars)
-
+rpartpclps <- unlist(multiRpart)
 
 ## prep intvars for inclusion in dataframe
 mrintForDf <- unlist(lapply(mrintvars, paste, collapse = ", "))
 ## create dataframe, and write to a file
-infoDF <- data.frame(seeds, mrpclps, mrintForDf)
+infoDF <- data.frame(seeds, mrpclps, mrintForDf, rpartpclps)
 write.csv(infoDF, paste0(writeloc, note, dv, min(seeds),"to", max(seeds),"missthresh of", missthresh, ".csv"),  row.names = F)
 
 myMessage <- "Ding! Simulation is done!"
