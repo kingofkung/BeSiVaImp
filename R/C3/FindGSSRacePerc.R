@@ -54,7 +54,7 @@ tooManyCats <- names(which(unlist(CatBin)))
 
 
 ## Remove DV, and variables used to create it
-varsToUse <- colnames(gssdv)[!colnames(gssdv) %in% c("armdv1", "uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "respnum", "ballot", "issp", "version", "sampcode", tooManyCats)]
+varsToUse <- colnames(gssdv)[!colnames(gssdv) %in% c("armdv1", "uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "respnum", "ballot", "issp", "version", "sampcode", "id", tooManyCats)]
 varsToUse <- sort(varsToUse)
 
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctionslm.R")
@@ -63,7 +63,7 @@ makeForm <- as.formula(paste(dv, "~", paste(varsToUse, collapse = " + ")))
 
 ## Rprof()
 myThresh <- 10
-seeds <- 1:5
+seeds <- 1:100
 multirnd <- lapply(seeds, function(i){
     print(paste("iteration", i))
     rnd1 <- besivalm(dv, varsToUse, gssdv, sampseed = i, hc = myThresh, showforms = F, showoutput = F)
@@ -91,9 +91,10 @@ multiRpart <- lapply(seeds, function(i){
         ##
         myPclp <- makepclp(NULL, gssdv[tst, dv], myPreds, myThresh)
         ##
-        list("pclp" = myPclp, "varImp" = myRpart$variable.importance)
+        list("pclp" = myPclp, "varImp" = myRpart$variable.importance, "myRpart" = myRpart)
 })
 
+summary(multiRpart[[1]]$myRpart)
 
 
 
@@ -105,6 +106,7 @@ rpartPclps <- unlist(lapply(multiRpart, function(x) x$pclp))
 
 
 ## prep intvars for inclusion in dataframe
+mrintvars <- lapply(multirnd, function(x) x$intvars)
 mrintForDf <- unlist(lapply(mrintvars, paste, collapse = ", "))
 rpartIntVars <- unlist(lapply(multiRpart, function(x) paste(names(x$varImp), collapse = ", ")))
 
