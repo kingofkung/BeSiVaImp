@@ -54,7 +54,7 @@ tooManyCats <- names(which(unlist(CatBin)))
 
 
 ## Remove DV, and variables used to create it
-varsToUse <- colnames(gssdv)[!colnames(gssdv) %in% c("armdv1", "uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "respnum", "ballot", "issp", "version", tooManyCats)]
+varsToUse <- colnames(gssdv)[!colnames(gssdv) %in% c("armdv1", "uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "respnum", "ballot", "issp", "version", "sampcode", tooManyCats)]
 varsToUse <- sort(varsToUse)
 
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctionslm.R")
@@ -63,30 +63,53 @@ makeForm <- as.formula(paste(dv, "~", paste(varsToUse, collapse = " + ")))
 
 ## Rprof()
 myThresh <- 10
-seeds <- 1:100
+seeds <- 1:5
 multirnd <- lapply(seeds, function(i){
     print(paste("iteration", i))
     rnd1 <- besivalm(dv, varsToUse, gssdv, sampseed = i, hc = myThresh, showforms = F, showoutput = F)
 })
 
+## Revised getBestCP so it wouldn't print no matter what
+getBestCP <- function(myCart, printTheCP = FALSE){
+    cpLs <- myCart$cptable
+    ## plotcp(myCart)
+    ## if(printTheCP) print(cpLs[order(cpLs[,"xerror"]),])
+    bestCP <- cpLs[order(cpLs[,"xerror"])[1],"CP"]
+}
+
 multiRpart <- lapply(seeds, function(i){
+        print(paste("rpart iteration", i))
         set.seed(i)
         tst <- sample(1:nrow(gssdv), size = round(nrow(gssdv) * .2))
         myRpart <- rpart(makeForm, data = gssdv[-tst, ])
+        ## Must prune the tree
+        myRpart <- prune(myRpart, cp = getBestCP(myRpart))
+        ##
+        ##
         myPreds <- predict(myRpart, newdata = gssdv[tst, ])
+        ##
+        ##
         myPclp <- makepclp(NULL, gssdv[tst, dv], myPreds, myThresh)
+        ##
+        list("pclp" = myPclp, "varImp" = myRpart$variable.importance)
 })
+
+
+
+
 
 
 ## Grab pclps, intvars
 mrpclps <- unlist(lapply(multirnd, function(x) max(x$pclps, na.rm = TRUE)))
-mrintvars <- lapply(multirnd, function(x) x$intvars)
-rpartpclps <- unlist(multiRpart)
+rpartPclps <- unlist(lapply(multiRpart, function(x) x$pclp))
+
 
 ## prep intvars for inclusion in dataframe
 mrintForDf <- unlist(lapply(mrintvars, paste, collapse = ", "))
+rpartIntVars <- unlist(lapply(multiRpart, function(x) paste(names(x$varImp), collapse = ", ")))
+
 ## create dataframe, and write to a file
-infoDF <- data.frame(seeds, mrpclps, mrintForDf, rpartpclps)
+infoDF <- data.frame(seeds, mrpclps, mrintForDf, rpartPclps, rpartIntVars)
 write.csv(infoDF, paste0(writeloc, note, dv, min(seeds),"to", max(seeds),"missthresh of", missthresh, ".csv"),  row.names = F)
 
 myMessage <- "Ding! Simulation is done!"
