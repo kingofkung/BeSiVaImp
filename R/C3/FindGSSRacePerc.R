@@ -29,7 +29,10 @@ dv <- "usblk"
 gssdv <- gss[complete.cases(gss[, dv]), ]
 nrow(gssdv)
 
-
+set.seed(27)
+trueHoldRows <- sample(1:nrow(gssdv), round(nrow(gssdv)* .1))
+trueholdout <-  gssdv[trueHoldRows, ]
+gssdv <- gssdv[-trueHoldRows, ]
 
 #get rid of values that are all NAs
 gssdv <- gssdv[, sapply(gssdv, function(x) !all(is.na(x)))]
@@ -99,7 +102,6 @@ summary(multiRpart[[1]]$myRpart)
 
 
 
-
 ## Grab pclps, intvars
 mrpclps <- unlist(lapply(multirnd, function(x) max(x$pclps, na.rm = TRUE)))
 rpartPclps <- unlist(lapply(multiRpart, function(x) x$pclp))
@@ -110,8 +112,28 @@ mrintvars <- lapply(multirnd, function(x) x$intvars)
 mrintForDf <- unlist(lapply(mrintvars, paste, collapse = ", "))
 rpartIntVars <- unlist(lapply(multiRpart, function(x) paste(names(x$varImp), collapse = ", ")))
 
+##
+trueHldPrds <- sapply(mrintvars, function(x, devee = dv, tho = trueholdout, dat = gssdv, thresh = myThresh){
+    form <- paste(devee, "~", paste(x, collapse = " + ") )
+    if(length(x) == 0) form <- paste0(form, "1")
+    form
+    ##
+    myMod <- lm(form, dat)
+    myPreds <- predict(myMod, newdata = tho)
+    makepclp(myMod, tho[,devee], myPreds, thresh)
+})
+
+trueHldPrdsRP <- sapply(multiRpart, function(x, tho = trueholdout, devee = dv, thresh = myThresh){
+    myPredsRP <- predict(x$myRpart, newdata = trueholdout)
+    makepclp(NULL, tho[, dv], myPredsRP, thresh)
+##
+})
+
+plot(density(trueHldPrdsRP), col = "red", xlim = c(0.35,0.65))
+lines(density(trueHldPrds))
+
 ## create dataframe, and write to a file
-infoDF <- data.frame(seeds, mrpclps, mrintForDf, rpartPclps, rpartIntVars)
+infoDF <- data.frame(seeds, mrpclps, mrintForDf, rpartPclps, rpartIntVars, trueHldPrds, trueHldPrdsRP)
 write.csv(infoDF, paste0(writeloc, note, dv, min(seeds),"to", max(seeds),"missthresh of", missthresh, ".csv"),  row.names = F)
 
 myMessage <- "Ding! Simulation is done!"
