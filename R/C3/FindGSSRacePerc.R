@@ -19,12 +19,14 @@ head(gss)
 
 gss$armdv1 <- log((gss$usblk + gss$ushisp)/gss$uswht)
 gss$armdv1[which(gss$armdv == Inf)] <- NA
+## Fun fact: This gives you the difference of the range divided by 10!
+armdv1Hc <- "-"(range(gss$armdv1, na.rm = TRUE))/10
 
 
 library(caret)
 library(rpart)
 
-dv <- "usblk"
+dv <- "armdv1"
 
 gssdv <- gss[complete.cases(gss[, dv]), ]
 nrow(gssdv)
@@ -66,6 +68,7 @@ makeForm <- as.formula(paste(dv, "~", paste(varsToUse, collapse = " + ")))
 
 ## Rprof()
 myThresh <- 10
+if(dv == "armdv1") myThresh <- armdv1Hc
 seeds <- 1:100
 multirnd <- lapply(seeds, function(i){
     print(paste("iteration", i))
