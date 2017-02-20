@@ -57,10 +57,10 @@ CatBin <- lapply(gssdv, function(x) {
 ## get their names
 tooManyCats <- names(which(unlist(CatBin)))
 
-cor(gss[, c("uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "armdv1")], use = "pairwise")
+cor(gss[, c("uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "usmixed", "armdv1")], use = "pairwise")
 
 ## Remove DV, and variables used to create it
-varsToUse <- colnames(gssdv)[!colnames(gssdv) %in% c("armdv1", "uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "respnum", "ballot", "issp", "version", "sampcode", "id" , tooManyCats)]
+varsToUse <- colnames(gssdv)[!colnames(gssdv) %in% c("armdv1", "uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "respnum", "ballot", "issp", "version", "sampcode", "id", "usmixed", vstrat , tooManyCats)]
 varsToUse <- sort(varsToUse)
 
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctionslm.R")
