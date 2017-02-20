@@ -20,8 +20,8 @@ head(gss)
 gss$armdv1 <- log((gss$usblk + gss$ushisp)/gss$uswht)
 gss$armdv1[which(gss$armdv == Inf)] <- NA
 ## Fun fact: This gives you the difference of the range divided by 10!
-armdv1Hc <- "-"(range(gss$armdv1, na.rm = TRUE))/10
-
+armdv1Hc <- range(gss$armdv1, na.rm = TRUE)/10
+armdv1Hc <- diff(armdv1Hc)
 
 library(caret)
 library(rpart)
@@ -57,9 +57,10 @@ CatBin <- lapply(gssdv, function(x) {
 ## get their names
 tooManyCats <- names(which(unlist(CatBin)))
 
+cor(gss[, c("uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "armdv1")], use = "pairwise")
 
 ## Remove DV, and variables used to create it
-varsToUse <- colnames(gssdv)[!colnames(gssdv) %in% c("armdv1", "uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "respnum", "ballot", "issp", "version", "sampcode", "id", tooManyCats)]
+varsToUse <- colnames(gssdv)[!colnames(gssdv) %in% c("armdv1", "uswht", "usblk", "ushisp", "usasn", "usamind", "usjews", "respnum", "ballot", "issp", "version", "sampcode", "id" , tooManyCats)]
 varsToUse <- sort(varsToUse)
 
 source("/Users/bjr/GitHub/BeSiVaImp/R/BeSiVaFunctionslm.R")
