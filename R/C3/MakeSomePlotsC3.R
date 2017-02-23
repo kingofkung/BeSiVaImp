@@ -18,7 +18,7 @@ colToTable <- function(x, dec = TRUE){
 varBesiva <- colToTable(csvOut$mrintForDf, dec = FALSE)
 varRpart <- colToTable(csvOut$rpartIntVars, dec = FALSE)
 
-minSelected <- 2
+minSelected <- 10
 varBesiva <- varBesiva[varBesiva >= minSelected]
 vBesLvls <- names(varBesiva)
 

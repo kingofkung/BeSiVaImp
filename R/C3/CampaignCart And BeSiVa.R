@@ -1,12 +1,14 @@
-library(rpart)
 rm(list = ls()[!ls() %in% "anes"])
+
+library(rpart)
+source("~/Github/BeSiVaImp/R/BeSiVaFunctionslm.R")
 anes <- read.csv("/Users/bjr/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHuntFindings/anes_pilot_2016recoded.csv")
 
 
 ## Assemble the formula
 colnames(anes)
 ## Write the dependent variable
-devee <- "repcand"
+devee <- "fttrump"
 !is.null(anes[,devee])
 
 ## Determine the means CART will use to predict the devee
@@ -37,21 +39,20 @@ form <- paste(devee, "~", paste(varsToCheck, collapse = " + "))
 anes$repcand[anes$repcand %in% "None"] <- NA
 anes$repcand <- factor(anes$repcand)
 
-
-trs <- lapply(1:20, function(i, dat = anes, prop = .1){
+seeds <- 1:20
+myCarts <- lapply(seeds, function(i, theform = form, dat = anes, myMethod = bestMethod, prop = .2){
     set.seed(i)
     tr <- sample(1:nrow(dat), round(nrow(dat)*prop))
+    myCart <- rpart(theform, data = dat[-i,], method = myMethod)
+    return(myCart)
 })
 
-myCarts <- lapply(trs, function(i, theform = form, dat = anes, myMethod = bestMethod){
-    ## browser()
-    myCart <- rpart(theform, data = dat[-i,], method = myMethod)
-})
+besivas <- lapply(seeds, function(i, deev = devee, ivees = varsToCheck, data = anes, prop = .2){
+    besivalm(devee = deev, ivs = ivees, data, perc = prop, sampseed = i, showoutput = F, showforms = F)
+    })
 
 getBestCP <- function(myCart){
-    cpLs <- printcp(myCart)
-    ## plotcp(myCart)
-    cpLs[order(cpLs[,"xerror"]),]
+    cpLs <- myCart$cptable
     bestCP <- cpLs[order(cpLs[,"xerror"])[1],"CP"]
 }
 
