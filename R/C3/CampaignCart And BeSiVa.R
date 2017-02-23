@@ -2,7 +2,7 @@ rm(list = ls()[!ls() %in% "anes"])
 
 library(rpart)
 source("~/Github/BeSiVaImp/R/BeSiVaFunctionslm.R")
-anes <- read.csv("/Users/bjr/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHuntFindings/anes_pilot_2016recoded.csv")
+anes <- read.csv("~/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHuntFindings/anes_pilot_2016recoded.csv")
 
 
 ## Assemble the formula
@@ -11,8 +11,12 @@ colnames(anes)
 devee <- "fttrump"
 !is.null(anes[,devee])
 
+anessub <- anes[complete.cases(anes[,devee]),]
+anessub[, devee]
+
+
 ## Determine the means CART will use to predict the devee
-if(is.numeric(anes[, devee])){
+if(is.numeric(anessub[, devee])){
     bestMethod <- "anova"
 } else
 {
@@ -24,14 +28,22 @@ catAnes <- anes[, sapply(anes, is.factor)]
 numAnes <- names(anes)[sapply(anes, is.numeric)]
 nCats <- sapply(catAnes, function(x) length(unique(x)))
 
+
 varsToCheck <- unique(c("rr1", "rr2", "rr3", "rr4", "race", "gender", "birthyr", "educ", "marstat", "faminc", grep("ft", colnames(anes), value = TRUE),
                  grep("lazy", colnames(anes), value = TRUE),
                  grep("violent", colnames(anes), value = TRUE),
                         "ladder", "getahead", "finwell",
-                        names(nCats)[nCats < 40],
+                        names(nCats)[nCats < 20],
                         numAnes
                         ))
-varsToCheck <- varsToCheck[!varsToCheck %in% devee]
+
+mostlyMissing <- sapply(varsToCheck, function(i, dataset = anessub) {
+    sum(is.na(dataset[,i]))/nrow(dataset) > .5
+})
+mostlyMissing <- names(which(mostlyMissing))
+
+varsToCheck <- varsToCheck[!varsToCheck %in% c(devee, mostlyMissing)]
+
 form <- paste(devee, "~", paste(varsToCheck, collapse = " + "))
 
 ## pull out the
@@ -40,16 +52,20 @@ anes$repcand[anes$repcand %in% "None"] <- NA
 anes$repcand <- factor(anes$repcand)
 
 seeds <- 1:20
-myCarts <- lapply(seeds, function(i, theform = form, dat = anes, myMethod = bestMethod, prop = .2){
+myCarts <- lapply(seeds, function(i, theform = form, dat = anessub, myMethod = bestMethod, prop = .2){
     set.seed(i)
+    print(paste0("rpart iteration = ", i))
     tr <- sample(1:nrow(dat), round(nrow(dat)*prop))
     myCart <- rpart(theform, data = dat[-i,], method = myMethod)
     return(myCart)
 })
 
-besivas <- lapply(seeds, function(i, deev = devee, ivees = varsToCheck, data = anes, prop = .2){
+besivas <- lapply(seeds, function(i, deev = devee, ivees = varsToCheck, data = anessub, prop = .2){
+    print(paste0("besiva iteration = ", i))
     besivalm(devee = deev, ivs = ivees, data, perc = prop, sampseed = i, showoutput = F, showforms = F)
-    })
+})
+
+
 
 getBestCP <- function(myCart){
     cpLs <- myCart$cptable
