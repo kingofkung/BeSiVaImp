@@ -51,12 +51,12 @@ form <- paste(devee, "~", paste(varsToCheck, collapse = " + "))
 anes$repcand[anes$repcand %in% "None"] <- NA
 anes$repcand <- factor(anes$repcand)
 
-seeds <- 1:20
+seeds <- 1:100
 myCarts <- lapply(seeds, function(i, theform = form, dat = anessub, myMethod = bestMethod, prop = .2){
     set.seed(i)
     print(paste0("rpart iteration = ", i))
     tr <- sample(1:nrow(dat), round(nrow(dat)*prop))
-    myCart <- rpart(theform, data = dat[-i,], method = myMethod)
+    myCart <- rpart(theform, data = dat[-tr,], method = myMethod)
     return(myCart)
 })
 
@@ -123,6 +123,7 @@ getErrorMetrics <- function(i, pCs = prunedCarts, mCs = myCarts, testRows = trs,
     }
 }
 
+trs <- lapply(seeds, function(x, dat = anes, prop = .2) tr <- sample(1:nrow(dat), round(nrow(dat)*prop)))
 
 lapply(seq_along(myCarts), getErrorMetrics)
 
