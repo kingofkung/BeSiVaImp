@@ -1,6 +1,7 @@
 rm(list = ls())
 
 library(rpart)
+writeloc <- "~/Dropbox/Dissertation Stuff/DatOutPut/C3/"
 source("~/Github/BeSiVaImp/R/BeSiVaFunctionslm.R")
 anes <- read.csv("~/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHuntFindings/anes_pilot_2016recoded.csv")
 
@@ -53,8 +54,6 @@ varsToCheck <- varsToCheck[!varsToCheck %in% c(devee, mostlyMissing)]
 
 form <- paste(devee, "~", paste(varsToCheck, collapse = " + "))
 
-## pull out the
-
 
 seeds <- 1:10
 myCarts <- lapply(seeds, function(i, theform = form, dat = anesSub, myMethod = bestMethod, prop = .2){
@@ -96,11 +95,9 @@ impVars <- table(unlist(lapply(impVarList, rownames)))
 sort(impVars)
 
 
-## trs <- lapply(seeds, function(x, dat = anes, prop = .2) tr <- sample(1:nrow(dat), round(nrow(dat)*prop)))
 
 getErrorMetrics <- function(i, pCs = prunedCarts, mCs = myCarts, testRows = valRows, rdig = 2, dv = devee, dat = anes){
     prunedCart <- pCs[[i]]
-    myCart <- mCs[[i]]
     theobs <- dat[testRows, dv]
     ##
     if(is.numeric(theobs)){
@@ -122,14 +119,31 @@ getErrorMetrics <- function(i, pCs = prunedCarts, mCs = myCarts, testRows = valR
     }
 }
 
+## When you get the data, you need the test rows' pclps from CART, to compare to BeSiVa
+trs <- lapply(seeds, function(x, dat = anes, prop = .2) tr <- sample(1:nrow(dat), round(nrow(dat)*prop)))
+myCartPClPs <- sapply(seq_along(myCarts), function(x) getErrorMetrics(x, testRows = trs[[x]]))
+##
+besivamrPClPs <- sapply(besivas, function(x) max(x$pclps))
 
-besivaforms <- lapply(besivas, function(x, dv = devee) paste(dv, "~", paste(x$intvars, collapse = " + ")))
+## Get vars, and
+besivaVars <- lapply(besivas, function(x) x$intvars)
+## Get them ready for output
+mrintForDf <- sapply(besivaVars, function(x) paste(x, collapse = ", "))
+rpartIntVars <- sapply(impVarList, function(x) paste(rownames(x), collapse = ", "))
+
+besivaforms <- lapply(besivaVars, function(x, dv = devee) paste(dv, "~", paste(x, collapse = " + ")))
 besivaMods <- lapply(besivaforms, lm, data = anesSub)
 besivaPreds <- lapply(besivaMods, predict, newdata = anes[valRows,])
 
 
-besivaValPClP <- lapply(besivaPreds, function(x) makepclp(NULL, anes[valRows, devee], x, 10))
+besivaValPClP <- sapply(besivaPreds, function(x) makepclp(NULL, anes[valRows, devee], x, 10))
+cartValPClP <- sapply(seq_along(myCarts), getErrorMetrics)
 
+plot(density(besivaValPClP), xlim = c(0.25, 0.75))
+lines(density(cartValPClP), lty = 2)
 
-cartValPClP <- lapply(seq_along(myCarts), getErrorMetrics)
-
+dfName <- paste0(devee, min(seeds),"to", max(seeds), "missthresh of", round(nrow(anesSub) * .5), ".csv")
+outDF <- data.frame("seeds" = seeds, "mrpclps" = besivamrPClPs, "mrintForDf" = mrintForDf,
+                    "rpartPclps" = myCartPClPs, "rpartIntVars" = rpartIntVars,
+                    "trueHldPrds" = besivaValPClP, "trueHldPrdsRP" = cartValPClP)
+write.csv(outDF, paste0(writeloc, dfName), row.names = FALSE)
