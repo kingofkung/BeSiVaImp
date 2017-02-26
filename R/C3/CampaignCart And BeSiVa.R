@@ -71,7 +71,6 @@ besivas <- lapply(seeds, function(i, deev = devee, ivees = varsToCheck, data = a
 })
 
 
-
 getBestCP <- function(myCart){
     cpLs <- myCart$cptable
     bestCP <- cpLs[order(cpLs[,"xerror"])[1],"CP"]
@@ -92,12 +91,12 @@ getImpVars <- function(myCart){
     tvI
 }
 
-impVarList <- lapply(myCarts, getImpVars)
+impVarList <- lapply(prunedCarts, getImpVars)
 impVars <- table(unlist(lapply(impVarList, rownames)))
 sort(impVars)
 
 
-trs <- lapply(seeds, function(x, dat = anes, prop = .2) tr <- sample(1:nrow(dat), round(nrow(dat)*prop)))
+## trs <- lapply(seeds, function(x, dat = anes, prop = .2) tr <- sample(1:nrow(dat), round(nrow(dat)*prop)))
 
 getErrorMetrics <- function(i, pCs = prunedCarts, mCs = myCarts, testRows = valRows, rdig = 2, dv = devee, dat = anes){
     prunedCart <- pCs[[i]]
@@ -109,7 +108,7 @@ getErrorMetrics <- function(i, pCs = prunedCarts, mCs = myCarts, testRows = valR
         ##
         prunePCLP <- makepclp(NULL, theobs, thepreds, howclose = 10)
         ##
-        return(c("prunePCLP" = prunePCLP))
+        return(prunePCLP)
         ##
     }else if(is.factor(obs)){
         preds <- predict(prunedCart, newdata = dat[testRows, ], type = "class")
@@ -124,5 +123,13 @@ getErrorMetrics <- function(i, pCs = prunedCarts, mCs = myCarts, testRows = valR
 }
 
 
-lapply(seq_along(myCarts), getErrorMetrics)
+besivaforms <- lapply(besivas, function(x, dv = devee) paste(dv, "~", paste(x$intvars, collapse = " + ")))
+besivaMods <- lapply(besivaforms, lm, data = anesSub)
+besivaPreds <- lapply(besivaMods, predict, newdata = anes[valRows,])
+
+
+besivaValPClP <- lapply(besivaPreds, function(x) makepclp(NULL, anes[valRows, devee], x, 10))
+
+
+cartValPClP <- lapply(seq_along(myCarts), getErrorMetrics)
 
