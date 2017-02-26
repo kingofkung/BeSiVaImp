@@ -55,7 +55,7 @@ varsToCheck <- varsToCheck[!varsToCheck %in% c(devee, mostlyMissing)]
 form <- paste(devee, "~", paste(varsToCheck, collapse = " + "))
 
 
-seeds <- 1:10
+seeds <- 1:100
 myCarts <- lapply(seeds, function(i, theform = form, dat = anesSub, myMethod = bestMethod, prop = .2){
     set.seed(i)
     print(paste0("rpart iteration = ", i))
@@ -132,7 +132,9 @@ mrintForDf <- sapply(besivaVars, function(x) paste(x, collapse = ", "))
 rpartIntVars <- sapply(impVarList, function(x) paste(rownames(x), collapse = ", "))
 
 besivaforms <- lapply(besivaVars, function(x, dv = devee) paste(dv, "~", paste(x, collapse = " + ")))
-besivaMods <- lapply(besivaforms, lm, data = anesSub)
+besivaforms[besivaforms %in% "fttrump ~ "] <- paste0(devee, " ~ 1")
+
+besivaMods <- lapply(besivaforms, function(x, dat = anesSub) lm(x, data = dat))
 besivaPreds <- lapply(besivaMods, predict, newdata = anes[valRows,])
 
 
