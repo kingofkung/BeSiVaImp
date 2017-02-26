@@ -1,4 +1,4 @@
-rm(list = ls()[!ls() %in% "anes"])
+rm(list = ls())
 
 library(rpart)
 source("~/Github/BeSiVaImp/R/BeSiVaFunctionslm.R")
@@ -11,12 +11,19 @@ colnames(anes)
 devee <- "fttrump"
 !is.null(anes[,devee])
 
-anessub <- anes[complete.cases(anes[,devee]),]
-anessub[, devee]
+if(is.numeric(anes[, devee])) myThresh <- diff(range(anes[, devee], na.rm = TRUE))/10
+
+anesSub <- anes[complete.cases(anes[,devee]),]
+anesSub[, devee]
+
+set.seed(1)
+valRows <- sample(1:nrow(anesSub), nrow(anesSub) * .1)
+valSet <- anesSub[valRows,]
+anesSub <- anesSub[-valRows,]
 
 
 ## Determine the means CART will use to predict the devee
-if(is.numeric(anessub[, devee])){
+if(is.numeric(anesSub[, devee])){
     bestMethod <- "anova"
 } else
 {
@@ -24,20 +31,20 @@ if(is.numeric(anessub[, devee])){
 }
 
 
-catAnes <- anes[, sapply(anes, is.factor)]
-numAnes <- names(anes)[sapply(anes, is.numeric)]
+catAnes <- anesSub[, sapply(anesSub, is.factor)]
+numAnes <- names(anesSub)[sapply(anesSub, is.numeric)]
 nCats <- sapply(catAnes, function(x) length(unique(x)))
 
 
-varsToCheck <- unique(c("rr1", "rr2", "rr3", "rr4", "race", "gender", "birthyr", "educ", "marstat", "faminc", grep("ft", colnames(anes), value = TRUE),
-                 grep("lazy", colnames(anes), value = TRUE),
-                 grep("violent", colnames(anes), value = TRUE),
+varsToCheck <- unique(c("rr1", "rr2", "rr3", "rr4", "race", "gender", "birthyr", "educ", "marstat", "faminc", grep("ft", colnames(anesSub), value = TRUE),
+                 grep("lazy", colnames(anesSub), value = TRUE),
+                 grep("violent", colnames(anesSub), value = TRUE),
                         "ladder", "getahead", "finwell",
                         names(nCats)[nCats < 20],
                         numAnes
                         ))
 
-mostlyMissing <- sapply(varsToCheck, function(i, dataset = anessub) {
+mostlyMissing <- sapply(varsToCheck, function(i, dataset = anesSub) {
     sum(is.na(dataset[,i]))/nrow(dataset) > .5
 })
 mostlyMissing <- names(which(mostlyMissing))
@@ -48,11 +55,9 @@ form <- paste(devee, "~", paste(varsToCheck, collapse = " + "))
 
 ## pull out the
 
-anes$repcand[anes$repcand %in% "None"] <- NA
-anes$repcand <- factor(anes$repcand)
 
-seeds <- 1:100
-myCarts <- lapply(seeds, function(i, theform = form, dat = anessub, myMethod = bestMethod, prop = .2){
+seeds <- 1:10
+myCarts <- lapply(seeds, function(i, theform = form, dat = anesSub, myMethod = bestMethod, prop = .2){
     set.seed(i)
     print(paste0("rpart iteration = ", i))
     tr <- sample(1:nrow(dat), round(nrow(dat)*prop))
@@ -60,9 +65,9 @@ myCarts <- lapply(seeds, function(i, theform = form, dat = anessub, myMethod = b
     return(myCart)
 })
 
-besivas <- lapply(seeds, function(i, deev = devee, ivees = varsToCheck, data = anessub, prop = .2){
+besivas <- lapply(seeds, function(i, deev = devee, ivees = varsToCheck, data = anesSub, prop = .2, mt = myThresh){
     print(paste0("besiva iteration = ", i))
-    besivalm(devee = deev, ivs = ivees, data, perc = prop, sampseed = i, showoutput = F, showforms = F)
+    besivalm(devee = deev, ivs = ivees, data, perc = prop, sampseed = i, showoutput = FALSE, showforms = FALSE, hc = mt)
 })
 
 
@@ -92,38 +97,32 @@ impVars <- table(unlist(lapply(impVarList, rownames)))
 sort(impVars)
 
 
+trs <- lapply(seeds, function(x, dat = anes, prop = .2) tr <- sample(1:nrow(dat), round(nrow(dat)*prop)))
 
-getErrorMetrics <- function(i, pCs = prunedCarts, mCs = myCarts, testRows = trs, rdig = 2, dv = devee, dat = anes){
+getErrorMetrics <- function(i, pCs = prunedCarts, mCs = myCarts, testRows = valRows, rdig = 2, dv = devee, dat = anes){
     prunedCart <- pCs[[i]]
     myCart <- mCs[[i]]
-    tr <- testRows[[i]]
-    obs <- dat[tr, dv]
-##
-    if(is.numeric(obs)){
-        preds <- predict(prunedCart, newdata = dat[tr, ])
-        fullPreds <- predict(myCart, newdata = dat[tr,])
-##
-        pruneRMSE <- sqrt(mean((obs - preds)^2, na.rm = TRUE))
-        fullRMSE <- sqrt(mean((obs - fullPreds)^2, na.rm = TRUE))
+    theobs <- dat[testRows, dv]
     ##
-        ## datRange <- range(dat[,dv], na.rm = TRUE)
-        return(c("pruneRMSE" = pruneRMSE, "fullRMSE" = fullRMSE))
-##
+    if(is.numeric(theobs)){
+        thepreds <- predict(prunedCart, newdata = dat[testRows, ])
+        ##
+        prunePCLP <- makepclp(NULL, theobs, thepreds, howclose = 10)
+        ##
+        return(c("prunePCLP" = prunePCLP))
+        ##
     }else if(is.factor(obs)){
-        preds <- predict(prunedCart, newdata = dat[tr, ], type = "class")
-        fullPreds <- predict(myCart, newdata = dat[tr,], type = "class")
-    ##
+        preds <- predict(prunedCart, newdata = dat[testRows, ], type = "class")
+        ##
         prunePCP <- sum(preds == obs, na.rm = TRUE)/length(na.omit(obs))
-        fullPCP <- sum(fullPreds == obs, na.rm = TRUE)/length(na.omit(obs))
-    ##
+        ##
         dvTab <- table(dat[,dv])
         modalCat <- prop.table(dvTab)[order(dvTab, decreasing = TRUE)[1]]
         names(modalCat) = NULL
-        return(c("modalCat" = modalCat, "prunePCP" = prunePCP, "fullPCP" = fullPCP ))
+        return(c("modalCat" = modalCat, "prunePCP" = prunePCP))
     }
 }
 
-trs <- lapply(seeds, function(x, dat = anes, prop = .2) tr <- sample(1:nrow(dat), round(nrow(dat)*prop)))
 
 lapply(seq_along(myCarts), getErrorMetrics)
 
