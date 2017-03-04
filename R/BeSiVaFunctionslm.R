@@ -35,7 +35,7 @@ fixbadlevels <- function(testdat, mod, traindat, ...){
 getrmses <- function(model, datain, dvname, rowstouse, naremove = TRUE){
 
     try(tstrmse <- sqrt(mean((datain[rowstouse, dvname] -
-             predict(model, newdata = fixbadlevels(datain[rowstouse,], model) ))^2,
+             predict(model, newdata = fixbadlevels(datain[rowstouse,], model, datain[-rowstouse, ]) ))^2,
         na.rm = naremove)))
     ifelse(exists("tstrmse"), return(tstrmse), NA)
 

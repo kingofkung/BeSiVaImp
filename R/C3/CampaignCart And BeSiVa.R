@@ -50,7 +50,9 @@ mostlyMissing <- sapply(varsToCheck, function(i, dataset = anesSub) {
 })
 mostlyMissing <- names(which(mostlyMissing))
 
-varsToCheck <- varsToCheck[!varsToCheck %in% c(devee, mostlyMissing)]
+similarToDV <- c("repcand")
+
+varsToCheck <- varsToCheck[!varsToCheck %in% c(devee, mostlyMissing, similarToDV)]
 
 form <- paste(devee, "~", paste(varsToCheck, collapse = " + "))
 
@@ -141,11 +143,29 @@ besivaPreds <- lapply(besivaMods, predict, newdata = anes[valRows,])
 besivaValPClP <- sapply(besivaPreds, function(x) makepclp(NULL, anes[valRows, devee], x, 10))
 cartValPClP <- sapply(seq_along(myCarts), getErrorMetrics)
 
-plot(density(besivaValPClP), xlim = c(0.25, 0.75))
+plot(density(besivaValPClP))
 lines(density(cartValPClP), lty = 2)
+
+
+
+oneModVal <- lapply(trs, function(x, dat = anesSub, deev = devee, vs = valSet){
+    mod <- lm(fttrump ~ rr1 + gender + race + pid7 + ideo5 + birthyr, data = dat[-x, ])
+    ## Get validation PClPs
+    modPredsVal <- predict.lm(mod, newdata = fixbadlevels(vs, mod, dat[-x,]))
+    valPclp <- makepclp(NULL, vs[, deev], modPredsVal, 10)
+    ## Get test PClPs
+    modPredsTest <- predict.lm(mod, newdata = fixbadlevels(dat[x,], mod, dat[-x,]))
+    testPclp <- makepclp(NULL, dat[x, deev], modPredsTest, 10)
+    return(c(testPclp, valPclp))
+})
+oneModVal <- do.call(rbind, oneModVal)
+oneModVal <- as.data.frame(oneModVal)
+colnames(oneModVal) <- c("testPclp", "valPclp")
+rockchalk::summarize(cbind(outDF[, -1]), alphaSort = F)$numerics
 
 dfName <- paste0(devee, min(seeds),"to", max(seeds), "missthresh of", round(nrow(anesSub) * .5), ".csv")
 outDF <- data.frame("seeds" = seeds, "mrpclps" = besivamrPClPs, "mrintForDf" = mrintForDf,
                     "rpartPclps" = myCartPClPs, "rpartIntVars" = rpartIntVars,
-                    "trueHldPrds" = besivaValPClP, "trueHldPrdsRP" = cartValPClP)
+                    "trueHldPrds" = besivaValPClP, "trueHldPrdsRP" = cartValPClP,
+                    "empTestPclp" = oneModVal$testPclp, "empValPclp" = oneModVal$valPclp)
 write.csv(outDF, paste0(writeloc, dfName), row.names = FALSE)

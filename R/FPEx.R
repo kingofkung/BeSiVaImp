@@ -72,19 +72,22 @@ anes$minority <- ifelse(anes$race %in% "White", 0, 1)
 anes$minority[is.na(anes$race)] <- NA
 table(anes$race, anes$minority, useNA = "always")
 
-myform <- fttrump ~ age + minority + gender + pid7num + ideo5num
+## myform <- fttrump ~ age + minority + gender + pid7num + ideo5num
 ## myform <- fttrump ~ rr1  + violenth + birthright_b
-## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
-trsupprmses <- unlist(lapply(1:100, function(x){
+myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+trsupprmses <- unlist(lapply(1:100, function(x, dat = anes){
+    ## browser()
     print(x)
     set.seed(x)
-    tr <- sample(1:nrow(anes), round(nrow(anes) * .2))
-    modo <- lm(myform, anes[-tr,])
-    ## pr <- predict(modo, newdata = fixbadlevels(anes[tr,], modo))
-    getrmses(modo, anes, "fttrump", tr)
+    tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
+    modo <- lm(myform, dat[-tr,])
+    pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
+    myRmse <- getrmses(modo, dat, "fttrump", tr)
+    myPClP <- makepclp(modo, dat[tr, 'fttrump'], pr, 10)
 }
 ))
 summarize(trsupprmses)
+
 ##
 ## Plot RMSES on a histogram
 dev.new()
