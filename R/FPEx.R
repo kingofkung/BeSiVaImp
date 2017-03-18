@@ -72,10 +72,10 @@ anes$minority <- ifelse(anes$race %in% "White", 0, 1)
 anes$minority[is.na(anes$race)] <- NA
 table(anes$race, anes$minority, useNA = "always")
 
-## myform <- fttrump ~ age + minority + gender + pid7num + ideo5num
+myform <- ftjeb ~ age + minority + gender + pid7num + ideo5num
 ## myform <- fttrump ~ rr1  + violenth + birthright_b
-myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
-trsupprmses <- unlist(lapply(1:100, function(x, dat = anes){
+## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+trsupprmses <- lapply(1:100, function(x, dat = anes){
     ## browser()
     print(x)
     set.seed(x)
@@ -84,15 +84,18 @@ trsupprmses <- unlist(lapply(1:100, function(x, dat = anes){
     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
     myRmse <- getrmses(modo, dat, "fttrump", tr)
     myPClP <- makepclp(modo, dat[tr, 'fttrump'], pr, 10)
+    return(c(myRmse, myPClP))
 }
-))
+)
+trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+colnames(trsupprmses) <- c("RMSE", "PClP")
 summarize(trsupprmses)
 
 ##
 ## Plot RMSES on a histogram
 dev.new()
 pdf(paste0(writeloc, "trumpSupportRMSE.pdf"))
-hist(trsupprmses, freq = F)
+hist(trsupprmses$RMSE, freq = F)
 lines(density(trsupprmses, na.rm = T))
 graphics.off()
 

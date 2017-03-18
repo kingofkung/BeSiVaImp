@@ -28,7 +28,7 @@ varLabs <- c(vote08bin = "Voted in 2008",
              "partyidnustrong democrat" = "Strong Democrat",
              "partyidnuother party" = "Other Party")
 
-m1 <- glm(vote12bin ~ vote08bin , family = binomial, data = dat2)
+m1 <- glm(vote12bin ~ vote08bin + educ, family = binomial, data = dat2)
 m2 <- glm(vote12bin ~ degree + partyidnu, family = binomial, data = dat2)
 rockchalk::outreg(list("First Attempt" = m1, "Removed Prior Vote" =  m2), varLabels = varLabs, showAIC = T)
 

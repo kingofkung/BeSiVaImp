@@ -348,6 +348,10 @@ tabularnewline
 
 \begin_layout Plain Layout
 
+\end_layout
+
+\begin_layout Plain Layout
+
     Deviance         &1449.296   &2372.294   
 \backslash
 tabularnewline
@@ -355,8 +359,9 @@ tabularnewline
 
 \begin_layout Plain Layout
 
- $-2LLR (Model chi^2)$ **       & 1242.991**$-2LLR (Model chi^2)$ **    
-   & 507.421* 
+ $-2LLR (Model 
+\backslash
+chi^2)$ **       & 1242.991**       & 507.421* 
 \backslash
 tabularnewline
 \end_layout
@@ -364,6 +369,17 @@ tabularnewline
 \begin_layout Plain Layout
 
  AIC      & 1455.296      & 2396.294 
+\backslash
+tabularnewline
+\end_layout
+
+\begin_layout Plain Layout
+
+PCPs			&88.6
+\backslash
+%			&79.7
+\backslash
+%				
 \backslash
 tabularnewline
 \end_layout
@@ -487,9 +503,7 @@ hline
 
 \begin_layout Plain Layout
 
-0
-\backslash
-% & 78.90 & 67.10 & 78.90 
+Minimum & 78.90 & 67.10 & 78.90 
 \backslash
 
 \backslash
@@ -498,9 +512,7 @@ hline
 
 \begin_layout Plain Layout
 
-  25
-\backslash
-% & 82.70 & 74.17 & 82.70 
+  First Quartile & 82.70 & 74.17 & 82.70 
 \backslash
 
 \backslash
@@ -509,9 +521,7 @@ hline
 
 \begin_layout Plain Layout
 
-  50
-\backslash
-% & 84.60 & 76.80 & 84.60 
+  Median & 84.60 & 76.80 & 84.60 
 \backslash
 
 \backslash
@@ -520,9 +530,7 @@ hline
 
 \begin_layout Plain Layout
 
-  75
-\backslash
-% & 86.10 & 78.90 & 86.08 
+  Third Quartile & 86.10 & 78.90 & 86.08 
 \backslash
 
 \backslash
@@ -531,9 +539,7 @@ hline
 
 \begin_layout Plain Layout
 
-  100
-\backslash
-% & 92.00 & 83.50 & 91.98 
+  Maximum & 92.00 & 83.50 & 91.98 
 \backslash
 
 \backslash
@@ -542,7 +548,7 @@ hline
 
 \begin_layout Plain Layout
 
-  mean & 84.60 & 76.48 & 84.59 
+  Mean & 84.60 & 76.48 & 84.59 
 \backslash
 
 \backslash
@@ -551,7 +557,7 @@ hline
 
 \begin_layout Plain Layout
 
-  sd & 2.34 & 3.37 & 2.32 
+  Standard Deviation & 2.34 & 3.37 & 2.32 
 \backslash
 
 \backslash
@@ -560,7 +566,7 @@ hline
 
 \begin_layout Plain Layout
 
-  var & 5.50 & 11.36 & 5.39 
+  Variance & 5.50 & 11.36 & 5.39 
 \backslash
 
 \backslash
@@ -569,7 +575,7 @@ hline
 
 \begin_layout Plain Layout
 
-  skewness & 0.26 & -0.16 & 0.24 
+  Skewness & 0.26 & -0.16 & 0.24 
 \backslash
 
 \backslash
@@ -578,7 +584,7 @@ hline
 
 \begin_layout Plain Layout
 
-  kurtosis & 0.01 & -0.51 & 0.01 
+  Kurtosis & 0.01 & -0.51 & 0.01 
 \backslash
 
 \backslash
@@ -587,7 +593,7 @@ hline
 
 \begin_layout Plain Layout
 
-  NA's & 0.00 & 0.00 & 0.00 
+  Missing Values & 0.00 & 0.00 & 0.00 
 \backslash
 
 \backslash
