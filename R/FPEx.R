@@ -72,32 +72,40 @@ anes$minority <- ifelse(anes$race %in% "White", 0, 1)
 anes$minority[is.na(anes$race)] <- NA
 table(anes$race, anes$minority, useNA = "always")
 
-myform <- ftjeb ~ age + minority + gender + pid7num + ideo5num
-## myform <- fttrump ~ rr1  + violenth + birthright_b
-## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
-trsupprmses <- lapply(1:100, function(x, dat = anes){
-    ## browser()
-    print(x)
-    set.seed(x)
-    tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
-    modo <- lm(myform, dat[-tr,])
-    pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
-    myRmse <- getrmses(modo, dat, "fttrump", tr)
-    myPClP <- makepclp(modo, dat[tr, 'fttrump'], pr, 10)
-    return(c(myRmse, myPClP))
-}
-)
-trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
-colnames(trsupprmses) <- c("RMSE", "PClP")
-summarize(trsupprmses)
 
+rm(list = c('pclpsavr', 'sumStats'))
+for(i in c('ftjeb', 'fthrc', 'fttrump')){
+    myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num + ftsanders"))
+    ## myform <- fttrump ~ rr1  + violenth + birthright_b
+    ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+    trsupprmses <- lapply(1:100, function(x, dat = anes){
+        ## browser()
+        print(x)
+        set.seed(x)
+        tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
+        modo <- lm(myform, dat[-tr,])
+        pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
+        myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
+        myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
+        return(c( myPClP* 100))
+    }
+                          )
+    trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+    colnames(trsupprmses) <- c(paste0(i, "PClPs"))
 ##
-## Plot RMSES on a histogram
-dev.new()
-pdf(paste0(writeloc, "trumpSupportRMSE.pdf"))
-hist(trsupprmses$RMSE, freq = F)
-lines(density(trsupprmses, na.rm = T))
-graphics.off()
+    pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
+    ifelse(!exists('sumStats'),
+           sumStats <- summarize(trsupprmses)$numerics,
+           sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
+}
+##
+write.csv(sumStats, file = paste0(writeloc, "/TrumpFigs/EmpEx", as.character(myform)[2], ".csv"))
+rownames(sumStats) <- c('Minimum', 'First Quartile', "Median", "Third Quartile", "Maximum",
+                        "Mean", "Standard Deviation", "Variance", "Skewness", "Kurtosis", "Missing Values", "N")
+colnames(sumStats) <- c("Jeb Bush", "Hillary Clinton", "Donald Trump")
+xtable::xtable(sumStats )
+
+
 
 
 ## Try a beta regression:

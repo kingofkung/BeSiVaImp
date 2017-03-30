@@ -18,7 +18,7 @@ colToTable <- function(x, dec = TRUE){
 varBesiva <- colToTable(csvOut$mrintForDf, dec = FALSE)
 varRpart <- colToTable(csvOut$rpartIntVars, dec = FALSE)
 
-minSelected <- 10
+minSelected <- 5
 varBesiva <- varBesiva[varBesiva >= minSelected]
 vBesLvls <- names(varBesiva)
 
@@ -52,25 +52,27 @@ VarPlotFunc <- function(dat, title){
                                   coord_flip()
 }
 
+outPath <- paste0(myPath, "/RacePercFigs/")
+
 dev.new()
-pdf(paste0(myPath, "BeSivaSelected", minSelected, "TimesC3.pdf"))
+pdf(paste0(outPath, "BeSivaSelected", minSelected, "TimesC3.pdf"))
 VarPlotFunc(varBesiva, paste("Variables Selected by BeSiVa", minSelected, "or More Times"))
 graphics.off()
 
 dev.new()
-pdf(paste0(myPath, "CARTSelected", minSelected, "TimesC3.pdf"))
+pdf(paste0(outPath, "CARTSelected", minSelected, "TimesC3.pdf"))
 VarPlotFunc(varRpart,  paste("Variables Selected by CART", minSelected, "or More Times"))
 graphics.off()
 
 dev.new()
-pdf(paste0(myPath, "TestPClPs.pdf"))
+pdf(paste0(outPath, "TestPClPs.pdf"))
 plot(density(csvOut$mrpclps * 100), main = "A comparison of PClPs on the Test Set", xlab = "Percent Closely Predicted")
 lines(density(csvOut$rpartPclps * 100), lty = 2)
 legend("topright", c("BeSiVa", "CART"), lty = c(1, 2))
 graphics.off()
 
 dev.new()
-pdf(paste0(myPath, "ValidationPClPs.pdf"))
+pdf(paste0(outPath, "ValidationPClPs.pdf"))
 plot(density(csvOut$trueHldPrds * 100), main = "A comparison of PClPs on the Validation Set", xlab = "Percent Closely Predicted")
 lines(density(csvOut$trueHldPrdsRP * 100), lty = 2)
 legend("topright", c("BeSiVa", "CART"), lty = c(1, 2))

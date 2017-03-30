@@ -1,0 +1,6359 @@
+
+R version 3.3.3 (2017-03-06) -- "Another Canoe"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> > ## Supporting the Populist: The Sanders Campaign and the 2016
+options(STERM='iESS', str.dendrogram.last="'", editor='emacsclient', show.error.locations=TRUE)
+>
+> > ## Democratic Primary.
+> rm(list = ls()[!ls()%in% "anes"] )
+> source("BeSiVaFunctionslm.R")
+> library(rockchalk)
+> library(ggplot2)
+Use suppressPackageStartupMessages() to eliminate package startup
+messages.
+> library(caret)
+Loading required package: lattice
+> library(parallel)
+> no_cores <- detectCores() - 4
+>
+>
+> writeloc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
+>
+> ## The hashtags at the start comment a line out, meaning I can write
+> ## whatever I want and R will ignore it. It's handy for leaving
+> ## notes/thourghts/what I was trying to do.
+>
+> ## Read in and attach the data
+> anes <- read.csv("/Users/bjr/Dropbox/Lab POLS 306_Fall 2016/Lab Materials/DataHuntFindings/anes_pilot_2016recoded.csv")
+> ## Get rid of variables with low variance and high proportions of NA's
+> anes <- anes[, -nearZeroVar(anes)]
+> mostlynas <- sapply(anes, function(x) sum(is.na(x))/length(x))
+> anes <- anes[,mostlynas<.7 ]
+>
+> ## Get the test rows separately
+> set.seed(45)
+> tr <- sample(nrow(anes), round(nrow(anes)* .2))
+> sort(tr)
+  [1]    6    7   16   17   19   20   22   31   38   48   49   58   60   66   70
+ [16]   71   78   81   82   95  103  104  110  115  120  140  146  149  153  168
+ [31]  171  178  180  181  183  189  198  199  221  224  225  227  229  230  238
+ [46]  246  251  254  256  260  261  262  269  273  279  281  289  299  307  314
+ [61]  323  329  331  336  345  354  356  362  366  378  381  382  388  392  400
+ [76]  402  411  416  418  421  422  427  431  439  440  453  459  460  469  471
+ [91]  473  478  484  487  494  510  511  514  516  524  526  531  537  542  546
+[106]  563  568  569  572  582  583  592  596  597  601  604  612  613  626  631
+[121]  638  641  643  644  648  649  657  660  662  663  666  669  670  684  686
+[136]  690  694  695  696  702  727  742  743  753  757  760  761  762  769  771
+[151]  778  779  780  782  789  791  801  811  815  824  825  827  830  835  854
+[166]  855  865  870  876  878  883  889  894  896  898  899  904  907  917  935
+[181]  936  940  955  966  968  973  974  978  980  981  984  990  994 1005 1013
+[196] 1018 1025 1026 1030 1037 1047 1048 1053 1056 1058 1059 1061 1062 1064 1073
+[211] 1075 1083 1085 1087 1089 1107 1108 1110 1111 1114 1118 1121 1124 1125 1138
+[226] 1143 1144 1153 1156 1164 1166 1170 1175 1176 1183 1186 1191 1194 1199 1200
+>
+> anes$age <- 2016 - anes$birthyr
+>
+> varstouse <- colnames(anes)
+>
+> realvarstouse <- varstouse[!varstouse %in% c("fttrump", "repcand", 'starttime', "count", "optintimestamp", "ua", "os", "browser")]
+>
+> ## fvars <- names(unlist(lapply(anes[, c("ftsanders", realvarstouse)], is.factor)))
+>
+>
+> ## Make a few preliminary plots:
+> dev.new()
+> pdf(paste0(writeloc, "OverallTrumpFeelings.pdf"))
+> hist(anes[ , "fttrump"], freq = F,
++      main = "Trump Support Across ANES Respondents",
++      xlab = "Trump Feeling Thermometer Response")
+> lines(density(anes$fttrump, na.rm = TRUE))
+> graphics.off()
+>
+> dev.new()
+> pdf(paste0(writeloc, "OverallTrumpFeelingsLogged.pdf"))
+> hist(log(anes[ , "fttrump"]), freq = F,
++      main = "Trump Support Across ANES Respondents",
++      xlab = "Logarithm of Trump Feeling Thermometer Response")
+> lines(density(log(anes$fttrump), na.rm = TRUE))
+> graphics.off()
+>
+>
+> dev.new()
+> pdf(paste0(writeloc, "RepublicanTrumpFeelings.pdf"))
+> hist(anes[grepl("republican", anes$pid7, TRUE) , "fttrump"],
++      main = "Republican Affect Towards Donald Trump",
++      xlab = "Feeling Thermometer of Donald Trump")
+> graphics.off()
+>
+>
+>
+>
+>
+>
+>
+> ## Recode race to minority, in conjunction with
+> anes$minority <- ifelse(anes$race %in% "White", 0, 1)
+> anes$minority[is.na(anes$race)] <- NA
+> table(anes$race, anes$minority, useNA = "always")
+
+                    0   1 <NA>
+  Asian             0  23    0
+  Black             0 135    0
+  Hispanic          0 113    0
+  Middle Eastern    0   2    0
+  Mixed             0  30    0
+  Native American   0   7    0
+  Other             0  15    0
+  White           875   0    0
+  <NA>              0   0    0
+>
+> myform <- ftjeb ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, "fttrump", tr)
++     myPClP <- makepclp(modo, dat[tr, 'fttrump'], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)
+$numerics
+             PClP     RMSE
+0%         0.0625  30.4488
+25%        0.0875  32.1931
+50%        0.0958  32.9608
+75%        0.1083  33.6491
+100%       0.1417  35.3305
+mean       0.0984  32.9737
+sd         0.0160   1.0139
+var        0.0003   1.0279
+skewness   0.3247   0.0845
+kurtosis  -0.3606  -0.2939
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+
+$factors
+NULL
+
+> str(myForm)
+Error in str(myForm) : object 'myForm' not found
+> str(myform)
+Class 'formula'  language ftjeb ~ age + minority + gender + pid7num + ideo5num
+  ..- attr(*, ".Environment")=<environment: R_GlobalEnv>
+> str(as.character(myform))
+ chr [1:3] "~" "ftjeb" "age + minority + gender + pid7num + ideo5num"
+> myform <- ftjeb ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, 'fttrump'], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)
+$numerics
+             PClP     RMSE
+0%         0.0625  22.5221
+25%        0.0875  24.3145
+50%        0.0958  24.7457
+75%        0.1083  25.3967
+100%       0.1417  27.6413
+mean       0.0984  24.8379
+sd         0.0160   0.8647
+var        0.0003   0.7478
+skewness   0.3247   0.2422
+kurtosis  -0.3606   0.3079
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+
+$factors
+NULL
+
+> myform <- ftjeb ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)
+$numerics
+             PClP     RMSE
+0%         0.1625  22.5221
+25%        0.1917  24.3145
+50%        0.2083  24.7457
+75%        0.2250  25.3967
+100%       0.2750  27.6413
+mean       0.2100  24.8379
+sd         0.0228   0.8647
+var        0.0005   0.7478
+skewness   0.2415   0.2422
+kurtosis  -0.0833   0.3079
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+
+$factors
+NULL
+
+> myform <- ftjeb ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)$numerics
+             PClP     RMSE
+0%         0.1625  22.5221
+25%        0.1917  24.3145
+50%        0.2083  24.7457
+75%        0.2250  25.3967
+100%       0.2750  27.6413
+mean       0.2100  24.8379
+sd         0.0228   0.8647
+var        0.0005   0.7478
+skewness   0.2415   0.2422
+kurtosis  -0.0833   0.3079
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+> myform <- fthrc ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)$numerics
+             PClP     RMSE
+0%         0.2000  22.6659
+25%        0.2375  25.0241
+50%        0.2479  25.7474
+75%        0.2708  26.3908
+100%       0.3167  29.0276
+mean       0.2530  25.6654
+sd         0.0232   1.1968
+var        0.0005   1.4324
+skewness   0.3256  -0.0803
+kurtosis  -0.2990   0.1219
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+> myform <- fthrc ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)$numerics
+             PClP     RMSE
+0%         0.2000  22.6659
+25%        0.2375  25.0241
+50%        0.2479  25.7474
+75%        0.2708  26.3908
+100%       0.3167  29.0276
+mean       0.2530  25.6654
+sd         0.0232   1.1968
+var        0.0005   1.4324
+skewness   0.3256  -0.0803
+kurtosis  -0.2990   0.1219
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+> write.table(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".txt"))
+> myform <- fthrc ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)$numerics
+             PClP     RMSE
+0%         0.2000  22.6659
+25%        0.2375  25.0241
+50%        0.2479  25.7474
+75%        0.2708  26.3908
+100%       0.3167  29.0276
+mean       0.2530  25.6654
+sd         0.0232   1.1968
+var        0.0005   1.4324
+skewness   0.3256  -0.0803
+kurtosis  -0.2990   0.1219
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+> write.table(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv", sep = ','))
+> myform <- fthrc ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)$numerics
+             PClP     RMSE
+0%         0.2000  22.6659
+25%        0.2375  25.0241
+50%        0.2479  25.7474
+75%        0.2708  26.3908
+100%       0.3167  29.0276
+mean       0.2530  25.6654
+sd         0.0232   1.1968
+var        0.0005   1.4324
+skewness   0.3256  -0.0803
+kurtosis  -0.2990   0.1219
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+> write.table(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"), sep = ',')
+> myform <- fthrc ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)$numerics
+             PClP     RMSE
+0%         0.2000  22.6659
+25%        0.2375  25.0241
+50%        0.2479  25.7474
+75%        0.2708  26.3908
+100%       0.3167  29.0276
+mean       0.2530  25.6654
+sd         0.0232   1.1968
+var        0.0005   1.4324
+skewness   0.3256  -0.0803
+kurtosis  -0.2990   0.1219
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+> write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> myform <- ftjeb ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)$numerics
+             PClP     RMSE
+0%         0.1625  22.5221
+25%        0.1917  24.3145
+50%        0.2083  24.7457
+75%        0.2250  25.3967
+100%       0.2750  27.6413
+mean       0.2100  24.8379
+sd         0.0228   0.8647
+var        0.0005   0.7478
+skewness   0.2415   0.2422
+kurtosis  -0.0833   0.3079
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+> write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> myform <- fttrump ~ age + minority + gender + pid7num + ideo5num
+> ## myform <- fttrump ~ rr1  + violenth + birthright_b
+> ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+> trsupprmses <- lapply(1:100, function(x, dat = anes){
++     ## browser()
++     print(x)
++     set.seed(x)
++     tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++     modo <- lm(myform, dat[-tr,])
++     pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++     myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++     myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++     return(c(myRmse, myPClP))
++ }
++ )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+> colnames(trsupprmses) <- c("RMSE", "PClP")
+> summarize(trsupprmses)$numerics
+             PClP     RMSE
+0%         0.1625  26.4886
+25%        0.2000  28.7442
+50%        0.2167  29.5986
+75%        0.2292  30.3521
+100%       0.2750  33.5556
+mean       0.2142  29.5814
+sd         0.0224   1.1843
+var        0.0005   1.4027
+skewness   0.1487   0.3006
+kurtosis  -0.2180   0.4540
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+> write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> for(i in c('fttrump', 'ftjeb', 'fthrc'){
+Error: unexpected '{' in "for(i in c('fttrump', 'ftjeb', 'fthrc'){"
+>     myform <-as.formula(paste(i,"~ age + minority + gender + pid7num + ideo5num"))
+Error in paste(i, "~ age + minority + gender + pid7num + ideo5num") :
+  object 'i' not found
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c(myRmse, myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))[, 2]
+>     colnames(trsupprmses) <- c("PClP")
+Error in `colnames<-`(`*tmp*`, value = "PClP") :
+  attempt to set 'colnames' on an object with less than two dimensions
+>     summarize(trsupprmses)$numerics
+         trsupprmses
+0%            0.1625
+25%           0.2000
+50%           0.2167
+75%           0.2292
+100%          0.2750
+mean          0.2142
+sd            0.0224
+var           0.0005
+skewness      0.1487
+kurtosis     -0.2180
+NA's          0.0000
+N           100.0000
+>     write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> }
+Error: unexpected '}' in "}"
+> trsupprmses
+  [1] 0.2250000 0.2333333 0.1833333 0.2166667 0.2333333 0.2166667 0.1791667
+  [8] 0.2125000 0.2375000 0.1750000 0.2166667 0.1791667 0.1791667 0.1750000
+ [15] 0.1791667 0.2416667 0.1958333 0.2166667 0.1833333 0.2750000 0.2166667
+ [22] 0.2291667 0.2041667 0.2333333 0.1875000 0.2208333 0.1958333 0.2000000
+ [29] 0.1958333 0.2291667 0.2125000 0.2041667 0.2333333 0.1958333 0.2125000
+ [36] 0.2041667 0.2000000 0.2416667 0.2208333 0.2000000 0.2041667 0.1958333
+ [43] 0.2416667 0.2291667 0.2416667 0.1625000 0.2291667 0.2166667 0.2166667
+ [50] 0.2083333 0.2000000 0.2125000 0.2500000 0.2625000 0.2000000 0.1833333
+ [57] 0.2041667 0.2208333 0.1916667 0.2125000 0.2250000 0.2291667 0.2333333
+ [64] 0.2416667 0.2166667 0.2375000 0.2041667 0.2708333 0.2166667 0.2166667
+ [71] 0.2000000 0.2166667 0.1791667 0.2333333 0.2125000 0.1875000 0.2125000
+ [78] 0.2291667 0.2333333 0.2583333 0.2083333 0.2333333 0.2125000 0.2083333
+ [85] 0.2291667 0.1833333 0.2500000 0.2375000 0.1833333 0.2041667 0.2375000
+ [92] 0.2208333 0.2291667 0.2333333 0.2083333 0.2000000 0.2208333 0.2208333
+ [99] 0.1833333 0.1875000
+> for(i in c('fttrump', 'ftjeb', 'fthrc'){
+Error: unexpected '{' in "for(i in c('fttrump', 'ftjeb', 'fthrc'){"
+>     myform <-as.formula(paste(i,"~ age + minority + gender + pid7num + ideo5num"))
+Error in paste(i, "~ age + minority + gender + pid7num + ideo5num") :
+  object 'i' not found
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c(myRmse, myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c('rmses', "PClPs")
+>     summarize(trsupprmses)$numerics
+            PClPs    rmses
+0%         0.1625  26.4886
+25%        0.2000  28.7442
+50%        0.2167  29.5986
+75%        0.2292  30.3521
+100%       0.2750  33.5556
+mean       0.2142  29.5814
+sd         0.0224   1.1843
+var        0.0005   1.4027
+skewness   0.1487   0.3006
+kurtosis  -0.2180   0.4540
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+>     write.csv(summarize(trsupprmses)$numerics[,2], file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> }
+Error: unexpected '}' in "}"
+> for(i in c('fttrump', 'ftjeb', 'fthrc'){
+Error: unexpected '{' in "for(i in c('fttrump', 'ftjeb', 'fthrc'){"
+>     myform <-as.formula(paste(i,"~ age + minority + gender + pid7num + ideo5num"))
+Error in paste(i, "~ age + minority + gender + pid7num + ideo5num") :
+  object 'i' not found
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c(myRmse, myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c('rmses', "PClPs")
+>     summarize(trsupprmses)$numerics
+            PClPs    rmses
+0%         0.1625  26.4886
+25%        0.2000  28.7442
+50%        0.2167  29.5986
+75%        0.2292  30.3521
+100%       0.2750  33.5556
+mean       0.2142  29.5814
+sd         0.0224   1.1843
+var        0.0005   1.4027
+skewness   0.1487   0.3006
+kurtosis  -0.2180   0.4540
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+>     write.csv(summarize(trsupprmses)$numerics[,2], file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> }
+Error: unexpected '}' in "}"
+> for(i in c('fttrump', 'ftjeb', 'fthrc'){
+Error: unexpected '{' in "for(i in c('fttrump', 'ftjeb', 'fthrc'){"
+>     myform <-as.formula(paste(i,"~ age + minority + gender + pid7num + ideo5num"))
+Error in paste(i, "~ age + minority + gender + pid7num + ideo5num") :
+  object 'i' not found
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c(myRmse, myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c('rmses', "PClPs")
+>     summarize(trsupprmses)$numerics
+            PClPs    rmses
+0%         0.1625  26.4886
+25%        0.2000  28.7442
+50%        0.2167  29.5986
+75%        0.2292  30.3521
+100%       0.2750  33.5556
+mean       0.2142  29.5814
+sd         0.0224   1.1843
+var        0.0005   1.4027
+skewness   0.1487   0.3006
+kurtosis  -0.2180   0.4540
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+>     write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> }
+Error: unexpected '}' in "}"
+> for(i in c('fttrump', 'ftjeb', 'fthrc'){
+Error: unexpected '{' in "for(i in c('fttrump', 'ftjeb', 'fthrc'){"
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+Error in paste(i, "~ age + minority + gender + pid7num + ideo5num") :
+  object 'i' not found
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c(myRmse, myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c('rmses', "PClPs")
+>     summarize(trsupprmses)$numerics
+            PClPs    rmses
+0%         0.1625  26.4886
+25%        0.2000  28.7442
+50%        0.2167  29.5986
+75%        0.2292  30.3521
+100%       0.2750  33.5556
+mean       0.2142  29.5814
+sd         0.0224   1.1843
+var        0.0005   1.4027
+skewness   0.1487   0.3006
+kurtosis  -0.2180   0.4540
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+>     write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> }
+Error: unexpected '}' in "}"
+> writeloc
+[1] "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C3/"
+> i <- 'ftjeb'
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c(myRmse, myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c('rmses', "PClPs")
+>     ## summarize(trsupprmses)$numerics
+>     write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> summarize(trsupprmses)$numerics
+            PClPs    rmses
+0%         0.1625  22.5221
+25%        0.1917  24.3145
+50%        0.2083  24.7457
+75%        0.2250  25.3967
+100%       0.2750  27.6413
+mean       0.2100  24.8379
+sd         0.0228   0.8647
+var        0.0005   0.7478
+skewness   0.2415   0.2422
+kurtosis  -0.0833   0.3079
+NA's       0.0000   0.0000
+N        100.0000 100.0000
+>     write.csv(summarize(trsupprmses)$numerics$PClPs, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+Error in summarize(trsupprmses)$numerics$PClPs :
+  $ operator is invalid for atomic vectors
+>     write.csv(summarize(trsupprmses)$numerics[, 'PClPs'], file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+>     summarize(trsupprmses)$numerics[, 'PClPs']
+      0%      25%      50%      75%     100%     mean       sd      var
+  0.1625   0.1917   0.2083   0.2250   0.2750   0.2100   0.0228   0.0005
+skewness kurtosis     NA's        N
+  0.2415  -0.0833   0.0000 100.0000
+>     if(!exists(sumStats), sumStats <- summarize(trsupprmses)$numerics[, 'PClPs'], sumStats <- cbind(sumStats,summarize(trsupprmses)$numerics[, 'PClPs'] )
+Error: unexpected ',' in "    if(!exists(sumStats),"
+> if(!exists(sumStats),
+Error: unexpected ',' in "if(!exists(sumStats),"
+>    sumStats <- summarize(trsupprmses)$numerics[, 'PClPs'],
+Error: unexpected ',' in "   sumStats <- summarize(trsupprmses)$numerics[, 'PClPs'],"
+>    sumStats <- cbind(sumStats,summarize(trsupprmses)$numerics[, 'PClPs'] )
+Error in cbind(sumStats, summarize(trsupprmses)$numerics[, "PClPs"]) :
+  object 'sumStats' not found
+> i <- 'ftjeb'
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c('rmses', "PClPs")
+Error in `colnames<-`(`*tmp*`, value = c("rmses", "PClPs")) :
+  'names' attribute [2] must be the same length as the vector [1]
+> ifelse(!exists(sumStats),
++    sumStats <- summarize(trsupprmses)$numerics[, 'PClPs'],
++    sumStats <- cbind(sumStats,summarize(trsupprmses)$numerics[, 'PClPs'] )
++     ## write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
++ trsupprmses
+Error: unexpected symbol in:
+"    ## write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+trsupprmses"
+> i <- 'ftjeb'
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c('rmses', "PClPs")
+Error in `colnames<-`(`*tmp*`, value = c("rmses", "PClPs")) :
+  'names' attribute [2] must be the same length as the vector [1]
+> ifelse(!exists(sumStats),
++    sumStats <- summarize(trsupprmses)$numerics[, 'PClPs'],
++    sumStats <- cbind(sumStats,summarize(trsupprmses)$numerics[, 'PClPs'] ))
+Error in exists(sumStats) : object 'sumStats' not found
+>     ## write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> trsupprmses
+           V1
+1   0.1916667
+2   0.2083333
+3   0.2083333
+4   0.2750000
+5   0.2166667
+6   0.2166667
+7   0.2250000
+8   0.2166667
+9   0.1833333
+10  0.1916667
+11  0.1916667
+12  0.1916667
+13  0.1958333
+14  0.2000000
+15  0.1875000
+16  0.1625000
+17  0.2416667
+18  0.1625000
+19  0.2166667
+20  0.2125000
+21  0.2125000
+22  0.1708333
+23  0.2208333
+24  0.2500000
+25  0.1708333
+26  0.2333333
+27  0.2041667
+28  0.2375000
+29  0.2083333
+30  0.2291667
+31  0.2083333
+32  0.2333333
+33  0.1916667
+34  0.1916667
+35  0.2166667
+36  0.2041667
+37  0.1916667
+38  0.2166667
+39  0.1916667
+40  0.2333333
+41  0.2125000
+42  0.2041667
+43  0.2000000
+44  0.2416667
+45  0.2416667
+46  0.2458333
+47  0.1750000
+48  0.1916667
+49  0.2166667
+50  0.2041667
+51  0.2333333
+52  0.2625000
+53  0.2250000
+54  0.1916667
+55  0.2041667
+56  0.2000000
+57  0.1958333
+58  0.2333333
+59  0.2166667
+60  0.2208333
+61  0.1875000
+62  0.2458333
+63  0.2000000
+64  0.2166667
+65  0.2083333
+66  0.2166667
+67  0.1916667
+68  0.2208333
+69  0.1875000
+70  0.2166667
+71  0.1625000
+72  0.2375000
+73  0.2083333
+74  0.2000000
+75  0.2375000
+76  0.1833333
+77  0.2291667
+78  0.2000000
+79  0.2083333
+80  0.2458333
+81  0.2250000
+82  0.2291667
+83  0.2041667
+84  0.1875000
+85  0.1916667
+86  0.2375000
+87  0.1916667
+88  0.1916667
+89  0.1958333
+90  0.2125000
+91  0.1833333
+92  0.2166667
+93  0.2041667
+94  0.2041667
+95  0.2500000
+96  0.2041667
+97  0.2125000
+98  0.2000000
+99  0.1625000
+100 0.2583333
+> i <- 'ftjeb'
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c("PClPs")
+> ifelse(!exists(sumStats),
++    sumStats <- summarize(trsupprmses)$numerics[, 'PClPs'],
++    sumStats <- cbind(sumStats,summarize(trsupprmses)$numerics[, 'PClPs'] ))
+Error in exists(sumStats) : object 'sumStats' not found
+>     ## write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> trsupprmses
+        PClPs
+1   0.1916667
+2   0.2083333
+3   0.2083333
+4   0.2750000
+5   0.2166667
+6   0.2166667
+7   0.2250000
+8   0.2166667
+9   0.1833333
+10  0.1916667
+11  0.1916667
+12  0.1916667
+13  0.1958333
+14  0.2000000
+15  0.1875000
+16  0.1625000
+17  0.2416667
+18  0.1625000
+19  0.2166667
+20  0.2125000
+21  0.2125000
+22  0.1708333
+23  0.2208333
+24  0.2500000
+25  0.1708333
+26  0.2333333
+27  0.2041667
+28  0.2375000
+29  0.2083333
+30  0.2291667
+31  0.2083333
+32  0.2333333
+33  0.1916667
+34  0.1916667
+35  0.2166667
+36  0.2041667
+37  0.1916667
+38  0.2166667
+39  0.1916667
+40  0.2333333
+41  0.2125000
+42  0.2041667
+43  0.2000000
+44  0.2416667
+45  0.2416667
+46  0.2458333
+47  0.1750000
+48  0.1916667
+49  0.2166667
+50  0.2041667
+51  0.2333333
+52  0.2625000
+53  0.2250000
+54  0.1916667
+55  0.2041667
+56  0.2000000
+57  0.1958333
+58  0.2333333
+59  0.2166667
+60  0.2208333
+61  0.1875000
+62  0.2458333
+63  0.2000000
+64  0.2166667
+65  0.2083333
+66  0.2166667
+67  0.1916667
+68  0.2208333
+69  0.1875000
+70  0.2166667
+71  0.1625000
+72  0.2375000
+73  0.2083333
+74  0.2000000
+75  0.2375000
+76  0.1833333
+77  0.2291667
+78  0.2000000
+79  0.2083333
+80  0.2458333
+81  0.2250000
+82  0.2291667
+83  0.2041667
+84  0.1875000
+85  0.1916667
+86  0.2375000
+87  0.1916667
+88  0.1916667
+89  0.1958333
+90  0.2125000
+91  0.1833333
+92  0.2166667
+93  0.2041667
+94  0.2041667
+95  0.2500000
+96  0.2041667
+97  0.2125000
+98  0.2000000
+99  0.1625000
+100 0.2583333
+> summarize(trsupprmses)$numerics
+            PClPs
+0%         0.1625
+25%        0.1917
+50%        0.2083
+75%        0.2250
+100%       0.2750
+mean       0.2100
+sd         0.0228
+var        0.0005
+skewness   0.2415
+kurtosis  -0.0833
+NA's       0.0000
+N        100.0000
+> i <- 'ftjeb'
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c("PClPs")
+> ifelse(!exists(sumStats),
++    sumStats <- summarize(trsupprmses)$numerics,
++    sumStats <- cbind(sumStats,summarize(trsupprmses)$numerics ))
+Error in exists(sumStats) : object 'sumStats' not found
+>     ## write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> i <- 'ftjeb'
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c("PClPs")
+> ifelse(!exists('sumStats'),
++    sumStats <- summarize(trsupprmses)$numerics,
++    sumStats <- cbind(sumStats,summarize(trsupprmses)$numerics ))
+[1] 0.1625
+>     ## write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> sumStats
+            PClPs
+0%         0.1625
+25%        0.1917
+50%        0.2083
+75%        0.2250
+100%       0.2750
+mean       0.2100
+sd         0.0228
+var        0.0005
+skewness   0.2415
+kurtosis  -0.0833
+NA's       0.0000
+N        100.0000
+> i <- 'ftjeb'
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
+> ifelse(!exists('sumStats'),
++    sumStats <- summarize(trsupprmses)$numerics,
++    sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
+[1] 0.1625
+>     ## write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> sumStats
+            PClPs ftjebPClPs
+0%         0.1625     0.1625
+25%        0.1917     0.1917
+50%        0.2083     0.2083
+75%        0.2250     0.2250
+100%       0.2750     0.2750
+mean       0.2100     0.2100
+sd         0.0228     0.0228
+var        0.0005     0.0005
+skewness   0.2415     0.2415
+kurtosis  -0.0833    -0.0833
+NA's       0.0000     0.0000
+N        100.0000   100.0000
+> rm(sumStats)
+> for(i in c('ftjeb', 'fthrc', 'fttrump'){
+Error: unexpected '{' in "for(i in c('ftjeb', 'fthrc', 'fttrump'){"
+>     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
+>     ## myform <- fttrump ~ rr1  + violenth + birthright_b
+>     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
+>     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
+>     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
+> ifelse(!exists('sumStats'),
++        sumStats <- summarize(trsupprmses)$numerics,
++        sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
+[1] 0.1625
+> }
+Error: unexpected '}' in "}"
+>     ## write.csv(summarize(trsupprmses)$numerics, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> sumStats
+         ftjebPClPs
+0%           0.1625
+25%          0.1917
+50%          0.2083
+75%          0.2250
+100%         0.2750
+mean         0.2100
+sd           0.0228
+var          0.0005
+skewness     0.2415
+kurtosis    -0.0833
+NA's         0.0000
+N          100.0000
+> for(i in c('ftjeb', 'fthrc', 'fttrump')){
++     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
++     ## myform <- fttrump ~ rr1  + violenth + birthright_b
++     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
++     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
++     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
++     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
++     ifelse(!exists('sumStats'),
++            sumStats <- summarize(trsupprmses)$numerics,
++            sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
++ }
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     ## write.csv(sumStats, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> sumStats
+         ftjebPClPs ftjebPClPs fthrcPClPs fttrumpPClPs
+0%           0.1625     0.1625     0.2000       0.1625
+25%          0.1917     0.1917     0.2375       0.2000
+50%          0.2083     0.2083     0.2479       0.2167
+75%          0.2250     0.2250     0.2708       0.2292
+100%         0.2750     0.2750     0.3167       0.2750
+mean         0.2100     0.2100     0.2530       0.2142
+sd           0.0228     0.0228     0.0232       0.0224
+var          0.0005     0.0005     0.0005       0.0005
+skewness     0.2415     0.2415     0.3256       0.1487
+kurtosis    -0.0833    -0.0833    -0.2990      -0.2180
+NA's         0.0000     0.0000     0.0000       0.0000
+N          100.0000   100.0000   100.0000     100.0000
+> rm(sumStats)
+> for(i in c('ftjeb', 'fthrc', 'fttrump')){
++     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
++     ## myform <- fttrump ~ rr1  + violenth + birthright_b
++     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
++     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
++     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
++     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
++     ifelse(!exists('sumStats'),
++            sumStats <- summarize(trsupprmses)$numerics,
++            sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
++ }
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+>     ## write.csv(sumStats, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> sumStats
+         ftjebPClPs fthrcPClPs fttrumpPClPs
+0%           0.1625     0.2000       0.1625
+25%          0.1917     0.2375       0.2000
+50%          0.2083     0.2479       0.2167
+75%          0.2250     0.2708       0.2292
+100%         0.2750     0.3167       0.2750
+mean         0.2100     0.2530       0.2142
+sd           0.0228     0.0232       0.0224
+var          0.0005     0.0005       0.0005
+skewness     0.2415     0.3256       0.1487
+kurtosis    -0.0833    -0.2990      -0.2180
+NA's         0.0000     0.0000       0.0000
+N          100.0000   100.0000     100.0000
+> write.csv(sumStats, file = paste0(writeloc, "EmpEx", as.character(myform)[2], ".csv"))
+> write.csv(sumStats, file = paste0(writeloc, "/TrumpFigs/EmpEx", as.character(myform)[2], ".csv"))
+> library(stargazer)
+Error in library(stargazer) : there is no package called 'stargazer'
+> install.packages('stargazer', dependencies = TRUE)
+trying URL 'https://rweb.crmda.ku.edu/cran/bin/macosx/mavericks/contrib/3.3/stargazer_5.2.tgz'
+Content type 'application/x-gzip' length 366958 bytes (358 KB)
+==================================================
+downloaded 358 KB
+
+
+The downloaded binary packages are in
+	/var/folders/g9/dlvzqjyc8xl37v006s6yhfxh0000gp/T//RtmprqT7aI/downloaded_packages
+> xtable::xtable(
++   C-c C-c
+> xtable::xtable(sumStats)
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:17:01 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & ftjebPClPs & fthrcPClPs & fttrumpPClPs \\
+  \hline
+0\% & 0.16 & 0.20 & 0.16 \\
+  25\% & 0.19 & 0.24 & 0.20 \\
+  50\% & 0.21 & 0.25 & 0.22 \\
+  75\% & 0.23 & 0.27 & 0.23 \\
+  100\% & 0.28 & 0.32 & 0.28 \\
+  mean & 0.21 & 0.25 & 0.21 \\
+  sd & 0.02 & 0.02 & 0.02 \\
+  var & 0.00 & 0.00 & 0.00 \\
+  skewness & 0.24 & 0.33 & 0.15 \\
+  kurtosis & -0.08 & -0.30 & -0.22 \\
+  NA's & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+>     ifelse(exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
+Error in cbind(pclpsavr, trsupprmses) : object 'pclpsavr' not found
+>     ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
+[[1]]
+  [1] 0.2250000 0.2333333 0.1833333 0.2166667 0.2333333 0.2166667 0.1791667
+  [8] 0.2125000 0.2375000 0.1750000 0.2166667 0.1791667 0.1791667 0.1750000
+ [15] 0.1791667 0.2416667 0.1958333 0.2166667 0.1833333 0.2750000 0.2166667
+ [22] 0.2291667 0.2041667 0.2333333 0.1875000 0.2208333 0.1958333 0.2000000
+ [29] 0.1958333 0.2291667 0.2125000 0.2041667 0.2333333 0.1958333 0.2125000
+ [36] 0.2041667 0.2000000 0.2416667 0.2208333 0.2000000 0.2041667 0.1958333
+ [43] 0.2416667 0.2291667 0.2416667 0.1625000 0.2291667 0.2166667 0.2166667
+ [50] 0.2083333 0.2000000 0.2125000 0.2500000 0.2625000 0.2000000 0.1833333
+ [57] 0.2041667 0.2208333 0.1916667 0.2125000 0.2250000 0.2291667 0.2333333
+ [64] 0.2416667 0.2166667 0.2375000 0.2041667 0.2708333 0.2166667 0.2166667
+ [71] 0.2000000 0.2166667 0.1791667 0.2333333 0.2125000 0.1875000 0.2125000
+ [78] 0.2291667 0.2333333 0.2583333 0.2083333 0.2333333 0.2125000 0.2083333
+ [85] 0.2291667 0.1833333 0.2500000 0.2375000 0.1833333 0.2041667 0.2375000
+ [92] 0.2208333 0.2291667 0.2333333 0.2083333 0.2000000 0.2208333 0.2208333
+ [99] 0.1833333 0.1875000
+
+>     ifelse(!exists('pclpsavr'), as.data.frame(trsupprmses), cbind(pclpsavr, trsupprmses))
+[[1]]
+  [1] 0.2250000 0.2333333 0.1833333 0.2166667 0.2333333 0.2166667 0.1791667
+  [8] 0.2125000 0.2375000 0.1750000 0.2166667 0.1791667 0.1791667 0.1750000
+ [15] 0.1791667 0.2416667 0.1958333 0.2166667 0.1833333 0.2750000 0.2166667
+ [22] 0.2291667 0.2041667 0.2333333 0.1875000 0.2208333 0.1958333 0.2000000
+ [29] 0.1958333 0.2291667 0.2125000 0.2041667 0.2333333 0.1958333 0.2125000
+ [36] 0.2041667 0.2000000 0.2416667 0.2208333 0.2000000 0.2041667 0.1958333
+ [43] 0.2416667 0.2291667 0.2416667 0.1625000 0.2291667 0.2166667 0.2166667
+ [50] 0.2083333 0.2000000 0.2125000 0.2500000 0.2625000 0.2000000 0.1833333
+ [57] 0.2041667 0.2208333 0.1916667 0.2125000 0.2250000 0.2291667 0.2333333
+ [64] 0.2416667 0.2166667 0.2375000 0.2041667 0.2708333 0.2166667 0.2166667
+ [71] 0.2000000 0.2166667 0.1791667 0.2333333 0.2125000 0.1875000 0.2125000
+ [78] 0.2291667 0.2333333 0.2583333 0.2083333 0.2333333 0.2125000 0.2083333
+ [85] 0.2291667 0.1833333 0.2500000 0.2375000 0.1833333 0.2041667 0.2375000
+ [92] 0.2208333 0.2291667 0.2333333 0.2083333 0.2000000 0.2208333 0.2208333
+ [99] 0.1833333 0.1875000
+
+>     pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
+> for(i in c('ftjeb', 'fthrc', 'fttrump')){
++     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
++     ## myform <- fttrump ~ rr1  + violenth + birthright_b
++     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
++     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
++     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
++     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
++ ##
++     pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
++     ifelse(!exists('sumStats'),
++            sumStats <- summarize(trsupprmses)$numerics,
++            sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
++ }
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> write.csv(sumStats, file = paste0(writeloc, "/TrumpFigs/EmpEx", as.character(myform)[2], ".csv"))
+> xtable::xtable(sumStats)
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:19:24 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrrrr}
+  \hline
+ & ftjebPClPs & fthrcPClPs & fttrumpPClPs & ftjebPClPs & fthrcPClPs & fttrumpPClPs \\
+  \hline
+0\% & 0.16 & 0.20 & 0.16 & 0.16 & 0.20 & 0.16 \\
+  25\% & 0.19 & 0.24 & 0.20 & 0.19 & 0.24 & 0.20 \\
+  50\% & 0.21 & 0.25 & 0.22 & 0.21 & 0.25 & 0.22 \\
+  75\% & 0.23 & 0.27 & 0.23 & 0.23 & 0.27 & 0.23 \\
+  100\% & 0.28 & 0.32 & 0.28 & 0.28 & 0.32 & 0.28 \\
+  mean & 0.21 & 0.25 & 0.21 & 0.21 & 0.25 & 0.21 \\
+  sd & 0.02 & 0.02 & 0.02 & 0.02 & 0.02 & 0.02 \\
+  var & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  skewness & 0.24 & 0.33 & 0.15 & 0.24 & 0.33 & 0.15 \\
+  kurtosis & -0.08 & -0.30 & -0.22 & -0.08 & -0.30 & -0.22 \\
+  NA's & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+> rm(c(pclpsavr, sumStats)
++ pclpsavr
+Error: unexpected symbol in:
+"rm(c(pclpsavr, sumStats)
+pclpsavr"
+> rm(c(pclpsavr, sumStats))
+Error in rm(c(pclpsavr, sumStats)) :
+  ... must contain names or character strings
+> rm(c('pclpsavr', 'sumStats'))
+Error in rm(c("pclpsavr", "sumStats")) :
+  ... must contain names or character strings
+> rm(list = c('pclpsavr', 'sumStats'))
+> rm(list = c('pclpsavr', 'sumStats'))
+Warning messages:
+1: In rm(list = c("pclpsavr", "sumStats")) : object 'pclpsavr' not found
+2: In rm(list = c("pclpsavr", "sumStats")) : object 'sumStats' not found
+> for(i in c('ftjeb', 'fthrc', 'fttrump')){
++     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
++     ## myform <- fttrump ~ rr1  + violenth + birthright_b
++     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
++     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
++     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
++     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
++ ##
++     pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
++     ifelse(!exists('sumStats'),
++            sumStats <- summarize(trsupprmses)$numerics,
++            sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
++ }
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> write.csv(sumStats, file = paste0(writeloc, "/TrumpFigs/EmpEx", as.character(myform)[2], ".csv"))
+> xtable::xtable(sumStats)
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:20:13 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & ftjebPClPs & fthrcPClPs & fttrumpPClPs \\
+  \hline
+0\% & 0.16 & 0.20 & 0.16 \\
+  25\% & 0.19 & 0.24 & 0.20 \\
+  50\% & 0.21 & 0.25 & 0.22 \\
+  75\% & 0.23 & 0.27 & 0.23 \\
+  100\% & 0.28 & 0.32 & 0.28 \\
+  mean & 0.21 & 0.25 & 0.21 \\
+  sd & 0.02 & 0.02 & 0.02 \\
+  var & 0.00 & 0.00 & 0.00 \\
+  skewness & 0.24 & 0.33 & 0.15 \\
+  kurtosis & -0.08 & -0.30 & -0.22 \\
+  NA's & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+> pclpsavr
+[[1]]
+  [1] 0.1916667 0.2083333 0.2083333 0.2750000 0.2166667 0.2166667 0.2250000
+  [8] 0.2166667 0.1833333 0.1916667 0.1916667 0.1916667 0.1958333 0.2000000
+ [15] 0.1875000 0.1625000 0.2416667 0.1625000 0.2166667 0.2125000 0.2125000
+ [22] 0.1708333 0.2208333 0.2500000 0.1708333 0.2333333 0.2041667 0.2375000
+ [29] 0.2083333 0.2291667 0.2083333 0.2333333 0.1916667 0.1916667 0.2166667
+ [36] 0.2041667 0.1916667 0.2166667 0.1916667 0.2333333 0.2125000 0.2041667
+ [43] 0.2000000 0.2416667 0.2416667 0.2458333 0.1750000 0.1916667 0.2166667
+ [50] 0.2041667 0.2333333 0.2625000 0.2250000 0.1916667 0.2041667 0.2000000
+ [57] 0.1958333 0.2333333 0.2166667 0.2208333 0.1875000 0.2458333 0.2000000
+ [64] 0.2166667 0.2083333 0.2166667 0.1916667 0.2208333 0.1875000 0.2166667
+ [71] 0.1625000 0.2375000 0.2083333 0.2000000 0.2375000 0.1833333 0.2291667
+ [78] 0.2000000 0.2083333 0.2458333 0.2250000 0.2291667 0.2041667 0.1875000
+ [85] 0.1916667 0.2375000 0.1916667 0.1916667 0.1958333 0.2125000 0.1833333
+ [92] 0.2166667 0.2041667 0.2041667 0.2500000 0.2041667 0.2125000 0.2000000
+ [99] 0.1625000 0.2583333
+
+> trsupprmses
+    fttrumpPClPs
+1      0.2250000
+2      0.2333333
+3      0.1833333
+4      0.2166667
+5      0.2333333
+6      0.2166667
+7      0.1791667
+8      0.2125000
+9      0.2375000
+10     0.1750000
+11     0.2166667
+12     0.1791667
+13     0.1791667
+14     0.1750000
+15     0.1791667
+16     0.2416667
+17     0.1958333
+18     0.2166667
+19     0.1833333
+20     0.2750000
+21     0.2166667
+22     0.2291667
+23     0.2041667
+24     0.2333333
+25     0.1875000
+26     0.2208333
+27     0.1958333
+28     0.2000000
+29     0.1958333
+30     0.2291667
+31     0.2125000
+32     0.2041667
+33     0.2333333
+34     0.1958333
+35     0.2125000
+36     0.2041667
+37     0.2000000
+38     0.2416667
+39     0.2208333
+40     0.2000000
+41     0.2041667
+42     0.1958333
+43     0.2416667
+44     0.2291667
+45     0.2416667
+46     0.1625000
+47     0.2291667
+48     0.2166667
+49     0.2166667
+50     0.2083333
+51     0.2000000
+52     0.2125000
+53     0.2500000
+54     0.2625000
+55     0.2000000
+56     0.1833333
+57     0.2041667
+58     0.2208333
+59     0.1916667
+60     0.2125000
+61     0.2250000
+62     0.2291667
+63     0.2333333
+64     0.2416667
+65     0.2166667
+66     0.2375000
+67     0.2041667
+68     0.2708333
+69     0.2166667
+70     0.2166667
+71     0.2000000
+72     0.2166667
+73     0.1791667
+74     0.2333333
+75     0.2125000
+76     0.1875000
+77     0.2125000
+78     0.2291667
+79     0.2333333
+80     0.2583333
+81     0.2083333
+82     0.2333333
+83     0.2125000
+84     0.2083333
+85     0.2291667
+86     0.1833333
+87     0.2500000
+88     0.2375000
+89     0.1833333
+90     0.2041667
+91     0.2375000
+92     0.2208333
+93     0.2291667
+94     0.2333333
+95     0.2083333
+96     0.2000000
+97     0.2208333
+98     0.2208333
+99     0.1833333
+100    0.1875000
+> rm(list = c('pclpsavr', 'sumStats'))
+> rm(list = c('pclpsavr', 'sumStats'))
+Warning messages:
+1: In rm(list = c("pclpsavr", "sumStats")) : object 'pclpsavr' not found
+2: In rm(list = c("pclpsavr", "sumStats")) : object 'sumStats' not found
+> xtable::xtable(sumStats)
+Error in xtable::xtable(sumStats) : object 'sumStats' not found
+> for(i in c('ftjeb', 'fthrc', 'fttrump')){
++     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
++     ## myform <- fttrump ~ rr1  + violenth + birthright_b
++     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
++     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP))
++     }
++                           )
++     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
++     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
++ ##
++     pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
++     ifelse(!exists('sumStats'),
++            sumStats <- summarize(trsupprmses)$numerics,
++            sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
++ }
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> write.csv(sumStats, file = paste0(writeloc, "/TrumpFigs/EmpEx", as.character(myform)[2], ".csv"))
+> xtable::xtable(sumStats)
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:23:52 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & ftjebPClPs & fthrcPClPs & fttrumpPClPs \\
+  \hline
+0\% & 0.16 & 0.20 & 0.16 \\
+  25\% & 0.19 & 0.24 & 0.20 \\
+  50\% & 0.21 & 0.25 & 0.22 \\
+  75\% & 0.23 & 0.27 & 0.23 \\
+  100\% & 0.28 & 0.32 & 0.28 \\
+  mean & 0.21 & 0.25 & 0.21 \\
+  sd & 0.02 & 0.02 & 0.02 \\
+  var & 0.00 & 0.00 & 0.00 \\
+  skewness & 0.24 & 0.33 & 0.15 \\
+  kurtosis & -0.08 & -0.30 & -0.22 \\
+  NA's & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+> rownames(sumStats)
+ [1] "0%"       "25%"      "50%"      "75%"      "100%"     "mean"
+ [7] "sd"       "var"      "skewness" "kurtosis" "NA's"     "N"
+>                         "Mean", "Standard Deviation", "Variance", "Skewness", "Kurtosis", "Missing Values", "N")
+Error: unexpected ',' in "                        "Mean","
+> rownames(sumStats) <- c('Minimum', 'First Quartile', "Median", "Third Quartile", "Maximum",
++                         "Mean", "Standard Deviation", "Variance", "Skewness", "Kurtosis", "Missing Values", "N")
+> xtable::xtable(sumStats)
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:25:18 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & ftjebPClPs & fthrcPClPs & fttrumpPClPs \\
+  \hline
+Minimum & 0.16 & 0.20 & 0.16 \\
+  First Quartile & 0.19 & 0.24 & 0.20 \\
+  Median & 0.21 & 0.25 & 0.22 \\
+  Third Quartile & 0.23 & 0.27 & 0.23 \\
+  Maximum & 0.28 & 0.32 & 0.28 \\
+  Mean & 0.21 & 0.25 & 0.21 \\
+  Standard Deviation & 0.02 & 0.02 & 0.02 \\
+  Variance & 0.00 & 0.00 & 0.00 \\
+  Skewness & 0.24 & 0.33 & 0.15 \\
+  Kurtosis & -0.08 & -0.30 & -0.22 \\
+  Missing Values & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+> xtable::xtable(sumStats* 100)
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:25:44 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & ftjebPClPs & fthrcPClPs & fttrumpPClPs \\
+  \hline
+Minimum & 16.25 & 20.00 & 16.25 \\
+  First Quartile & 19.17 & 23.75 & 20.00 \\
+  Median & 20.83 & 24.79 & 21.67 \\
+  Third Quartile & 22.50 & 27.08 & 22.92 \\
+  Maximum & 27.50 & 31.67 & 27.50 \\
+  Mean & 21.00 & 25.30 & 21.42 \\
+  Standard Deviation & 2.28 & 2.32 & 2.24 \\
+  Variance & 0.05 & 0.05 & 0.05 \\
+  Skewness & 24.15 & 32.56 & 14.87 \\
+  Kurtosis & -8.33 & -29.90 & -21.80 \\
+  Missing Values & 0.00 & 0.00 & 0.00 \\
+  N & 10000.00 & 10000.00 & 10000.00 \\
+   \hline
+\end{tabular}
+\end{table}
+> sumStats
+                   ftjebPClPs fthrcPClPs fttrumpPClPs
+Minimum                0.1625     0.2000       0.1625
+First Quartile         0.1917     0.2375       0.2000
+Median                 0.2083     0.2479       0.2167
+Third Quartile         0.2250     0.2708       0.2292
+Maximum                0.2750     0.3167       0.2750
+Mean                   0.2100     0.2530       0.2142
+Standard Deviation     0.0228     0.0232       0.0224
+Variance               0.0005     0.0005       0.0005
+Skewness               0.2415     0.3256       0.1487
+Kurtosis              -0.0833    -0.2990      -0.2180
+Missing Values         0.0000     0.0000       0.0000
+N                    100.0000   100.0000     100.0000
+> rm(list = c('pclpsavr', 'sumStats'))
+> for(i in c('ftjeb', 'fthrc', 'fttrump')){
++     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
++     ## myform <- fttrump ~ rr1  + violenth + birthright_b
++     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
++     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP* 100))
++     }
++                           )
++     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
++     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
++ ##
++     pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
++     ifelse(!exists('sumStats'),
++            sumStats <- summarize(trsupprmses)$numerics,
++            sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
++ }
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> ##
+> write.csv(sumStats, file = paste0(writeloc, "/TrumpFigs/EmpEx", as.character(myform)[2], ".csv"))
+> rownames(sumStats) <- c('Minimum', 'First Quartile', "Median", "Third Quartile", "Maximum",
++                         "Mean", "Standard Deviation", "Variance", "Skewness", "Kurtosis", "Missing Values", "N")
+> xtable::xtable(sumStats )
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:27:23 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & ftjebPClPs & fthrcPClPs & fttrumpPClPs \\
+  \hline
+Minimum & 16.25 & 20.00 & 16.25 \\
+  First Quartile & 19.17 & 23.75 & 20.00 \\
+  Median & 20.83 & 24.79 & 21.67 \\
+  Third Quartile & 22.50 & 27.08 & 22.92 \\
+  Maximum & 27.50 & 31.67 & 27.50 \\
+  Mean & 21.00 & 25.30 & 21.42 \\
+  Standard Deviation & 2.28 & 2.32 & 2.24 \\
+  Variance & 5.21 & 5.36 & 5.01 \\
+  Skewness & 0.24 & 0.33 & 0.15 \\
+  Kurtosis & -0.08 & -0.30 & -0.22 \\
+  Missing Values & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+> rm(list = c('pclpsavr', 'sumStats'))
+> for(i in c('ftjeb', 'fthrc', 'fttrump')){
++     myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num + ftsanders"))
++     ## myform <- fttrump ~ rr1  + violenth + birthright_b
++     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
++     trsupprmses <- lapply(1:100, function(x, dat = anes){
++         ## browser()
++         print(x)
++         set.seed(x)
++         tr <- sample(1:nrow(dat), round(nrow(dat) * .2))
++         modo <- lm(myform, dat[-tr,])
++         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
++         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
++         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
++         return(c( myPClP* 100))
++     }
++                           )
++     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
++     colnames(trsupprmses) <- c(paste0(i, "PClPs"))
++ ##
++     pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
++     ifelse(!exists('sumStats'),
++            sumStats <- summarize(trsupprmses)$numerics,
++            sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
++ }
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> ##
+> write.csv(sumStats, file = paste0(writeloc, "/TrumpFigs/EmpEx", as.character(myform)[2], ".csv"))
+> rownames(sumStats) <- c('Minimum', 'First Quartile', "Median", "Third Quartile", "Maximum",
++                         "Mean", "Standard Deviation", "Variance", "Skewness", "Kurtosis", "Missing Values", "N")
+> xtable::xtable(sumStats )
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:31:02 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & ftjebPClPs & fthrcPClPs & fttrumpPClPs \\
+  \hline
+Minimum & 16.25 & 20.83 & 16.25 \\
+  First Quartile & 20.00 & 24.58 & 20.31 \\
+  Median & 21.88 & 25.83 & 21.67 \\
+  Third Quartile & 23.75 & 27.50 & 23.33 \\
+  Maximum & 28.75 & 34.58 & 27.92 \\
+  Mean & 21.81 & 26.28 & 21.89 \\
+  Standard Deviation & 2.55 & 2.44 & 2.44 \\
+  Variance & 6.48 & 5.98 & 5.97 \\
+  Skewness & 0.19 & 0.65 & 0.01 \\
+  Kurtosis & -0.42 & 1.32 & -0.19 \\
+  Missing Values & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+> colnames(sumStats)
+[1] "ftjebPClPs"   "fthrcPClPs"   "fttrumpPClPs"
+> colnames(sumStats) <- c("Jeb.Bush", "Hillary.Clinton", "Donald.Trump")
+> xtable::xtable(sumStats )
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:34:35 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & Jeb.Bush & Hillary.Clinton & Donald.Trump \\
+  \hline
+Minimum & 16.25 & 20.83 & 16.25 \\
+  First Quartile & 20.00 & 24.58 & 20.31 \\
+  Median & 21.88 & 25.83 & 21.67 \\
+  Third Quartile & 23.75 & 27.50 & 23.33 \\
+  Maximum & 28.75 & 34.58 & 27.92 \\
+  Mean & 21.81 & 26.28 & 21.89 \\
+  Standard Deviation & 2.55 & 2.44 & 2.44 \\
+  Variance & 6.48 & 5.98 & 5.97 \\
+  Skewness & 0.19 & 0.65 & 0.01 \\
+  Kurtosis & -0.42 & 1.32 & -0.19 \\
+  Missing Values & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+> colnames(sumStats) <- c("Jeb Bush", "Hillary Clinton", "Donald Trump")
+> xtable::xtable(sumStats )
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Thu Mar 23 16:34:47 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & Jeb Bush & Hillary Clinton & Donald Trump \\
+  \hline
+Minimum & 16.25 & 20.83 & 16.25 \\
+  First Quartile & 20.00 & 24.58 & 20.31 \\
+  Median & 21.88 & 25.83 & 21.67 \\
+  Third Quartile & 23.75 & 27.50 & 23.33 \\
+  Maximum & 28.75 & 34.58 & 27.92 \\
+  Mean & 21.81 & 26.28 & 21.89 \\
+  Standard Deviation & 2.55 & 2.44 & 2.44 \\
+  Variance & 6.48 & 5.98 & 5.97 \\
+  Skewness & 0.19 & 0.65 & 0.01 \\
+  Kurtosis & -0.42 & 1.32 & -0.19 \\
+  Missing Values & 0.00 & 0.00 & 0.00 \\
+  N & 100.00 & 100.00 & 100.00 \\
+   \hline
+\end{tabular}
+\end{table}
+>
