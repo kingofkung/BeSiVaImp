@@ -73,9 +73,14 @@ anes$minority[is.na(anes$race)] <- NA
 table(anes$race, anes$minority, useNA = "always")
 
 
+
+
+
+
+
 rm(list = c('pclpsavr', 'sumStats'))
-for(i in c('ftjeb', 'fthrc', 'fttrump')){
-    myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num + ftsanders"))
+for(i in c('ftjeb', 'fthrc', 'fttrump')[3]){
+    myform <- as.formula(paste(i, "~ age + minority + gender + pid7num + ideo5num"))
     ## myform <- fttrump ~ rr1  + violenth + birthright_b
     ## myform <- fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num
     trsupprmses <- lapply(1:100, function(x, dat = anes){
@@ -87,13 +92,13 @@ for(i in c('ftjeb', 'fthrc', 'fttrump')){
         pr <- predict.lm(modo, newdata = fixbadlevels(dat[tr,], modo, dat[-tr,]))
         myRmse <- getrmses(modo, dat, as.character(myform)[2], tr)
         myPClP <- makepclp(modo, dat[tr, as.character(myform)[2]], pr, 10)
-        return(c( myPClP* 100))
+        return(c( myPClP* 100, myRmse))
     }
                           )
     trsupprmses <- as.data.frame(do.call(rbind, trsupprmses))
-    colnames(trsupprmses) <- c(paste0(i, "PClPs"))
+    colnames(trsupprmses) <- c(paste0(i, "PClPs"), paste0(i, 'rmses'))
 ##
-    pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses, cbind(pclpsavr, trsupprmses))
+    pclpsavr <- ifelse(!exists('pclpsavr'), trsupprmses[, 1], cbind(pclpsavr, trsupprmses))
     ifelse(!exists('sumStats'),
            sumStats <- summarize(trsupprmses)$numerics,
            sumStats <- cbind(sumStats, summarize(trsupprmses)$numerics ))
@@ -104,6 +109,8 @@ rownames(sumStats) <- c('Minimum', 'First Quartile', "Median", "Third Quartile",
                         "Mean", "Standard Deviation", "Variance", "Skewness", "Kurtosis", "Missing Values", "N")
 colnames(sumStats) <- c("Jeb Bush", "Hillary Clinton", "Donald Trump")
 xtable::xtable(sumStats )
+
+stargazer::stargazer(lm(myform, data = anes))
 
 
 
