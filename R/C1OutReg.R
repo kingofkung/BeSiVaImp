@@ -32,12 +32,66 @@ m1 <- glm(vote12bin ~ vote08bin + educ, family = binomial, data = dat2)
 m2 <- glm(vote12bin ~ degree + partyidnu, family = binomial, data = dat2)
 rockchalk::outreg(list("First Attempt" = m1, "Removed Prior Vote" =  m2), varLabels = varLabs, showAIC = T)
 
+renamr <- c('hhtype' = "Household Type",
+            'relig' = "Religion",
+            'vote08bin' = "Prior Vote",
+            'born' = "Native Born",
+            'childs' = "Number Of Children",
+            'consent' = "Consented to Recording",
+            'ethnum' = "Number of Ethnicities",
+            'feeused' = "Respondent was Paid",
+            'finalter' = "Change in Financial Situation",
+            'gender1' = "Gender of First Family Member",
+            'hhrace' = "Race of Household",
+            'hompop' = "Size of Household",
+            'incom16' = "Family Income at Age 16",
+            'intsex' = "Sex of Interviewer",
+            'mode' = "Interviewed in Person",
+            'parborn' = "Parents Born in U.S.",
+            'preteen' = "Number of Children in Household",
+            'relactiv' = "Active at Church",
+            'relig16' = "Religion at Age 16",
+            'relpersn' = "Extent of Religiosity",
+            'respnum' = "Respondent's Number in Family",
+            'savesoul' = "Evangelistic Activities",
+            'whoelse1' = "Presence of Children Under 6",
+            'whoelse3' = "Presence of Spouse",
+            'xnorcsiz' ="Size of Place",
+            'class' = "Social Class",
+            'famgen' = "Number of Family Generations in Household",
+            'family16' = "Living With Parents at Age 16",
+            'happy' = "Overall Happiness",
+            'mobile16' = "Geographic Mobility Since Age 16",
+            'phone' = "Provided Number for Recontact",
+            'racecen1' = "Race Census Categories",
+            'reg16' = "Region of Residence at 16",
+            'rplace' = "Relationship to Head of Household",
+            'sibs' = "Number of Siblings",
+            'weekswrk' = "Weeks Worked Last Year",
+            'wrkstat' = "Labor Force Status",
+            'finrela' = "Relative Income",
+            'intethn' = "Interviewer Race",
+            'satfin' = "Satisfaction With Finances",
+            'comprend' = "Respondent's Understanding of Questions",
+            'hhtype1' = "Condensed Household Type",
+            'res16' = "Type of Place Lived in at Age 16",
+            'hefinfo' = "Household Informant's Number in Family",
+            'marital' = "Marital Status",
+            'attend' = "Religious Attendance",
+            'race' = "Race 3 Categories",
+            'hispanic' = "Hispanic Ethnicity",
+            'degree' = "Last Degree Attained",
+            'educ' = "Education in Years",
+            'partyid' = "Party Identification" )
 
 dbLoc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/"
 vote08Vars <- read.csv(paste0(dbLoc, "C1IntVarsV08Bin.csv"), stringsAsFactors = FALSE)[, 2]
 ## Having read in the data, we sort it so that ggplot2 knows what
 ## order we'd like the data in.
 VarTab <- sort(table(vote08Vars), decreasing = FALSE)
+
+paste(names(VarTab), collapse = "', '")
+
 vote08VarFac <- factor(vote08Vars, levels = names(VarTab))
 ## The data.frame makes it so ggplot2 can use it
 vote08VarFac <- data.frame("Var" = vote08VarFac)
@@ -60,6 +114,8 @@ NoEducVarFac <- data.frame("Var" = NoEducVarFac[as.character(NoEducVarFac$Var) %
 noVoteVars <- read.csv(paste0(dbLoc, "C1IntVarsNoVote.csv"), stringsAsFactors = FALSE)[, 2]
 ## Create Data Frame... If we do this again, we should make it a function, especially when we rename them all
 noVoteTab <- sort(table(noVoteVars), decreasing = FALSE)
+paste(names(noVoteTab), collapse = "', '")
+
 noVoteVarFac <- factor(noVoteVars, levels = names(noVoteTab))
 noVoteVarFac <- data.frame("Var" = noVoteVarFac)
 ## Unique Variable Removal

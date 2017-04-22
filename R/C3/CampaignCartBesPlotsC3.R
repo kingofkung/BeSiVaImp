@@ -52,7 +52,7 @@ trumpBesiva$Var <- factor(trumpBesiva$Var, levels = tbLvls)
 
 
 
-minSelCart <- minSelected + 5
+minSelCart <- minSelected + 20
 ## and repeat for the Cart example
 trumpCart <- colToTable(ftDat$rpartIntVars, dec = FALSE)
 trumpCart <- trumpCart[trumpCart >= minSelCart]

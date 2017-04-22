@@ -15,16 +15,68 @@ colToTable <- function(x, dec = TRUE){
     sort(table(myIVs[!myIVs %in% ""]), decreasing = dec)
 }
 
+
+renamer <- c('size' = "Population",
+             'comhisp' = "Estimated Percent of Hispanics In Community",
+             'degree' = "Last Degree Attained",
+             'finrela' = "Relative Income",
+             'educ' = "Education in Years",
+             'relig16' = "Religion at Age 16",
+             'sex' = "Sex",
+             'comblk' = "Estimated Percent of Blacks In Community",
+             'dateintv' = "Date Interviewed",
+             'family16' = "Family at 16",
+             'relig' = "Religion",
+             'sexsex' = 'Number of Sex Partners',
+             'comamind'= "Estimated Percent of Indians In Community",
+             'sibs' = "Number of Siblings",
+             'hhtype1' = 'Condensed Household Type',
+             'region' = "Region",
+             'gender1' = "Gender of First Family Member",
+             'sexsex5' = "Genders of Sex Partners",
+             'nummen' = "Number of Male Partners",
+             'numwomen' = "Number of Female Partners",
+             'isco681' = "Occupation",
+             'prestg105plus' = "Occupational Prestige, new measure",
+             'comasn' = "Estimated Percent of Asians In Community",
+             'prestg10' = "Occupational Prestige in 2010",
+             'prestg80'= "Occupational Prestige in 1980",
+             'sei' = "Socioeconomic Index",
+             'hhrace' = "Race of Household",
+             'srcbelt' = "Population Density SRC Code",
+             'comwht' = "Estimated Percent of Whites In Community",
+             'race' = "Race 3 Categories",
+             'racecen1' = "Race Census Categories")
+
+
+
+
 varBesiva <- colToTable(csvOut$mrintForDf, dec = FALSE)
 varRpart <- colToTable(csvOut$rpartIntVars, dec = FALSE)
 
 minSelected <- 5
 varBesiva <- varBesiva[varBesiva >= minSelected]
+
+for(i in seq_along(renamer)){
+    names(varBesiva)[names(varBesiva) %in% names(renamer)[i]] <- renamer[i]
+}
+
+
 vBesLvls <- names(varBesiva)
 
-varRpart <- varRpart[varRpart >= minSelected]
-vRpartLvls <- names(varRpart)
+minCartSelected <- minSelected + 20
+varRpart <- varRpart[varRpart >= minCartSelected]
 
+for(i in seq_along(renamer)){
+    names(varRpart)[names(varRpart) %in% names(renamer)[i]] <- renamer[i]
+}
+
+
+vRpartLvls <- names(varRpart)
+names(varRpart)
+
+rpartnames <- names(varRpart)[!names(varRpart) %in% names(renamer)]
+paste(rpartnames, collapse = "', '")
 
 rockchalk::summarizeNumerics(csvOut[, -1], F)
 
@@ -60,8 +112,8 @@ VarPlotFunc(varBesiva, paste("Variables Selected by BeSiVa", minSelected, "or Mo
 graphics.off()
 
 dev.new()
-pdf(paste0(outPath, "CARTSelected", minSelected, "TimesC3.pdf"))
-VarPlotFunc(varRpart,  paste("Variables Selected by CART", minSelected, "or More Times"))
+pdf(paste0(outPath, "CARTSelected", minCartSelected, "TimesC3.pdf"))
+VarPlotFunc(varRpart,  paste("Variables Selected by CART", minCartSelected, "or More Times"))
 graphics.off()
 
 dev.new()
