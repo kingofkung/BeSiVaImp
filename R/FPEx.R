@@ -110,7 +110,9 @@ rownames(sumStats) <- c('Minimum', 'First Quartile', "Median", "Third Quartile",
 colnames(sumStats) <- c("Jeb Bush", "Hillary Clinton", "Donald Trump")
 xtable::xtable(sumStats )
 
-stargazer::stargazer(lm(myform, data = anes))
+firstlm <- lm(fttrump ~ age + minority + gender + pid7num + ideo5num, data = anes)
+biaslm <- lm(fttrump ~ rr1 + violenth + birthright_b + age + minority + gender + pid7num + ideo5num, data = anes)
+outreg(list(firstlm, biaslm))
 
 
 
