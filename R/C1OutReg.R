@@ -83,6 +83,8 @@ renamr <- c('hhtype' = "Household Type",
             'degree' = "Last Degree Attained",
             'educ' = "Education in Years",
             'partyid' = "Party Identification" )
+repNames <- function(i, vb) rep(names(vb[i]), vb[i])
+
 
 dbLoc <- "/Users/bjr/Dropbox/Dissertation Stuff/DatOutPut/C1/"
 vote08Vars <- read.csv(paste0(dbLoc, "C1IntVarsV08Bin.csv"), stringsAsFactors = FALSE)[, 2]
@@ -90,9 +92,25 @@ vote08Vars <- read.csv(paste0(dbLoc, "C1IntVarsV08Bin.csv"), stringsAsFactors = 
 ## order we'd like the data in.
 VarTab <- sort(table(vote08Vars), decreasing = FALSE)
 
+for(i in seq_along(renamr)){
+    names(VarTab)[names(VarTab) %in% names((renamr))[i]] <- (renamr)[i]
+}
+
+
+
+
 paste(names(VarTab), collapse = "', '")
 
-vote08VarFac <- factor(vote08Vars, levels = names(VarTab))
+## repeat the name of a table the number of times that table has a value
+repTabj <- function(j, tab) rep(names(tab[j]), times = tab[j])
+
+nuVarTab <- unlist(lapply(seq(VarTab), repTabj, tab = VarTab))
+
+
+
+vote08VarFac <- factor(nuVarTab, levels = names(VarTab))
+
+
 ## The data.frame makes it so ggplot2 can use it
 vote08VarFac <- data.frame("Var" = vote08VarFac)
 ## Remove any only appearing threshold times.
@@ -114,9 +132,18 @@ NoEducVarFac <- data.frame("Var" = NoEducVarFac[as.character(NoEducVarFac$Var) %
 noVoteVars <- read.csv(paste0(dbLoc, "C1IntVarsNoVote.csv"), stringsAsFactors = FALSE)[, 2]
 ## Create Data Frame... If we do this again, we should make it a function, especially when we rename them all
 noVoteTab <- sort(table(noVoteVars), decreasing = FALSE)
+
+## And do the renaming
+for(i in seq_along(renamr)){
+    names(noVoteTab)[names(noVoteTab) %in% names((renamr))[i]] <- (renamr)[i]
+}
+
+nunoVoteTab <- unlist(lapply(seq(noVoteTab), repTabj, tab = noVoteTab))
+
+
 paste(names(noVoteTab), collapse = "', '")
 
-noVoteVarFac <- factor(noVoteVars, levels = names(noVoteTab))
+noVoteVarFac <- factor(nunoVoteTab, levels = names(noVoteTab))
 noVoteVarFac <- data.frame("Var" = noVoteVarFac)
 ## Unique Variable Removal
 noVotegt2 <- names(which(noVoteTab > threshold))
@@ -144,7 +171,7 @@ graphics.off()
 
 dev.new()
 pdf(paste0(dbLoc, "GSS", 100, "C1NoVote08.pdf"))
-fullTitleNPV <- paste("Number of times BeSiVa Selected a Variable Out of", 100, "Runs\nIn the 2014 GSS Data Without Prior Vote")
+fullTitleNPV <- paste("Number of times BeSiVa Selected a Variable\n Out of", 100, "Runs In the 2014 GSS Data Without Prior Vote")
 VarPlotFunc(noVoteVarFac, title = fullTitleNPV)
 graphics.off()
 
